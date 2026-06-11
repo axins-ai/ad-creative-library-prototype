@@ -53,9 +53,15 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .filter-group input[type="date"]{width:150px;font-size:12px;padding:0 8px}
 .filter-actions{display:flex;gap:8px;align-items:flex-end;padding-bottom:1px}
 
-/* Search box - 缩短宽度 */
+/* Search box */
 .filter-group.search-group{width:180px;flex:none}
 .filter-group.search-group input{width:180px}
+
+/* Display mode toggle */
+.mode-toggle{display:flex;align-items:center;gap:4px;padding:4px;background:var(--bg-page);border-radius:var(--radius-s);height:34px}
+.mode-toggle label{font-size:12px;color:var(--text-2);cursor:pointer;padding:4px 10px;border-radius:4px;transition:all .15s;user-select:none;line-height:1}
+.mode-toggle label.active{background:#fff;color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.mode-toggle input[type="radio"]{display:none}
 
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:5px;
@@ -135,6 +141,7 @@ tbody tr.selected{background:var(--primary-light)}
 .action-btn.edit:hover{background:var(--primary-light)}
 .action-btn.del{color:var(--danger)}
 .action-btn.del:hover{background:#fff1f0}
+.summary-hint{font-size:11px;color:var(--text-3);margin-left:4px}
 
 /* Modal */
 .modal-mask{
@@ -245,6 +252,7 @@ tbody tr.selected{background:var(--primary-light)}
 <main class="main-content">
 
   <div class="filter-card">
+    <!-- 第一行：搜索 + 类型 + 业务归属 + 渠道 + 显示模式 -->
     <div class="filter-row">
       <div class="filter-group search-group">
         <label>素材名称</label>
@@ -278,7 +286,17 @@ tbody tr.selected{background:var(--primary-light)}
           <option value="B站">B站</option>
         </select>
       </div>
+      <div class="filter-group" style="justify-content:flex-end">
+        <label>显示模式</label>
+        <div class="mode-toggle">
+          <input type="radio" name="displayMode" id="modeDetail" value="detail" checked onchange="onModeChange()">
+          <label for="modeDetail" class="active">明细</label>
+          <input type="radio" name="displayMode" id="modeSummary" value="summary" onchange="onModeChange()">
+          <label for="modeSummary">汇总（按素材名称）</label>
+        </div>
+      </div>
     </div>
+    <!-- 第二行：优化师 + 设计师 + 创建日期起 + 创建日期止 + 数据范围起 + 数据范围止 -->
     <div class="filter-row">
       <div class="filter-group">
         <label>优化师</label>
@@ -300,16 +318,12 @@ tbody tr.selected{background:var(--primary-light)}
         </select>
       </div>
       <div class="filter-group">
-        <label>状态</label>
-        <select id="statusFilter" onchange="applyFilter()">
-          <option value="">全部状态</option>
-          <option value="投放中">投放中</option>
-          <option value="已暂停">已暂停</option>
-        </select>
+        <label>创建日期（起）</label>
+        <input type="date" id="dateCreatedStart" onchange="applyFilter()">
       </div>
       <div class="filter-group">
-        <label>创建日期</label>
-        <input type="date" id="dateCreated" onchange="applyFilter()">
+        <label>创建日期（止）</label>
+        <input type="date" id="dateCreatedEnd" onchange="applyFilter()">
       </div>
       <div class="filter-group">
         <label>数据范围（起）</label>
@@ -345,34 +359,8 @@ tbody tr.selected{background:var(--primary-light)}
     <div class="table-scroll">
       <table id="dataTable">
         <thead>
-          <tr>
-            <th style="width:40px;text-align:center"><input type="checkbox" id="checkAll2" onchange="toggleCheckAll(this.checked)"></th>
-            <th style="width:80px">预览</th>
-            <th>素材名称</th>
-            <th>素材ID</th>
-            <th>广告ID</th>
-            <th>项目ID</th>
-            <th>账户ID</th>
-            <th>类型</th>
-            <th>业务归属</th>
-            <th>优化师</th>
-            <th>设计师</th>
-            <th>渠道</th>
-            <th>标签</th>
-            <th>状态</th>
-            <th>落地页URL</th>
-            <th>创建时间</th>
-            <th style="text-align:right">展示量</th>
-            <th style="text-align:right">点击量</th>
-            <th style="text-align:right">CTR</th>
-            <th style="text-align:right">CPC</th>
-            <th style="text-align:right">转化量</th>
-            <th style="text-align:right">CPA</th>
-            <th style="text-align:right">ROAS</th>
-            <th style="text-align:right">3s完播率</th>
-            <th style="text-align:right">7s完播率</th>
-            <th style="text-align:right">15s完播率</th>
-            <th>操作</th>
+          <tr id="colHeaderRow">
+            <!-- 动态生成 -->
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -424,10 +412,6 @@ tbody tr.selected{background:var(--primary-light)}
           <label>设计师 <span class="req">*</span></label>
           <select id="f_designer"><option value="李明">李明</option><option value="陈晓">陈晓</option><option value="赵丽">赵丽</option></select>
         </div>
-      </div>
-      <div class="fm-group" style="margin-bottom:16px">
-        <label>落地页URL</label>
-        <input type="text" id="f_url" placeholder="https://">
       </div>
       <div class="fm-group">
         <label>标签</label>
@@ -548,9 +532,47 @@ const BIZS = ['存量','权益'];
 const OPTIMIZERS = ['张伟','王芳','刘强','赵明'];
 const DESIGNERS = ['李明','陈晓','赵丽'];
 const CHANNELS = ['抖音','微信','小红书','百度','B站'];
-const STATUSES = ['投放中','已暂停'];
 const TAG_POOL = ['促销','品牌','新品','节日','活动','618','双11','爆款','限时','满减'];
-const MS_DAY = 86400000;
+
+/* ============ COLUMN DEFINITIONS ============ */
+var ALL_COLS = [
+  {key:'preview',     label:'预览',       show:true,  exp:false},
+  {key:'name',        label:'素材名称',   show:true,  exp:true},
+  {key:'creativeId',  label:'素材ID',    show:true,  exp:true},
+  {key:'adId',        label:'广告ID',     show:true,  exp:true},
+  {key:'projectId',   label:'项目ID',    show:true,  exp:true},
+  {key:'accountId',   label:'账户ID',    show:true,  exp:true},
+  {key:'type',        label:'类型',       show:true,  exp:true},
+  {key:'biz',         label:'业务归属',   show:true,  exp:true},
+  {key:'optimizer',   label:'优化师',     show:true,  exp:true},
+  {key:'designer',    label:'设计师',     show:true,  exp:true},
+  {key:'channel',     label:'渠道',       show:true,  exp:true},
+  {key:'tags',        label:'标签',       show:true,  exp:true},
+  {key:'url',         label:'落地页URL', show:true,  exp:true},
+  {key:'createTime',  label:'创建时间',   show:true,  exp:true},
+  {key:'cost',        label:'消耗',       show:true,  exp:true,  group:'数据指标'},
+  {key:'impressions', label:'展示量',     show:true,  exp:true,  group:'数据指标'},
+  {key:'clicks',      label:'点击量',     show:true,  exp:true,  group:'数据指标'},
+  {key:'ctr',         label:'CTR',        show:true,  exp:true,  group:'数据指标'},
+  {key:'cpc',         label:'CPC',       show:true,  exp:true,  group:'数据指标'},
+  {key:'conversions', label:'转化量',     show:true,  exp:true,  group:'数据指标'},
+  {key:'cpa',         label:'CPA',       show:true,  exp:true,  group:'数据指标'},
+  {key:'roas',        label:'ROAS',      show:true,  exp:true,  group:'数据指标'},
+  {key:'v3',          label:'3s完播率',  show:true,  exp:true,  group:'完播率指标'},
+  {key:'v7',          label:'7s完播率',  show:true,  exp:true,  group:'完播率指标'},
+  {key:'v15',         label:'15s完播率', show:true,  exp:true,  group:'完播率指标'},
+];
+
+/* ============ STATE ============ */
+var data = [];
+var filtered = [];
+var displayMode = 'detail'; // 'detail' | 'summary'
+var selected = new Set();
+var exportRange = '';
+var exportCols = [];
+var editingId = null;
+var sortKey = 'createTime'; // 当前排序字段，默认按创建时间
+var sortOrder = 'desc'; // 'asc' | 'desc'，默认降序
 
 /* ============ DATA GENERATION ============ */
 function randomDate(){
@@ -575,48 +597,21 @@ function randomMetrics(){
   var v3 = (30+Math.random()*65).toFixed(1);
   var v7 = (15+Math.random()*50).toFixed(1);
   var v15 = (5+Math.random()*40).toFixed(1);
-  return {impressions:impressions,clicks:clicks,ctr:ctr,cpc:cpc,conversions:conversions,cpa:cpa,roas:roas,v3:v3,v7:v7,v15:v15};
+  var cost = (Math.random()*10000).toFixed(2); // 消耗，单位：元
+  return {impressions:impressions,clicks:clicks,ctr:ctr,cpc:cpc,conversions:conversions,cpa:cpa,roas:roas,v3:v3,v7:v7,v15:v15,cost:cost};
 }
 
-var ALL_COLS = [
-  {key:'preview',     label:'预览',       show:true,  exp:false},
-  {key:'name',        label:'素材名称',   show:true,  exp:true},
-  {key:'creativeId',  label:'素材ID',    show:true,  exp:true},
-  {key:'adId',        label:'广告ID',     show:true,  exp:true},
-  {key:'projectId',   label:'项目ID',    show:true,  exp:true},
-  {key:'accountId',   label:'账户ID',    show:true,  exp:true},
-  {key:'type',        label:'类型',       show:true,  exp:true},
-  {key:'biz',         label:'业务归属',   show:true,  exp:true},
-  {key:'optimizer',   label:'优化师',     show:true,  exp:true},
-  {key:'designer',    label:'设计师',     show:true,  exp:true},
-  {key:'channel',     label:'渠道',       show:true,  exp:true},
-  {key:'tags',        label:'标签',       show:true,  exp:true},
-  {key:'status',      label:'状态',       show:true,  exp:true},
-  {key:'url',         label:'落地页URL', show:true,  exp:true},
-  {key:'createTime',  label:'创建时间',   show:true,  exp:true},
-
-  {key:'impressions', label:'展示量',     show:true,  exp:true,  group:'数据指标'},
-  {key:'clicks',      label:'点击量',     show:true,  exp:true,  group:'数据指标'},
-  {key:'ctr',         label:'CTR',        show:true,  exp:true,  group:'数据指标'},
-  {key:'cpc',         label:'CPC',       show:true,  exp:true,  group:'数据指标'},
-  {key:'conversions', label:'转化量',     show:true,  exp:true,  group:'数据指标'},
-  {key:'cpa',         label:'CPA',       show:true,  exp:true,  group:'数据指标'},
-  {key:'roas',        label:'ROAS',      show:true,  exp:true,  group:'数据指标'},
-  {key:'v3',          label:'3s完播率',  show:true,  exp:true,  group:'完播率指标'},
-  {key:'v7',          label:'7s完播率',  show:true,  exp:true,  group:'完播率指标'},
-  {key:'v15',         label:'15s完播率', show:true,  exp:true,  group:'完播率指标'},
-  {key:'action',      label:'操作',       show:true,  exp:false},
-];
-
-var data = [];
 function generateData(){
   data = [];
   for(var i=1;i<=120;i++){
     var m = randomMetrics();
     var type = TYPES[Math.floor(Math.random()*TYPES.length)];
+    // 让部分素材名称重复，以便汇总模式有聚合效果
+    var nameIdx = (i % 40 === 0) ? Math.floor(i/40) : i;
+    var name = '素材_' + (nameIdx).toString().padStart(4,'0');
     data.push({
       id:i,
-      name:'素材_' + i.toString().padStart(4,'0'),
+      name:name,
       creativeId:'CR' + i.toString().padStart(8,'0'),
       adId:'AD' + (100000+i).toString(),
       projectId:'PJ' + (5000+i).toString(),
@@ -627,10 +622,10 @@ function generateData(){
       designer:DESIGNERS[Math.floor(Math.random()*DESIGNERS.length)],
       channel:CHANNELS[Math.floor(Math.random()*CHANNELS.length)],
       tags:randomTags(),
-      status:STATUSES[Math.floor(Math.random()*STATUSES.length)],
-      url:'https://landing.example.com/p/' + i,
       createTime:randomDate(),
       thumb:type==='视频' ? 'https://picsum.photos/seed/vid'+i+'/160/120' : 'https://picsum.photos/seed/img'+i+'/160/120',
+      url:'https://landing.example.com/p/' + i, // 落地页URL由报表匹配得来
+      cost:m.cost,
       impressions:m.impressions,
       clicks:m.clicks,
       ctr:m.ctr,
@@ -645,12 +640,150 @@ function generateData(){
   }
 }
 
-/* ============ STATE ============ */
-var filtered = [];
-var selected = new Set();
-var exportRange = '';
-var exportCols = [];
-var editingId = null;
+/* ============ AGGREGATION ============ */
+function aggregateByName(items){
+  var groups = {};
+  for(var i=0;i<items.length;i++){
+    var item = items[i];
+    var nm = item.name;
+    if(!groups[nm]){
+      groups[nm] = {
+        name:nm,
+        ids:[],
+        creativeIds:[],
+        adIds:[],
+        projectIds:[],
+        accountIds:[],
+        type:item.type,
+        biz:item.biz,
+        optimizer:item.optimizer,
+        designer:item.designer,
+        channels:{},
+        allTags:{},
+        urls:[],
+        createTimes:[],
+        impressions:0,
+        clicks:0,
+        conversions:0,
+        ctr_vals:[],
+        cpc_vals:[],
+        cpa_vals:[],
+        roas_vals:[],
+        v3_vals:[],
+        v7_vals:[],
+        v15_vals:[],
+        count:0
+      };
+    }
+    var g = groups[nm];
+    g.ids.push(item.id);
+    g.creativeIds.push(item.creativeId);
+    g.adIds.push(item.adId);
+    g.projectIds.push(item.projectId);
+    g.accountIds.push(item.accountId);
+    if(item.channel) g.channels[item.channel] = (g.channels[item.channel]||0)+1;
+    item.tags.forEach(function(t){ g.allTags[t] = (g.allTags[t]||0)+1; });
+    g.urls.push(item.url);
+    g.createTimes.push(item.createTime);
+    g.impressions += item.impressions;
+    g.clicks += item.clicks;
+    g.conversions += item.conversions;
+    g.ctr_vals.push(parseFloat(item.ctr));
+    g.cpc_vals.push(parseFloat(item.cpc));
+    g.cpa_vals.push(parseFloat(item.cpa));
+    g.roas_vals.push(parseFloat(item.roas));
+    g.v3_vals.push(parseFloat(item.v3));
+    g.v7_vals.push(parseFloat(item.v7));
+    g.v15_vals.push(parseFloat(item.v15));
+    g.count++;
+  }
+  var result = [];
+  var keys = Object.keys(groups);
+  for(var j=0;j<keys.length;j++){
+    var g = groups[keys[j]];
+    var sum = function(arr){ return arr.reduce(function(a,b){return a+b;},0); };
+    var avgCtr    = g.ctr_vals.length ? (sum(g.ctr_vals)/g.ctr_vals.length).toFixed(2) : '0.00';
+    var avgCpc    = g.cpc_vals.length ? (sum(g.cpc_vals)/g.cpc_vals.length).toFixed(2) : '0.00';
+    var avgCpa    = g.cpa_vals.length ? (sum(g.cpa_vals)/g.cpa_vals.length).toFixed(1) : '0.0';
+    var avgRoas   = g.roas_vals.length ? (sum(g.roas_vals)/g.roas_vals.length).toFixed(1) : '0.0';
+    var avgV3     = g.v3_vals.length ? (sum(g.v3_vals)/g.v3_vals.length).toFixed(1) : '0.0';
+    var avgV7     = g.v7_vals.length ? (sum(g.v7_vals)/g.v7_vals.length).toFixed(1) : '0.0';
+    var avgV15    = g.v15_vals.length ? (sum(g.v15_vals)/g.v15_vals.length).toFixed(1) : '0.0';
+    var topChannel = '';
+    var maxC = 0;
+    var chKeys = Object.keys(g.channels);
+    for(var c=0;c<chKeys.length;c++){ if(g.channels[chKeys[c]]>maxC){ maxC=g.channels[chKeys[c]]; topChannel=chKeys[c]; } }
+    var allTagsArr = Object.keys(g.allTags);
+    result.push({
+      _isSummary:true,
+      _count:g.count,
+      id:'summary_'+g.name,
+      name:g.name + ' <span class="summary-hint">（汇总 '+g.count+' 条）</span>',
+      creativeId: g.creativeIds.join(', '),
+      adId: g.adIds.join(', '),
+      projectId: g.projectIds.join(', '),
+      accountId: g.accountIds.join(', '),
+      type:g.type,
+      biz:g.biz,
+      optimizer:g.optimizer,
+      designer:g.designer,
+      channel:topChannel,
+      tags:allTagsArr,
+      url: g.urls[0]||'',
+      createTime: g.createTimes.sort().reverse()[0]||'',
+      impressions:g.impressions,
+      clicks:g.clicks,
+      ctr:avgCtr,
+      cpc:avgCpc,
+      conversions:g.conversions,
+      cpa:avgCpa,
+      roas:avgRoas,
+      v3:avgV3,
+      v7:avgV7,
+      v15:avgV15,
+      _rawIds: g.ids
+    });
+  }
+  return result;
+}
+
+/* ============ SORT ============ */
+function sortBy(key){
+  if(sortKey===key){
+    // 切换排序方向
+    sortOrder = sortOrder==='asc' ? 'desc' : 'asc';
+  } else {
+    // 新字段，设置默认排序方向
+    sortKey = key;
+    // 创建时间和花费默认降序，其他字段默认升序
+    sortOrder = (key==='createTime' || key==='cost') ? 'desc' : 'asc';
+  }
+  render();
+}
+
+function applySort(items){
+  if(!sortKey) return items;
+  var order = sortOrder;
+  var key = sortKey;
+  var sorted = items.slice(); // 复制数组
+  sorted.sort(function(a, b){
+    var va = a[key];
+    var vb = b[key];
+    // 处理数字字段
+    if(['cost','impressions','clicks','ctr','cpc','conversions','cpa','roas','v3','v7','v15'].indexOf(key)!==-1){
+      va = parseFloat(va) || 0;
+      vb = parseFloat(vb) || 0;
+    }
+    // 处理字符串字段
+    if(typeof va === 'string') va = va.toLowerCase();
+    if(typeof vb === 'string') vb = vb.toLowerCase();
+    // 比较
+    if(va < vb) return order==='asc' ? -1 : 1;
+    if(va > vb) return order==='asc' ? 1 : -1;
+    return 0;
+  });
+  return sorted;
+}
 
 /* ============ FILTER ============ */
 function applyFilter(){
@@ -660,10 +793,10 @@ function applyFilter(){
   var ch = document.getElementById('channelFilter').value;
   var o = document.getElementById('optimizerFilter').value;
   var d = document.getElementById('designerFilter').value;
-  var st = document.getElementById('statusFilter').value;
-  var dateCreated = document.getElementById('dateCreated').value;
-  var dateRangeStart = document.getElementById('dateRangeStart').value;
-  var dateRangeEnd = document.getElementById('dateRangeEnd').value;
+  var dateStart = document.getElementById('dateCreatedStart').value;
+  var dateEnd = document.getElementById('dateCreatedEnd').value;
+  var rangeStart = document.getElementById('dateRangeStart').value;
+  var rangeEnd = document.getElementById('dateRangeEnd').value;
 
   filtered = data.filter(function(item){
     if(s && item.name.toLowerCase().indexOf(s)===-1) return false;
@@ -672,10 +805,12 @@ function applyFilter(){
     if(ch && item.channel!==ch) return false;
     if(o && item.optimizer!==o) return false;
     if(d && item.designer!==d) return false;
-    if(st && item.status!==st) return false;
-    if(dateCreated && item.createTime !== dateCreated) return false;
-    if(dateRangeStart && item.createTime < dateRangeStart) return false;
-    if(dateRangeEnd && item.createTime > dateRangeEnd) return false;
+    if(dateStart && item.createTime < dateStart) return false;
+    if(dateEnd && item.createTime > dateEnd) return false;
+    // Note: dateRangeStart/End are for "数据范围", which is a conceptual filter
+    // For prototype purposes, we treat them as additional createTime filters
+    if(rangeStart && item.createTime < rangeStart) return false;
+    if(rangeEnd && item.createTime > rangeEnd) return false;
     return true;
   });
   selected = new Set();
@@ -689,42 +824,99 @@ function resetFilters(){
   document.getElementById('channelFilter').value = '';
   document.getElementById('optimizerFilter').value = '';
   document.getElementById('designerFilter').value = '';
-  document.getElementById('statusFilter').value = '';
-  document.getElementById('dateCreated').value = '';
+  document.getElementById('dateCreatedStart').value = '';
+  document.getElementById('dateCreatedEnd').value = '';
   document.getElementById('dateRangeStart').value = '';
   document.getElementById('dateRangeEnd').value = '';
+  document.getElementById('modeDetail').checked = true;
+  document.getElementById('modeSummary').checked = false;
+  var labels = document.querySelectorAll('.mode-toggle label');
+  labels.forEach(function(l){ l.classList.remove('active'); });
+  document.querySelector('label[for="modeDetail"]').classList.add('active');
+  displayMode = 'detail';
   applyFilter();
+}
+
+/* ============ MODE TOGGLE ============ */
+function onModeChange(){
+  var detail = document.getElementById('modeDetail').checked;
+  displayMode = detail ? 'detail' : 'summary';
+  var labels = document.querySelectorAll('.mode-toggle label');
+  labels.forEach(function(l){ l.classList.remove('active'); });
+  if(detail){
+    document.querySelector('label[for="modeDetail"]').classList.add('active');
+  } else {
+    document.querySelector('label[for="modeSummary"]').classList.add('active');
+  }
+  selected = new Set();
+  render();
 }
 
 /* ============ RENDER ============ */
 function render(){
   var cols = ALL_COLS.filter(function(c){ return c.show; });
-  var thead = document.querySelector('#dataTable thead');
-  var thHtml = '<tr><th style="width:40px;text-align:center"><input type="checkbox" ' + (selected.size===filtered.length&&filtered.length>0?'checked':'') + ' onchange="toggleCheckAll(this.checked)"></th>';
+  var thead = document.getElementById('colHeaderRow');
+  var thHtml = '';
+  if(displayMode==='detail'){
+    thHtml += '<th style="width:40px;text-align:center"><input type="checkbox" ' + (selected.size===filtered.length&&filtered.length>0?'checked':'') + ' onchange="toggleCheckAll(this.checked)"></th>';
+  }
   cols.forEach(function(c){
-    var isNum = ['impressions','clicks','ctr','cpc','conversions','cpa','roas','v3','v7','v15'].indexOf(c.key)!==-1;
-    thHtml += '<th ' + (isNum?'style="text-align:right"':'') + '>' + c.label + '</th>';
+    var isNum = ['cost','impressions','clicks','ctr','cpc','conversions','cpa','roas','v3','v7','v15'].indexOf(c.key)!==-1;
+    var sortable = isNum || c.key==='name' || c.key==='createTime';
+    var sortIcon = '';
+    if(sortable){
+      if(sortKey===c.key){
+        // 当前排序字段，显示 ↑ 或 ↓（高亮）
+        sortIcon = sortOrder==='asc' ? ' ↑' : ' ↓';
+      } else {
+        // 非当前排序字段，显示 ⇅（灰色，提示可点击排序）
+        sortIcon = ' ⇅';
+      }
+    }
+    var clickHandler = sortable ? (' onclick="sortBy(\'' + c.key + '\')" style="cursor:pointer;user-select:none"') : '';
+    thHtml += '<th ' + (isNum?'style="text-align:right"':'') + clickHandler + '>' + c.label + sortIcon + '</th>';
   });
-  thHtml += '</tr>';
+  // 明细模式下添加操作列表头
+  if(displayMode==='detail'){
+    thHtml += '<th>操作</th>';
+  }
   thead.innerHTML = thHtml;
 
+  var displayData = (displayMode==='summary') ? aggregateByName(filtered) : filtered;
+
+  // 应用排序
+  displayData = applySort(displayData);
+
   var tb = document.getElementById('tableBody');
-  if(filtered.length===0){
-    var colSpan = cols.length+1;
+  if(displayData.length===0){
+    var colSpan = cols.length + (displayMode==='detail'?1:0);
     tb.innerHTML = '<tr><td colspan="' + colSpan + '" style="text-align:center;padding:60px 20px;color:var(--text-3)">' +
       '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.35;display:block;margin:0 auto 12px"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>' +
       '<p>暂无数据</p></td></tr>';
   } else {
     var rows = [];
-    for(var i=0;i<filtered.length;i++){
-      var item = filtered[i];
-      var checked = selected.has(item.id)?'checked':'';
-      var tr = '<tr class="' + (checked?'selected':'') + '" data-id="' + item.id + '">';
-      tr += '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="toggleRow(' + item.id + ',this.checked)"></td>';
-      for(var j=0;j<cols.length;j++){
-        tr += renderCell(item, cols[j].key);
+    for(var i=0;i<displayData.length;i++){
+      var item = displayData[i];
+      var tr = '';
+      if(displayMode==='detail'){
+        var checked = selected.has(item.id)?'checked':'';
+        tr = '<tr class="' + (checked?'selected':'') + '" data-id="' + item.id + '">';
+        tr += '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="toggleRow(' + item.id + ',this.checked)"></td>';
+        for(var j=0;j<cols.length;j++){
+          tr += renderCell(item, cols[j].key, false);
+        }
+        tr += '<td>' +
+          '<button class="action-btn edit" onclick="openEdit(' + item.id + ')">✏编辑</button> ' +
+          '<button class="action-btn del" onclick="deleteOne(' + item.id + ')">🗑删除</button>' +
+          '</td>';
+        tr += '</tr>';
+      } else {
+        tr = '<tr>';
+        for(var j=0;j<cols.length;j++){
+          tr += renderCell(item, cols[j].key, true);
+        }
+        tr += '</tr>';
       }
-      tr += '</tr>';
       rows.push(tr);
     }
     tb.innerHTML = rows.join('');
@@ -734,48 +926,46 @@ function render(){
   updateBatchBar();
 }
 
-function renderCell(item, key){
+function renderCell(item, key, isSummary){
   if(key==='preview'){
+    if(isSummary) return '<td></td>';
     return '<td><img class="cell-thumb" src="' + item.thumb + '" alt="" onclick="openPreview(' + item.id + ')"></td>';
   }
   if(key==='name'){
+    if(isSummary){
+      return '<td><span class="cell-name">' + item.name + '</span></td>';
+    }
     return '<td><span class="cell-name" onclick="openPreview(' + item.id + ')">' + item.name + '</span></td>';
   }
   if(key==='creativeId'||key==='adId'||key==='projectId'||key==='accountId'){
-    return '<td><span class="mono">' + item[key] + '</span></td>';
+    return '<td><span class="mono" title="' + item[key] + '">' + item[key] + '</span></td>';
   }
   if(key==='type'){
     var cls = item.type==='图片'?'tag-type-img':(item.type==='视频'?'tag-type-vid':'tag-type-car');
     return '<td><span class="tag-inline ' + cls + '">' + item.type + '</span></td>';
   }
   if(key==='biz'){ return '<td>' + item.biz + '</td>'; }
-  if(key==='optimizer'||key==='designer'||key==='channel'){ return '<td>' + item[key] + '</td>'; }
+  if(key==='optimizer'||key==='designer'||key==='channel'){ return '<td>' + (item[key]||'-') + '</td>'; }
   if(key==='tags'){
-    var tags = item.tags.map(function(t){ return '<span class="tag-inline">' + t + '</span>'; }).join(' ');
-    return '<td>' + tags + '</td>';
-  }
-  if(key==='status'){
-    var dot = item.status==='投放中'?'on':'off';
-    return '<td><span class="status-dot ' + dot + '"></span>' + item.status + '</td>';
+    var tags = (typeof item.tags==='string') ? [item.tags] : (item.tags||[]);
+    var tagHtml = tags.map(function(t){ return '<span class="tag-inline">' + t + '</span>'; }).join(' ');
+    return '<td>' + tagHtml + '</td>';
   }
   if(key==='url'){
-    var displayUrl = item.url.length>30 ? item.url.slice(0,30)+'…' : item.url;
-    return '<td><a class="cell-link" href="' + item.url + '" target="_blank" onclick="event.stopPropagation()">' + displayUrl + '</a></td>';
+    var displayUrl = item.url&&item.url.length>30 ? item.url.slice(0,30)+'…' : (item.url||'');
+    return '<td><a class="cell-link" href="' + (item.url||'#') + '" target="_blank" onclick="event.stopPropagation()">' + displayUrl + '</a></td>';
   }
   if(key==='createTime'){
-    return '<td style="font-size:12px;color:var(--text-3)">' + item.createTime + '</td>';
+    return '<td style="font-size:12px;color:var(--text-3)">' + (item.createTime||'-') + '</td>';
+  }
+  if(key==='cost'){
+    return '<td style="text-align:right;font-weight:600;color:var(--danger)">¥' + Number(item.cost).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>';
   }
   if(key==='impressions'){ return '<td style="text-align:right">' + Number(item.impressions).toLocaleString() + '</td>'; }
   if(key==='clicks'){ return '<td style="text-align:right">' + Number(item.clicks).toLocaleString() + '</td>'; }
   if(key==='ctr'||key==='cpc'||key==='cpa'||key==='roas'){ return '<td style="text-align:right">' + item[key] + '</td>'; }
-  if(key==='conversions'){ return '<td style="text-align:right">' + item[key] + '</td>'; }
+  if(key==='conversions'){ return '<td style="text-align:right">' + item.conversions + '</td>'; }
   if(key==='v3'||key==='v7'||key==='v15'){ return '<td style="text-align:right">' + item[key] + '%</td>'; }
-  if(key==='action'){
-    return '<td>' +
-      '<button class="action-btn edit" onclick="openEdit(' + item.id + ')">✏编辑</button> ' +
-      '<button class="action-btn del" onclick="deleteOne(' + item.id + ')">🗑删除</button>' +
-      '</td>';
-  }
   return '<td>' + (item[key]||'') + '</td>';
 }
 
@@ -786,6 +976,7 @@ function toggleRow(id,checked){
   updateHeaderCheckbox();
 }
 function toggleCheckAll(checked){
+  if(displayMode==='summary') return;
   if(checked){
     filtered.forEach(function(item){ selected.add(item.id); });
   } else {
@@ -795,7 +986,7 @@ function toggleCheckAll(checked){
 }
 function updateBatchBar(){
   var bar = document.getElementById('batchBar');
-  if(selected.size>0){
+  if(selected.size>0 && displayMode==='detail'){
     bar.classList.add('show');
     bar.querySelector('#batchCount').textContent = selected.size;
   } else {
@@ -848,7 +1039,6 @@ function submitUpload(){
   var channel = document.getElementById('f_channel').value;
   var optimizer = document.getElementById('f_optimizer').value;
   var designer = document.getElementById('f_designer').value;
-  var url = document.getElementById('f_url').value.trim();
   var tags = [];
   var tagEls = document.querySelectorAll('#tagWrap .ti-tag');
   for(var i=0;i<tagEls.length;i++){ tags.push(tagEls[i].textContent.replace('×','').trim()); }
@@ -868,7 +1058,7 @@ function submitUpload(){
     channel:channel,
     tags:tags.length?tags:['新素材'],
     status:'投放中',
-    url:url||'https://landing.example.com/p/'+newId,
+    url:'https://landing.example.com/p/'+newId, // 落地页URL由报表匹配得来
     createTime:new Date().toISOString().slice(0,10),
     thumb:type==='视频' ? 'https://picsum.photos/seed/vidnew/160/120' : 'https://picsum.photos/seed/imgnew/160/120',
     impressions:m.impressions,
@@ -887,7 +1077,6 @@ function submitUpload(){
   applyFilter();
   showToast('素材「' + name + '」上传成功！');
   document.getElementById('f_name').value='';
-  document.getElementById('f_url').value='';
   var existingTags = document.querySelectorAll('#tagWrap .ti-tag');
   for(var j=0;j<existingTags.length;j++){ existingTags[j].remove(); }
 }
@@ -903,7 +1092,7 @@ function openPreview(id){
   var infoHtml = '';
   infoHtml += '<p><strong>素材名称：</strong>' + item.name + '</p>';
   infoHtml += '<p><strong>素材ID：</strong>' + item.creativeId + '</p>';
-  infoHtml += '<p><strong>类型：</strong>' + item.type + '　<strong>状态：</strong>' + item.status + '</p>';
+  infoHtml += '<p><strong>类型：</strong>' + item.type + '　<strong>状态：</strong>' + (item.status||'投放中') + '</p>';
   infoHtml += '<p><strong>业务归属：</strong>' + item.biz + '　<strong>渠道：</strong>' + item.channel + '</p>';
   infoHtml += '<p><strong>优化师：</strong>' + item.optimizer + '　<strong>设计师：</strong>' + item.designer + '</p>';
   infoHtml += '<p><strong>创建时间：</strong>' + item.createTime + '</p>';
@@ -944,8 +1133,8 @@ function openEdit(id){
   html += '  <div class="fm-group"><label>设计师</label><select id="e_designer">' + DESIGNERS.map(function(d){ return '<option ' + (item.designer===d?'selected':'') + '>' + d + '</option>'; }).join('') + '</select></div>';
   html += '</div>';
   html += '<div class="fm-group" style="margin-bottom:16px">';
-  html += '  <label>落地页URL（不可修改）</label>';
-  html += '  <input type="text" id="e_url" value="' + item.url + '" readonly>';
+  html += '  <label>落地页URL（由报表匹配，不可修改）</label>';
+  html += '  <input type="text" id="e_url" value="' + item.url + '" readonly style="background:#f5f5f5;color:#999">';
   html += '</div>';
   html += '<div class="fm-group">';
   html += '  <label>标签（逗号分隔）</label>';
