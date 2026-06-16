@@ -36,10 +36,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 /* === Filter Card === */
 .filter-card{
   background:var(--bg-card);border-radius:var(--radius-l);
-  padding:18px 20px 14px;
+  padding:16px 20px 12px;
   box-shadow:var(--shadow-s);border:1px solid var(--border-light);flex-shrink:0;
 }
-.filter-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+.filter-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px}
 .filter-row:last-child{margin-bottom:0}
 .filter-group{display:flex;flex-direction:column;gap:4px;min-width:0}
 .filter-group label{font-size:12px;color:var(--text-3);font-weight:500;padding-left:2px}
@@ -128,7 +128,6 @@ tbody tr.selected{background:var(--primary-light)}
 .tag-inline{display:inline-block;padding:2px 8px;background:var(--primary-light);color:var(--primary);border-radius:4px;font-size:11px;margin:1px 2px}
 .tag-type-img{background:#e6fffb;color:#13c2c2}
 .tag-type-vid{background:#f6ffed;color:#52c41a}
-.tag-type-car{background:#fff7e6;color:#fa8c16}
 .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .status-dot.on{background:var(--success)}
 .status-dot.off{background:var(--warning)}
@@ -195,7 +194,17 @@ tbody tr.selected{background:var(--primary-light)}
 .quick-tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 
 /* Column config */
-.col-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.col-group{margin-bottom:10px}
+.col-group-title{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:var(--text-3);font-weight:500;
+  margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border-light);
+}
+.col-group-title .group-actions{display:flex;gap:4px}
+.col-group-title .group-actions button{
+  font-size:11px;padding:2px 8px;height:22px;line-height:1;
+}
+.col-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .col-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);cursor:pointer;transition:all .15s;}
 .col-item:hover{border-color:var(--primary)}
 
@@ -247,9 +256,15 @@ tbody tr.selected{background:var(--primary-light)}
 
 <!-- Main Content -->
 <div class="main-content">
+
   <!-- Filter Card -->
   <div class="filter-card">
+    <!-- 第一行：搜索 + 素材类型 + 业务归属 + 渠道 + 显示模式 -->
     <div class="filter-row">
+      <div class="filter-group search-group">
+        <label>素材名称</label>
+        <input type="text" id="searchInput" placeholder="搜索素材名称…">
+      </div>
       <div class="filter-group">
         <label>素材类型 <span style="color:var(--danger)">*</span></label>
         <select id="typeFilter">
@@ -267,9 +282,32 @@ tbody tr.selected{background:var(--primary-light)}
         </select>
       </div>
       <div class="filter-group">
+        <label>渠道</label>
+        <select id="channelFilter">
+          <option value="">全部渠道</option>
+          <option>抖音</option>
+          <option>微信</option>
+          <option>小红书</option>
+          <option>百度</option>
+          <option>B站</option>
+        </select>
+      </div>
+      <div class="filter-group" style="justify-content:flex-end">
+        <label>显示模式</label>
+        <div class="mode-toggle">
+          <input type="radio" id="modeDetail" name="mode" value="detail" checked>
+          <label for="modeDetail" class="active" onclick="switchMode('detail')">明细</label>
+          <input type="radio" id="modeSummary" name="mode" value="summary">
+          <label for="modeSummary" onclick="switchMode('summary')">汇总</label>
+        </div>
+      </div>
+    </div>
+    <!-- 第二行：优化师 + 设计师 + 创建日期 + 数据范围 + 按钮 -->
+    <div class="filter-row">
+      <div class="filter-group">
         <label>优化师</label>
         <select id="optimizerFilter">
-          <option value="">全部</option>
+          <option value="">全部优化师</option>
           <option>张伟</option>
           <option>王芳</option>
           <option>刘强</option>
@@ -279,26 +317,27 @@ tbody tr.selected{background:var(--primary-light)}
       <div class="filter-group">
         <label>设计师</label>
         <select id="designerFilter">
-          <option value="">全部</option>
+          <option value="">全部设计师</option>
           <option>李明</option>
           <option>陈晓</option>
           <option>赵丽</option>
         </select>
       </div>
       <div class="filter-group">
-        <label>渠道</label>
-        <select id="channelFilter">
-          <option value="">全部</option>
-          <option>抖音</option>
-          <option>微信</option>
-          <option>小红书</option>
-          <option>百度</option>
-          <option>B站</option>
-        </select>
+        <label>创建日期（起）</label>
+        <input type="date" id="dateCreatedStart">
       </div>
-      <div class="filter-group search-group">
-        <label>素材名称搜索</label>
-        <input type="text" id="searchInput" placeholder="输入关键词…" onkeydown="if(event.key==='Enter')applyFilter()">
+      <div class="filter-group">
+        <label>创建日期（止）</label>
+        <input type="date" id="dateCreatedEnd">
+      </div>
+      <div class="filter-group">
+        <label>数据范围（起）</label>
+        <input type="date" id="dateRangeStart">
+      </div>
+      <div class="filter-group">
+        <label>数据范围（止）</label>
+        <input type="date" id="dateRangeEnd">
       </div>
       <div class="filter-actions">
         <button class="btn btn-primary" onclick="applyFilter()">🔍 筛选</button>
@@ -321,12 +360,6 @@ tbody tr.selected{background:var(--primary-light)}
     <div class="table-toolbar">
       <div class="table-title">📊 数据报表</div>
       <div class="table-actions">
-        <div class="mode-toggle">
-          <input type="radio" id="modeDetail" name="mode" value="detail" checked>
-          <label for="modeDetail" class="active">明细</label>
-          <input type="radio" id="modeSummary" name="mode" value="summary">
-          <label for="modeSummary">汇总</label>
-        </div>
         <button class="btn btn-outline" onclick="openUploadModal()">📷 上传素材</button>
         <button class="btn btn-outline" onclick="openColConfig()">⚙ 自定义列</button>
         <button class="btn btn-success" onclick="openExport()">📥 导出报表</button>
@@ -433,14 +466,14 @@ tbody tr.selected{background:var(--primary-light)}
 
 <!-- Column Config Modal -->
 <div class="modal-mask" id="colMask">
-  <div class="modal" style="max-width:520px">
+  <div class="modal" style="max-width:560px">
     <div class="modal-hd">
       <h3>⚙ 自定义列显示</h3>
       <button class="modal-close" onclick="closeModal('colMask')">×</button>
     </div>
-    <div class="modal-bd">
+    <div class="modal-bd" id="colModalBody">
       <p style="font-size:13px;color:var(--text-3);margin-bottom:14px">选择需要在表格中显示的列</p>
-      <div class="col-grid" id="colGrid"></div>
+      <div id="colGroups"></div>
     </div>
     <div class="modal-ft">
       <button class="btn btn-outline" onclick="closeModal('colMask')">取消</button>
@@ -533,20 +566,20 @@ const TAG_POOL = ['促销','品牌','新品','节日','活动','618','双11','�
 
 /* ============ COLUMN DEFINITIONS ============ */
 var ALL_COLS = [
-  {key:'preview',     label:'预览',       show:true,  exp:false},
-  {key:'name',        label:'素材名称',   show:true,  exp:true},
-  {key:'creativeId',  label:'素材ID',    show:true,  exp:true},
-  {key:'adId',        label:'广告ID',     show:true,  exp:true},
-  {key:'projectId',   label:'项目ID',    show:true,  exp:true},
-  {key:'accountId',   label:'账户ID',    show:true,  exp:true},
-  {key:'type',        label:'类型',       show:true,  exp:true},
-  {key:'biz',         label:'业务归属',   show:true,  exp:true},
-  {key:'optimizer',   label:'优化师',     show:true,  exp:true},
-  {key:'designer',    label:'设计师',     show:true,  exp:true},
-  {key:'channel',     label:'渠道',       show:true,  exp:true},
-  {key:'tags',        label:'标签',       show:true,  exp:true},
-  {key:'url',         label:'落地页URL', show:true,  exp:true},
-  {key:'createTime',  label:'创建时间',   show:true,  exp:true},
+  {key:'preview',     label:'预览',       show:true,  exp:false, group:'基础信息'},
+  {key:'name',        label:'素材名称',   show:true,  exp:true,  group:'基础信息'},
+  {key:'creativeId',  label:'素材ID',    show:true,  exp:true,  group:'基础信息'},
+  {key:'adId',        label:'广告ID',     show:true,  exp:true,  group:'基础信息'},
+  {key:'projectId',   label:'项目ID',    show:true,  exp:true,  group:'基础信息'},
+  {key:'accountId',   label:'账户ID',    show:true,  exp:true,  group:'基础信息'},
+  {key:'type',        label:'类型',       show:true,  exp:true,  group:'基础信息'},
+  {key:'biz',         label:'业务归属',   show:true,  exp:true,  group:'基础信息'},
+  {key:'optimizer',   label:'优化师',     show:true,  exp:true,  group:'基础信息'},
+  {key:'designer',    label:'设计师',     show:true,  exp:true,  group:'基础信息'},
+  {key:'channel',     label:'渠道',       show:true,  exp:true,  group:'基础信息'},
+  {key:'tags',        label:'标签',       show:true,  exp:true,  group:'基础信息'},
+  {key:'url',         label:'落地页URL', show:true,  exp:true,  group:'基础信息'},
+  {key:'createTime',  label:'创建时间',   show:true,  exp:true,  group:'基础信息'},
   // 通用数据指标
   {key:'cost',            label:'消耗',          show:true,  exp:true,  group:'数据指标'},
   {key:'impressions',    label:'展示量',        show:true,  exp:true,  group:'数据指标'},
@@ -696,7 +729,6 @@ function aggregateByName(items){
     var nm = item.name;
     if(!groups[nm]){
       groups[nm] = {
-        name:nm,
         ids:[],
         creativeIds:[],
         adIds:[],
@@ -899,7 +931,11 @@ function applyFilter(){
   var ch = document.getElementById('channelFilter').value;
   var o = document.getElementById('optimizerFilter').value;
   var d = document.getElementById('designerFilter').value;
-
+  var dateCs = document.getElementById('dateCreatedStart').value;
+  var dateCe = document.getElementById('dateCreatedEnd').value;
+  var dateRs = document.getElementById('dateRangeStart').value;
+  var dateRe = document.getElementById('dateRangeEnd').value;
+  
   filtered = data.filter(function(item){
     if(s && item.name.toLowerCase().indexOf(s)===-1) return false;
     if(type && item.type!==type) return false;
@@ -907,6 +943,8 @@ function applyFilter(){
     if(ch && item.channel!==ch) return false;
     if(o && item.optimizer!==o) return false;
     if(d && item.designer!==d) return false;
+    if(dateCs && item.createTime < dateCs) return false;
+    if(dateCe && item.createTime > dateCe) return false;
     return true;
   });
   
@@ -921,6 +959,10 @@ function resetFilters(){
   document.getElementById('channelFilter').value = '';
   document.getElementById('optimizerFilter').value = '';
   document.getElementById('designerFilter').value = '';
+  document.getElementById('dateCreatedStart').value = '';
+  document.getElementById('dateCreatedEnd').value = '';
+  document.getElementById('dateRangeStart').value = '';
+  document.getElementById('dateRangeEnd').value = '';
   document.getElementById('modeDetail').checked = true;
   document.getElementById('modeSummary').checked = false;
   var labels = document.querySelectorAll('.mode-toggle label');
@@ -930,6 +972,11 @@ function resetFilters(){
   filterApplied = false;
   filtered = [];
   selected = new Set();
+  render();
+}
+
+function switchMode(mode){
+  displayMode = mode;
   render();
 }
 
@@ -956,7 +1003,6 @@ function render(){
       '<p style="font-size:14px;margin-top:12px">请选择素材类型和业务归属，然后点击"筛选"按钮查看数据</p>' +
       '</td></tr>';
     thead.innerHTML = '';
-    document.getElementById('totalCount').textContent = '0';
     updateBatchBar();
     return;
   }
@@ -984,13 +1030,13 @@ function render(){
   if(displayMode==='detail'){
     thHtml += '<th>操作</th>';
   }
-  thead.innerHTML = thHtml;
-
+  thead.innerHTML = 'thHtml;
+  
   var displayData = (displayMode==='summary') ? aggregateByName(filtered) : filtered;
-
+  
   // 应用排序
   displayData = applySort(displayData);
-
+  
   var tb = document.getElementById('tableBody');
   if(displayData.length===0){
     var colSpan = cols.length + (displayMode==='detail'?1:0);
@@ -1025,7 +1071,6 @@ function render(){
     tb.innerHTML = rows.join('');
   }
   
-  document.getElementById('totalCount').textContent = data.length;
   updateBatchBar();
 }
 
@@ -1069,7 +1114,7 @@ function renderCell(item, key, isSummary){
 }
 
 /* ============ SELECTION ============ */
-function toggleRow(id,checked){
+function toggleRow(id, checked){
   if(checked) selected.add(id); else selected.delete(id);
   updateBatchBar();
   updateHeaderCheckbox();
@@ -1091,13 +1136,6 @@ function updateBatchBar(){
   } else {
     bar.classList.remove('show');
   }
-}
-function updateHeaderCheckbox(){
-  var allChecked = filtered.length>0 && filtered.every(function(i){ return selected.has(i.id); });
-  var c1 = document.getElementById('checkAll');
-  var c2 = document.getElementById('checkAll2');
-  if(c1) c1.checked = allChecked;
-  if(c2) c2.checked = allChecked;
 }
 function clearSelection(){
   selected = new Set();
@@ -1130,11 +1168,10 @@ function addTag(){
   var inp = document.getElementById('tagInput');
   var v = inp.value.trim();
   if(!v) return;
-  var wrap = document.getElementById('tagWrap');
   var tag = document.createElement('span');
   tag.className='ti-tag';
   tag.innerHTML = v + ' <span class="ti-x" onclick="this.parentNode.remove()">×</span>';
-  wrap.insertBefore(tag, inp);
+  inp.parentNode.insertBefore(tag, inp);
   inp.value='';
 }
 function addQuickTag(t){
@@ -1296,42 +1333,653 @@ function deleteOne(id){
 
 /* ============ COLUMN CONFIG ============ */
 function openColConfig(){
-  var grid = document.getElementById('colGrid');
-  var html = '';
-  // 按分组显示
   var groups = {};
   ALL_COLS.forEach(function(c){
-    var g = c.group || '基础信息';
+    var g = c.group || '其他';
     if(!groups[g]) groups[g] = [];
     groups[g].push(c);
   });
-  var groupNames = Object.keys(groups);
-  // 先显示基础信息，然后是指标
+  
   var orderedGroups = ['基础信息'];
   if(groups['数据指标']) orderedGroups.push('数据指标');
   if(groups['视频指标']) orderedGroups.push('视频指标');
   
+  var html = '';
   orderedGroups.forEach(function(gName){
     if(!groups[gName]) return;
-    html += '<div style="grid-column:1/-1;font-size:12px;color:var(--text-3);margin-top:8px;margin-bottom:4px;font-weight:500">' + gName + '</div>';
-    groups[gName].forEach(function(c){
+    var cols = groups[gName];
+    var allChecked = cols.every(function(c){ return c.show; });
+    var noneChecked = cols.every(function(c){ return !c.show; });
+    
+    html += '<div class="col-group">';
+    html += '  <div class="col-group-title">';
+    html += '    <span>' + gName + '</span>';
+    html += '    <div class="group-actions">';
+    html += '      <button class="btn btn-outline" style="height:22px;font-size:11px;padding:0 8px" onclick="toggleGroup(\'' + gName + '\',true)">全选</button>';
+    html += '      <button class="btn btn-outline" style="height:22px;font-size:11px;padding:0 8px" onclick="toggleGroup(\'' + gName + '\',false)">清空</button>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '  <div class="col-grid">';
+    cols.forEach(function(c){
       html += '<div class="col-item" onclick="toggleCol(\'' + c.key + '\')" id="colOpt_' + c.key + '">' +
         '<input type="checkbox" ' + (c.show?'checked':'') + '> ' + c.label +
         '</div>';
     });
+    html += '  </div>';
+    html += '</div>';
   });
-  grid.innerHTML = html;
+  
+  document.getElementById('colGroups').innerHTML = html;
   document.getElementById('colMask').classList.add('show');
   document.body.style.overflow='hidden';
 }
+
+function toggleGroup(groupName, check){
+  ALL_COLS.forEach(function(c){
+    if(c.group === groupName){
+      c.show = check;
+    }
+  });
+  // 刷新弹窗中的显示
+  openColConfig();
+}
+
 function toggleCol(key){
   var c = ALL_COLS.find(function(c){ return c.key===key; });
   if(c){
     c.show = !c.show;
     var el = document.getElementById('colOpt_' + key);
-    el.querySelector('input').checked = c.show;
+
+[... 2000 characters truncated ...]
+    avgV5Count = g.v5Count_vals.length ? Math.round(sum(g.v5Count_vals)/g.v5Count_vals.length) : 0;
+    var avgV5Rate = g.v5Rate_vals.length ? (sum(g.v5Rate_vals)/g.v5Rate_vals.length).toFixed(2) : '0.00';
+    var avgV7Count = g.v7Count_vals.length ? Math.round(sum(g.v7Count_vals)/g.v7Count_vals.length) : 0;
+    var avgV7Rate = g.v7Rate_vals.length ? (sum(g.v7Rate_vals)/g.v7Rate_vals.length).toFixed(2) : '0.00';
+    var avgP10 = g.p10Count_vals.length ? Math.round(sum(g.p10Count_vals)/g.p10Count_vals.length) : 0;
+    var avgP25 = g.p25Count_vals.length ? Math.round(sum(g.p25Count_vals)/g.p25Count_vals.length) : 0;
+    var avgP50 = g.p50Count_vals.length ? Math.round(sum(g.p50Count_vals)/g.p50Count_vals.length) : 0;
+    var avgP75 = g.p75Count_vals.length ? Math.round(sum(g.p75Count_vals)/g.p75Count_vals.length) : 0;
+    var avgP90 = g.p90Count_vals.length ? Math.round(sum(g.p90Count_vals)/g.p90Count_vals.length) : 0;
+    var avgP95 = g.p95Count_vals.length ? Math.round(sum(g.p95Count_vals)/g.p95Count_vals.length) : 0;
+    var avgP100 = g.p100Count_vals.length ? Math.round(sum(g.p100Count_vals)/g.p100Count_vals.length) : 0;
+    var topChannel = '';
+    var maxC = 0;
+    var chKeys = Object.keys(g.channels);
+    for(var c=0;c<chKeys.length;c++){ if(g.channels[chKeys[c]]>maxC){ maxC=g.channels[chKeys[c]]; topChannel=chKeys[c]; } }
+    var allTagsArr = Object.keys(g.allTags);
+    result.push({
+      _isSummary:true,
+      _count:g.count,
+      id:'summary_'+g.name,
+      name:g.name + ' <span class="summary-hint">（汇总 '+g.count+' 条）</span>',
+      creativeId: g.creativeIds.join(', '),
+      adId: g.adIds.join(', '),
+      projectId: g.projectIds.join(', '),
+      accountId: g.accountIds.join(', '),
+      type:g.type,
+      biz:g.biz,
+      optimizer:g.optimizer,
+      designer:g.designer,
+      channel:topChannel,
+      tags:allTagsArr,
+      url: g.urls[0]||'',
+      createTime: g.createTimes.sort().reverse()[0]||'',
+      cost:g.cost,
+      impressions:g.impressions,
+      cpm:avgCpm,
+      clicks:g.clicks,
+      ctr:avgCtr,
+      conversions:g.conversions,
+      cvr:avgCvr,
+      effectivePlays:avgEffectivePlays,
+      effectivePlayRate:avgEffectivePlayRate,
+      v3Count:avgV3Count,
+      v3Rate:avgV3Rate,
+      v5Count:avgV5Count,
+      v5Rate:avgV5Rate,
+      v7Count:avgV7Count,
+      v7Rate:avgV7Rate,
+      p10Count:avgP10,
+      p25Count:avgP25,
+      p50Count:avgP50,
+      p75Count:avgP75,
+      p90Count:avgP90,
+      p95Count:avgP95,
+      p100Count:avgP100,
+      _rawIds: g.ids
+    });
+  }
+  return result;
+}
+
+/* ============ SORT ============ */
+function sortBy(key){
+  if(sortKey===key){
+    // 切换排序方向
+    sortOrder = sortOrder==='asc' ? 'desc' : 'asc';
+  } else {
+    // 新字段，设置默认排序方向
+    sortKey = key;
+    // 创建时间和花费默认降序，其他字段默认升序
+    sortOrder = (key==='createTime' || key==='cost') ? 'desc' : 'asc';
+  }
+  render();
+}
+
+function applySort(items){
+  if(!sortKey) return items;
+  var order = sortOrder;
+  var key = sortKey;
+  var sorted = items.slice(); // 复制数组
+  sorted.sort(function(a, b){
+    var va = a[key];
+    var vb = b[key];
+    // 处理数字字段
+    if(['cost','impressions','cpm','clicks','conversions','effectivePlays','v3Count','v5Count','v7Count','p10Count','p25Count','p50Count','p75Count','p90Count','p95Count','p100Count'].indexOf(key)!==-1){
+      va = parseFloat(va) || 0;
+      vb = parseFloat(vb) || 0;
+    }
+    // 处理字符串字段
+    if(typeof va === 'string') va = va.toLowerCase();
+    if(typeof vb === 'string') vb = vb.toLowerCase();
+    // 比较
+    if(va < vb) return order==='asc' ? -1 : 1;
+    if(va > vb) return order==='asc' ? 1 : -1;
+    return 0;
+  });
+  return sorted;
+}
+
+/* ============ FILTER ============ */
+function applyFilter(){
+  var type = document.getElementById('typeFilter').value;
+  var biz = document.getElementById('bizFilter').value;
+  
+  // 检查是否选择了素材类型和业务归属
+  if(!type || !biz){
+    showToast('请选择素材类型和业务归属', 'error');
+    return;
+  }
+  
+  filterApplied = true;
+  
+  var s = document.getElementById('searchInput').value.trim().toLowerCase();
+  var ch = document.getElementById('channelFilter').value;
+  var o = document.getElementById('optimizerFilter').value;
+  var d = document.getElementById('designerFilter').value;
+  var dateCs = document.getElementById('dateCreatedStart').value;
+  var dateCe = document.getElementById('dateCreatedEnd').value;
+  var dateRs = document.getElementById('dateRangeStart').value;
+  var dateRe = document.getElementById('dateRangeEnd').value;
+  
+  filtered = data.filter(function(item){
+    if(s && item.name.toLowerCase().indexOf(s)===-1) return false;
+    if(type && item.type!==type) return false;
+    if(biz && item.biz!==biz) return false;
+    if(ch && item.channel!==ch) return false;
+    if(o && item.optimizer!==o) return false;
+    if(d && item.designer!==d) return false;
+    if(dateCs && item.createTime < dateCs) return false;
+    if(dateCe && item.createTime > dateCe) return false;
+    return true;
+  });
+  
+  selected = new Set();
+  render();
+}
+
+function resetFilters(){
+  document.getElementById('searchInput').value = '';
+  document.getElementById('typeFilter').value = '';
+  document.getElementById('bizFilter').value = '';
+  document.getElementById('channelFilter').value = '';
+  document.getElementById('optimizerFilter').value = '';
+  document.getElementById('designerFilter').value = '';
+  document.getElementById('dateCreatedStart').value = '';
+  document.getElementById('dateCreatedEnd').value = '';
+  document.getElementById('dateRangeStart').value = '';
+  document.getElementById('dateRangeEnd').value = '';
+  document.getElementById('modeDetail').checked = true;
+  document.getElementById('modeSummary').checked = false;
+  var labels = document.querySelectorAll('.mode-toggle label');
+  labels.forEach(function(l){ l.classList.remove('active'); });
+  document.querySelector('label[for="modeDetail"]').classList.add('active');
+  displayMode = 'detail';
+  filterApplied = false;
+  filtered = [];
+  selected = new Set();
+  render();
+}
+
+function switchMode(mode){
+  displayMode = mode;
+  render();
+}
+
+/* ============ RENDER ============ */
+function render(){
+  var cols = ALL_COLS.filter(function(c){ 
+    // 视频专属列只在类型为视频时显示
+    if(c.videoOnly){
+      // 检查当前筛选是否有视频类型
+      var hasVideo = filtered.some(function(item){ return item.type==='视频'; }) || 
+                      data.some(function(item){ return item.type==='视频'; });
+      return c.show && hasVideo;
+    }
+    return c.show; 
+  });
+  
+  var thead = document.getElementById('colHeaderRow');
+  var thHtml = '';
+  
+  if(!filterApplied){
+    // 未筛选时显示提示
+    document.getElementById('tableBody').innerHTML = 
+      '<tr><td colspan="99" style="text-align:center;padding:60px 20px;color:var(--text-3)">' +
+      '<p style="font-size:14px;margin-top:12px">请选择素材类型和业务归属，然后点击"筛选"按钮查看数据</p>' +
+      '</td></tr>';
+    thead.innerHTML = '';
+;
+    updateBatchBar();
+    return;
+  }
+  
+  if(displayMode==='detail'){
+    thHtml += '<th style="width:40px;text-align:center"><input type="checkbox" ' + (selected.size===filtered.length&&filtered.length>0?'checked':'') + ' onchange="toggleCheckAll(this.checked)"></th>';
+  }
+  cols.forEach(function(c){
+    var isNum = ['cost','impressions','cpm','clicks','conversions','effectivePlays','v3Count','v5Count','v7Count','p10Count','p25Count','p50Count','p75Count','p90Count','p95Count','p100Count'].indexOf(c.key)!==-1;
+    var sortable = isNum || c.key==='name' || c.key==='createTime';
+    var sortIcon = '';
+    if(sortable){
+      if(sortKey===c.key){
+        // 当前排序字段，显示 ↑ 或 ↓（高亮）
+        sortIcon = sortOrder==='asc' ? ' ↑' : ' ↓';
+      } else {
+        // 非当前排序字段，显示 ⇅（灰色，提示可点击排序）
+        sortIcon = ' ⇅';
+      }
+    }
+    var clickHandler = sortable ? (' onclick="sortBy(\'' + c.key + '\')" style="cursor:pointer;user-select:none"') : '';
+    thHtml += '<th ' + (isNum?'style="text-align:right"':'') + clickHandler + '>' + c.label + sortIcon + '</th>';
+  });
+  // 明细模式下添加操作列表头
+  if(displayMode==='detail'){
+    thHtml += '<th>操作</th>';
+  }
+  thead.innerHTML = thHtml;
+  
+  var displayData = (displayMode==='summary') ? aggregateByName(filtered) : filtered;
+  
+  // 应用排序
+  displayData = applySort(displayData);
+  
+  var tb = document.getElementById('tableBody');
+  if(displayData.length===0){
+    var colSpan = cols.length + (displayMode==='detail'?1:0);
+    tb.innerHTML = '<tr><td colspan="' + colSpan + '" style="text-align:center;padding:60px 20px;color:var(--text-3)">' +
+      '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.35;display:block;margin:0 auto 12px"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>' +
+      '<p>暂无数据</p></td></tr>';
+  } else {
+    var rows = [];
+    for(var i=0;i<displayData.length;i++){
+      var item = displayData[i];
+      var tr = '';
+      if(displayMode==='detail'){
+        var checked = selected.has(item.id)?'checked':'';
+        tr = '<tr class="' + (checked?'selected':'') + '" data-id="' + item.id + '">';
+        tr += '<td style="text-align:center"><input type="checkbox" ' + checked + ' onchange="toggleRow(' + item.id + ',this.checked)"></td>';
+        for(var j=0;j<cols.length;j++){
+          tr += renderCell(item, cols[j].key, false);
+        }
+        tr += '<td>' +
+          '<button class="action-btn edit" onclick="openEdit(' + item.id + ')">✏编辑</button> ' +
+          '<button class="action-btn del" onclick="deleteOne(' + item.id + ')">🗑删除</button>' +
+          '</td>';
+      } else {
+        tr = '<tr>';
+        for(var j=0;j<cols.length;j++){
+          tr += renderCell(item, cols[j].key, true);
+        }
+      }
+      tr += '</tr>';
+      rows.push(tr);
+    }
+    tb.innerHTML = rows.join('');
+  }
+  
+  updateBatchBar();
+}
+
+function renderCell(item, key, isSummary){
+  if(key==='preview'){
+    if(isSummary) return '<td></td>';
+    return '<td><img class="cell-thumb" src="' + item.thumb + '" alt="" onclick="openPreview(' + item.id + ')"></td>';
+  }
+  if(key==='name'){
+    if(isSummary) return '<td><a class="cell-name" onclick="showSummaryDetail(\'' + item.name + '\')">' + item.name + '</a>' + (item._isSummary ? '<span class="summary-hint">（汇总 ' + item._count + ' 条）</span>' : '') + '</td>';
+    return '<td><span class="cell-name" onclick="openPreview(' + item.id + ')">' + item.name + '</span></td>';
+  }
+  if(key==='type'){
+    var cls = item.type==='图片'?'tag-type-img':'tag-type-vid';
+    return '<td><span class="tag-inline ' + cls + '">' + item.type + '</span></td>';
+  }
+  if(key==='biz'){ return '<td>' + item.biz + '</td>'; }
+  if(key==='optimizer'||key==='designer'||key==='channel'){ return '<td>' + (item[key]||'-') + '</td>'; }
+  if(key==='tags'){
+    var tags = (typeof item.tags==='string') ? [item.tags] : (item.tags||[]);
+    var tagHtml = tags.map(function(t){ return '<span class="tag-inline">' + t + '</span>'; }).join(' ');
+    return '<td>' + tagHtml + '</td>';
+  }
+  if(key==='url'){
+    var displayUrl = item.url&&item.url.length>30 ? item.url.slice(0,30)+'…' : (item.url||'');
+    return '<td><a class="cell-link" href="' + (item.url||'#') + '" target="_blank" onclick="event.stopPropagation()">' + displayUrl + '</a></td>';
+  }
+  if(key==='createTime'){
+    return '<td style="font-size:12px;color:var(--text-3)">' + (item.createTime||'-') + '</td>';
+  }
+  if(key==='cost'){
+    return '<td style="text-align:right;font-weight:600;color:var(--danger)">¥' + Number(item.cost).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>';
+  }
+  if(key==='impressions'){ return '<td style="text-align:right">' + Number(item.impressions).toLocaleString() + '</td>'; }
+  if(key==='cpm'){ return '<td style="text-align:right">¥' + parseFloat(item.cpm).toFixed(2) + '</td>'; }
+  if(key==='clicks'){ return '<td style="text-align:right">' + Number(item.clicks).toLocaleString() + '</td>'; }
+  if(key==='ctr'||key==='cvr'||key==='effectivePlayRate'||key==='v3Rate'||key==='v5Rate'||key==='v7Rate'){ return '<td style="text-align:right">' + item[key] + '%</td>'; }
+  if(key==='conversions'){ return '<td style="text-align:right">' + item.conversions + '</td>'; }
+  if(key==='effectivePlays'||key==='v3Count'||key==='v5Count'||key==='v7Count'||key==='p10Count'||key==='p25Count'||key==='p50Count'||key==='p75Count'||key==='p90Count'||key==='p95Count'||key==='p100Count'){ return '<td style="text-align:right">' + Number(item[key]).toLocaleString() + '</td>'; }
+  return '<td>' + (item[key]||'') + '</td>';
+}
+
+/* ============ SELECTION ============ */
+function toggleRow(id, checked){
+  if(checked) selected.add(id); else selected.delete(id);
+  updateBatchBar();
+  updateHeaderCheckbox();
+}
+function toggleCheckAll(checked){
+  if(displayMode==='summary') return;
+  if(checked){
+    filtered.forEach(function(item){ selected.add(item.id); });
+  } else {
+    filtered.forEach(function(item){ selected.delete(item.id); });
+  }
+  render();
+}
+function updateBatchBar(){
+  var bar = document.getElementById('batchBar');
+  if(selected.size>0 && displayMode==='detail'){
+    bar.classList.add('show');
+    bar.querySelector('#batchCount').textContent = selected.size;
+  } else {
+    bar.classList.remove('show');
   }
 }
+function clearSelection(){
+  selected = new Set();
+  render();
+}
+function batchDelete(){
+  if(selected.size===0) return;
+  if(!confirm('确定要删除选中的 ' + selected.size + ' 条素材吗？')) return;
+  data = data.filter(function(item){ return !selected.has(item.id); });
+  selected = new Set();
+  applyFilter();
+  showToast('成功删除 ' + selected.size + ' 条素材');
+}
+
+/* ============ UPLOAD ============ */
+function openUploadModal(){
+  document.getElementById('uploadMask').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+  document.body.style.overflow='';
+  if(id==='uploadMask') editingId=null;
+}
+function handleFileSelect(e){
+  var file = e.target.files[0];
+  if(file) showToast('已选择文件：' + file.name);
+}
+function addTag(){
+  var inp = document.getElementById('tagInput');
+  var v = inp.value.trim();
+  if(!v) return;
+  var tag = document.createElement('span');
+  tag.className='ti-tag';
+  tag.innerHTML = v + ' <span class="ti-x" onclick="this.parentNode.remove()">×</span>';
+  inp.parentNode.insertBefore(tag, inp);
+  inp.value='';
+}
+function addQuickTag(t){
+  var inp = document.getElementById('tagInput');
+  inp.value = t;
+  addTag();
+}
+function submitUpload(){
+  var name = document.getElementById('f_name').value.trim();
+  if(!name){ showToast('请输入素材名称','error'); return; }
+  var type = document.getElementById('f_type').value;
+  var biz = document.getElementById('f_biz').value;
+  var channel = document.getElementById('f_channel').value;
+  var optimizer = document.getElementById('f_optimizer').value;
+  var designer = document.getElementById('f_designer').value;
+  var tags = [];
+  var tagEls = document.querySelectorAll('#tagWrap .ti-tag');
+  for(var i=0;i<tagEls.length;i++){ tags.push(tagEls[i].textContent.replace('×','').trim()); }
+  var m = randomMetrics(type==='视频');
+  var newId = data.length+1;
+  var newItem = {
+    id:newId,
+    name:name,
+    creativeId:'CR' + newId.toString().padStart(8,'0'),
+    adId:'AD' + (100000+newId),
+    projectId:'PJ' + (5000+newId),
+    accountId:'AC' + (20000+newId),
+    type:type,
+    biz:biz,
+    optimizer:optimizer,
+    designer:designer,
+    channel:channel,
+    tags:tags.length?tags:['新素材'],
+    url:'https://landing.example.com/p/'+newId, // 落地页URL由报表匹配得来
+    createTime:new Date().toISOString().slice(0,10),
+    thumb:type==='视频' ? 'https://picsum.photos/seed/vidnew/160/120' : 'https://picsum.photos/seed/imgnew/160/120',
+    cost:parseFloat(m.cost),
+    impressions:m.impressions,
+    cpm:parseFloat(m.cpm),
+    clicks:m.clicks,
+    ctr:m.ctr,
+    conversions:m.conversions,
+    cvr:m.cvr,
+    effectivePlays:m.effectivePlays || 0,
+    effectivePlayRate:m.effectivePlayRate || '0.00',
+    v3Count:m.v3Count || 0,
+    v3Rate:m.v3Rate || '0.00',
+    v5Count:m.v5Count || 0,
+    v5Rate:m.v5Rate || '0.00',
+    v7Count:m.v7Count || 0,
+    v7Rate:m.v7Rate || '0.00',
+    p10Count:m.p10Count || 0,
+    p25Count:m.p25Count || 0,
+    p50Count:m.p50Count || 0,
+    p75Count:m.p75Count || 0,
+    p90Count:m.p90Count || 0,
+    p95Count:m.p95Count || 0,
+    p100Count:m.p100Count || 0
+  };
+  data.unshift(newItem);
+  closeModal('uploadMask');
+  applyFilter();
+  showToast('素材「' + name + '」上传成功！');
+  document.getElementById('f_name').value='';
+  var existingTags = document.querySelectorAll('#tagWrap .ti-tag');
+  for(var j=0;j<existingTags.length;j++){ existingTags[j].remove(); }
+}
+
+/* ============ PREVIEW ============ */
+function openPreview(id){
+  var item = null;
+  for(var i=0;i<data.length;i++){ if(data[i].id===id){ item=data[i]; break; } }
+  if(!item) return;
+  document.getElementById('previewTitle').textContent = item.name;
+  var body = document.getElementById('previewBody');
+  var isVideo = item.type==='视频';
+  var infoHtml = '';
+  infoHtml += '<p><strong>素材名称：</strong>' + item.name + '</p>';
+  infoHtml += '<p><strong>素材ID：</strong>' + item.creativeId + '</p>';
+  infoHtml += '<p><strong>类型：</strong>' + item.type + '　<strong>业务归属：</strong>' + item.biz + '</p>';
+  infoHtml += '<p><strong>优化师：</strong>' + item.optimizer + '　<strong>设计师：</strong>' + item.designer + '</p>';
+  infoHtml += '<p><strong>渠道：</strong>' + item.channel + '　<strong>创建时间：</strong>' + item.createTime + '</p>';
+  infoHtml += '<p><strong>落地页：</strong><a href="' + item.url + '" target="_blank" style="color:var(--primary)">' + item.url + '</a></p>';
+  infoHtml += '<p><strong>标签：</strong>' + item.tags.join(' ') + '</p>';
+  infoHtml += '<p style="margin-top:8px"><strong>数据指标：</strong>消耗 ¥' + Number(item.cost).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' / 展示 ' + Number(item.impressions).toLocaleString() + ' / 千展成本 ¥' + parseFloat(item.cpm).toFixed(2) + ' / 点击 ' + Number(item.clicks).toLocaleString() + ' / 点击率 ' + item.ctr + '% / 目标转化 ' + item.conversions + ' / 目标转化率 ' + item.cvr + '%</p>';
+  if(item.type==='视频'){
+    infoHtml += '<p><strong>视频指标：</strong>有效播放 ' + item.effectivePlays + '（' + item.effectivePlayRate + '%）/ 3s完播 ' + item.v3Count + '（' + item.v3Rate + '%）/ 5s完播 ' + item.v5Count + '（' + item.v5Rate + '%）/ 7s完播 ' + item.v7Count + '（' + item.v7Rate + '%）</p>';
+    infoHtml += '<p><strong>进度播放：</strong>10% ' + item.p10Count + ' / 25% ' + item.p25Count + ' / 50% ' + item.p50Count + ' / 75% ' + item.p75Count + ' / 90% ' + item.p90Count + ' / 95% ' + item.p95Count + ' / 100% ' + item.p100Count + '</p>';
+  }
+  if(isVideo){
+    body.innerHTML = '<div style="width:100%;height:360px;background:#000;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:#fff;font-size:48px">▶</div>' +
+      '<div class="preview-info">' + infoHtml + '</div>';
+  } else {
+    body.innerHTML = '<img src="' + item.thumb.replace('/160/120','/640/480') + '" alt="' + item.name + '" style="width:100%;max-height:420px;object-fit:contain;border-radius:var(--radius);background:#000">' +
+      '<div class="preview-info">' + infoHtml + '</div>';
+  }
+  document.getElementById('previewMask').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+/* ============ EDIT ============ */
+function openEdit(id){
+  var item = null;
+  for(var i=0;i<data.length;i++){ if(data[i].id===id){ item=data[i]; break; } }
+  if(!item) return;
+  editingId = id;
+  var html = '';
+  html += '<div class="fm-row">';
+  html += '  <div class="fm-group"><label>素材名称</label><input type="text" id="e_name" value="' + item.name + '"></div>';
+  html += '  <div class="fm-group"><label>素材类型</label><select id="e_type"><option ' + (item.type==='图片'?'selected':'') + '>图片</option><option ' + (item.type==='视频'?'selected':'') + '>视频</option></select></div>';
+  html += '</div>';
+  html += '<div class="fm-row">';
+  html += '  <div class="fm-group"><label>业务归属</label><select id="e_biz"><option ' + (item.biz==='存量'?'selected':'') + '>存量</option><option ' + (item.biz==='权益'?'selected':'') + '>权益</option></select></div>';
+  html += '  <div class="fm-group"><label>渠道</label><select id="e_channel">' + CHANNELS.map(function(c){ return '<option ' + (item.channel===c?'selected':'') + '>' + c + '</option>'; }).join('') + '</select></div>';
+  html += '</div>';
+  html += '<div class="fm-row">';
+  html += '  <div class="fm-group"><label>优化师</label><select id="e_optimizer">' + OPTIMIZERS.map(function(o){ return '<option ' + (item.optimizer===o?'selected':'') + '>' + o + '</option>'; }).join('') + '</select></div>';
+  html += '  <div class="fm-group"><label>设计师</label><select id="e_designer">' + DESIGNERS.map(function(d){ return '<option ' + (item.designer===d?'selected':'') + '>' + d + '</option>'; }).join('') + '</select></div>';
+  html += '</div>';
+  html += '<div class="fm-group" style="margin-bottom:16px">';
+  html += '  <label>落地页URL（由报表匹配，不可修改）</label>';
+  html += '  <input type="text" id="e_url" value="' + item.url + '" readonly style="background:#f5f5f5;color:#999">';
+  html += '</div>';
+  html += '<div class="fm-group">';
+  html += '  <label>标签（逗号分隔）</label>';
+  html += '  <input type="text" id="e_tags" value="' + item.tags.join(', ') + '">';
+  html += '</div>';
+  document.getElementById('editBody').innerHTML = html;
+  document.getElementById('editMask').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function saveEdit(){
+  var item = null;
+  for(var i=0;i<data.length;i++){ if(data[i].id===editingId){ item=data[i]; break; } }
+  if(!item) return;
+  item.name = document.getElementById('e_name').value.trim()||item.name;
+  item.type = document.getElementById('e_type').value;
+  item.biz = document.getElementById('e_biz').value;
+  item.channel = document.getElementById('e_channel').value;
+  item.optimizer = document.getElementById('e_optimizer').value;
+  item.designer = document.getElementById('e_designer').value;
+  item.tags = document.getElementById('e_tags').value.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s; });
+  closeModal('editMask');
+  applyFilter();
+  showToast('素材「' + item.name + '」修改成功！');
+}
+
+/* ============ DELETE ============ */
+function deleteOne(id){
+  var item = null;
+  for(var i=0;i<data.length;i++){ if(data[i].id===id){ item=data[i]; break; } }
+  if(!item) return;
+  if(!confirm('确定要删除素材「' + item.name + '」吗？')) return;
+  data = data.filter(function(d){ return d.id!==id; });
+  selected.delete(id);
+  applyFilter();
+  showToast('素材「' + item.name + '」已删除');
+}
+
+/* ============ COLUMN CONFIG ============ */
+function openColConfig(){
+  var groups = {};
+  ALL_COLS.forEach(function(c){
+    var g = c.group || '其他';
+    if(!groups[g]) groups[g] = [];
+    groups[g].push(c);
+  });
+  
+  var orderedGroups = ['基础信息'];
+  if(groups['数据指标']) orderedGroups.push('数据指标');
+  if(groups['视频指标']) orderedGroups.push('视频指标');
+  
+  var html = '';
+  orderedGroups.forEach(function(gName){
+    if(!groups[gName]) return;
+    var cols = groups[gName];
+    var allChecked = cols.every(function(c){ return c.show; });
+    var noneChecked = cols.every(function(c){ return !c.show; });
+    
+    html += '<div class="col-group">';
+    html += '  <div class="col-group-title">';
+    html += '    <span>' + gName + '</span>';
+    html += '    <div class="group-actions">';
+    html += '      <button class="btn btn-outline" style="height:22px;font-size:11px;padding:0 8px" onclick="toggleGroup(\'' + gName + '\',true)">全选</button>';
+    html += '      <button class="btn btn-outline" style="height:22px;font-size:11px;padding:0 8px" onclick="toggleGroup(\'' + gName + '\',false)">清空</button>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '  <div class="col-grid">';
+    cols.forEach(function(c){
+      html += '<div class="col-item" onclick="toggleCol(\'' + c.key + '\')" id="colOpt_' + c.key + '">' +
+        '<input type="checkbox" ' + (c.show?'checked':'') + '> ' + c.label +
+        '</div>';
+    });
+    html += '  </div>';
+    html += '</div>';
+  });
+  
+  document.getElementById('colGroups').innerHTML = html;
+  document.getElementById('colMask').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+function toggleGroup(groupName, check){
+  ALL_COLS.forEach(function(c){
+    if(c.group === groupName){
+      c.show = check;
+    }
+  });
+  // 刷新弹窗中的显示
+  openColConfig();
+}
+
+function toggleCol(key){
+  var c = ALL_COLS.find(function(c){ return c.key===key; });
+  if(c){
+    c.show = !c.show;
+    var el = document.getElementById('colOpt_' + key);
+    if(el) el.querySelector('input').checked = c.show;
+    // 更新分组按钮状态
+    updateGroupButtons(c.group);
+  }
+}
+
+function updateGroupButtons(groupName){
+  var cols = ALL_COLS.filter(function(c){ return c.group === groupName; });
+  var allChecked = cols.every(function(c){ return c.show; });
+  var noneChecked = cols.every(function(c){ return !c.show; });
+  // 这里可以更新分组标题旁边的按钮状态
+  // 暂时不需要特殊显示
+}
+
 function saveCols(){
   closeModal('colMask');
   render();
@@ -1376,19 +2024,6 @@ function doExport(){
   }, 1500);
 }
 
-/* ============ MODE TOGGLE ============ */
-(function(){
-  var labels = document.querySelectorAll('.mode-toggle label');
-  labels.forEach(function(l){
-    l.addEventListener('click', function(){
-      labels.forEach(function(ll){ ll.classList.remove('active'); });
-      l.classList.add('active');
-      displayMode = l.getAttribute('for')==='modeDetail' ? 'detail' : 'summary';
-      render();
-    });
-  });
-})();
-
 /* ============ TOAST ============ */
 function showToast(msg, type){
   var toast = document.getElementById('toast');
@@ -1400,7 +2035,6 @@ function showToast(msg, type){
 
 /* ============ INIT ============ */
 generateData();
-document.getElementById('totalCount').textContent = data.length;
 updateBatchBar();
 
 </script>
