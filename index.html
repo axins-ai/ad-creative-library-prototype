@@ -198,189 +198,165 @@ tbody tr.selected{background:var(--primary-light)}
 .col-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .col-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-s);cursor:pointer;transition:all .15s;}
 .col-item:hover{border-color:var(--primary)}
-.col-item.active{border-color:var(--primary);background:var(--primary-light)}
-.col-item input{pointer-events:none}
 
 /* Export */
-.exp-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
-.exp-opt{padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;}
-.exp-opt:hover{border-color:var(--primary)}
-.exp-opt.active{border-color:var(--primary);background:var(--primary-light)}
-.exp-opt h4{font-size:14px;margin-bottom:2px}
-.exp-opt p{font-size:12px;color:var(--text-3)}}
+.exp-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+.exp-opt{
+  border:2px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;
+  cursor:pointer;transition:all .2s;
+}
+.exp-opt:hover,.exp-opt.selected{border-color:var(--primary);background:var(--primary-light)}
+.exp-opt h4{font-size:14px;margin-bottom:6px;color:var(--text-1)}
+.exp-opt p{font-size:12px;color:var(--text-3)}
 .exp-col-section{margin-top:14px}
-.exp-col-section h4{font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-left:2px}
-.exp-col-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:220px;overflow-y:auto;padding:4px 0}
-.exp-col-item{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border-light);border-radius:var(--radius-s);font-size:12px;cursor:pointer;transition:all .15s;}
-.exp-col-item:hover{border-color:var(--primary)}
-.exp-col-item.active{border-color:var(--primary);background:var(--primary-light)}
-.exp-col-item input{pointer-events:none;width:14px;height:14px}
-.col-group-label{grid-column:1/-1;font-weight:600;color:var(--text-1);padding:4px 0 2px;font-size:12px;border-top:1px solid var(--border-light);margin-top:4px}
+.exp-col-section h4{font-size:13px;font-weight:500;margin-bottom:8px;color:var(--text-2)}
 
-/* Preview Modal */
-.preview-modal .modal{background:transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:90vw;max-height:90vh}
-.preview-modal .modal-hd{background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:var(--radius-l) var(--radius-l) 0 0;width:100%;max-width:720px}
-.preview-modal .modal-close{color:rgba(255,255,255,.7)}
-.preview-modal .modal-close:hover{color:#fff;background:rgba(255,255,255,.15)}
-.preview-body{background:#fff;border-radius:0 0 var(--radius-l) var(--radius-l);width:100%;max-width:720px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px;overflow-y:auto;max-height:70vh;}
-.preview-body img,.preview-body video{width:100%;max-height:420px;object-fit:contain;border-radius:var(--radius);background:#000}
-.preview-info{width:100%;font-size:13px;color:var(--text-2);line-height:1.7}
-.preview-info strong{color:var(--text-1)}
+/* Preview */
+.preview-modal .modal{max-width:740px}
+.preview-body{padding:20px}
+.preview-body img{width:100%;max-height:420px;object-fit:contain;border-radius:var(--radius);background:#000}
+.preview-info{padding:16px 0}
+.preview-info p{margin-bottom:8px;font-size:13px;line-height:1.6}
+.preview-info strong{color:var(--text-2);margin-right:4px}
 
 /* Toast */
-.toast{position:fixed;top:20px;right:24px;z-index:3000;padding:12px 20px;border-radius:var(--radius);font-size:13px;background:#fff;box-shadow:var(--shadow-m);display:flex;align-items:center;gap:8px;transform:translateX(120%);transition:transform .3s ease;border-left:3px solid var(--success);}
-.toast.show{transform:translateX(0)}
-.toast.error{border-left-color:var(--danger)}
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#333;color:#fff;padding:10px 24px;border-radius:var(--radius);
+  font-size:13px;z-index:2000;opacity:0;transition:all .3s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-3)}
 
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-@keyframes fadeSlideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-
-.empty{text-align:center;padding:60px 20px;color:var(--text-3)}
-.empty svg{width:80px;height:80px;margin-bottom:12px;opacity:.35}
+@keyframes scaleIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <header class="app-header">
   <div class="logo">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-    素材库
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    素材库管理系统
   </div>
 </header>
 
-<main class="main-content">
-
+<!-- Main Content -->
+<div class="main-content">
+  <!-- Filter Card -->
   <div class="filter-card">
-    <!-- 第一行：搜索 + 类型 + 业务归属 + 渠道 + 显示模式 -->
     <div class="filter-row">
-      <div class="filter-group search-group">
-        <label>素材名称</label>
-        <input type="text" id="searchInput" placeholder="搜索素材名称…" oninput="applyFilter()">
-      </div>
       <div class="filter-group">
-        <label>素材类型</label>
-        <select id="typeFilter" onchange="applyFilter()">
-          <option value="">全部类型</option>
-          <option value="图片">图片</option>
-          <option value="视频">视频</option>
-          <option value="轮播">轮播</option>
+        <label>素材类型 <span style="color:var(--danger)">*</span></label>
+        <select id="typeFilter">
+          <option value="">请选择</option>
+          <option>图片</option>
+          <option>视频</option>
         </select>
       </div>
       <div class="filter-group">
-        <label>业务归属</label>
-        <select id="bizFilter" onchange="applyFilter()">
-          <option value="">全部业务</option>
-          <option value="存量">存量</option>
-          <option value="权益">权益</option>
+        <label>业务归属 <span style="color:var(--danger)">*</span></label>
+        <select id="bizFilter">
+          <option value="">请选择</option>
+          <option>存量</option>
+          <option>权益</option>
         </select>
       </div>
-      <div class="filter-group">
-        <label>渠道</label>
-        <select id="channelFilter" onchange="applyFilter()">
-          <option value="">全部渠道</option>
-          <option value="抖音">抖音</option>
-          <option value="微信">微信</option>
-          <option value="小红书">小红书</option>
-          <option value="百度">百度</option>
-          <option value="B站">B站</option>
-        </select>
-      </div>
-      <div class="filter-group" style="justify-content:flex-end">
-        <label>显示模式</label>
-        <div class="mode-toggle">
-          <input type="radio" name="displayMode" id="modeDetail" value="detail" checked onchange="onModeChange()">
-          <label for="modeDetail" class="active">明细</label>
-          <input type="radio" name="displayMode" id="modeSummary" value="summary" onchange="onModeChange()">
-          <label for="modeSummary">汇总（按素材名称）</label>
-        </div>
-      </div>
-    </div>
-    <!-- 第二行：优化师 + 设计师 + 创建日期起 + 创建日期止 + 数据范围起 + 数据范围止 -->
-    <div class="filter-row">
       <div class="filter-group">
         <label>优化师</label>
-        <select id="optimizerFilter" onchange="applyFilter()">
-          <option value="">全部优化师</option>
-          <option value="张伟">张伟</option>
-          <option value="王芳">王芳</option>
-          <option value="刘强">刘强</option>
-          <option value="赵明">赵明</option>
+        <select id="optimizerFilter">
+          <option value="">全部</option>
+          <option>张伟</option>
+          <option>王芳</option>
+          <option>刘强</option>
+          <option>赵明</option>
         </select>
       </div>
       <div class="filter-group">
         <label>设计师</label>
-        <select id="designerFilter" onchange="applyFilter()">
-          <option value="">全部设计师</option>
-          <option value="李明">李明</option>
-          <option value="陈晓">陈晓</option>
-          <option value="赵丽">赵丽</option>
+        <select id="designerFilter">
+          <option value="">全部</option>
+          <option>李明</option>
+          <option>陈晓</option>
+          <option>赵丽</option>
         </select>
       </div>
       <div class="filter-group">
-        <label>创建日期（起）</label>
-        <input type="date" id="dateCreatedStart" onchange="applyFilter()">
+        <label>渠道</label>
+        <select id="channelFilter">
+          <option value="">全部</option>
+          <option>抖音</option>
+          <option>微信</option>
+          <option>小红书</option>
+          <option>百度</option>
+          <option>B站</option>
+        </select>
       </div>
-      <div class="filter-group">
-        <label>创建日期（止）</label>
-        <input type="date" id="dateCreatedEnd" onchange="applyFilter()">
-      </div>
-      <div class="filter-group">
-        <label>数据范围（起）</label>
-        <input type="date" id="dateRangeStart" onchange="applyFilter()">
-      </div>
-      <div class="filter-group">
-        <label>数据范围（止）</label>
-        <input type="date" id="dateRangeEnd" onchange="applyFilter()">
+      <div class="filter-group search-group">
+        <label>素材名称搜索</label>
+        <input type="text" id="searchInput" placeholder="输入关键词…" onkeydown="if(event.key==='Enter')applyFilter()">
       </div>
       <div class="filter-actions">
-        <button class="btn btn-outline" onclick="resetFilters()">重置筛选</button>
+        <button class="btn btn-primary" onclick="applyFilter()">🔍 筛选</button>
+        <button class="btn btn-outline" onclick="resetFilters()">重置</button>
       </div>
     </div>
   </div>
 
+  <!-- Batch Bar -->
   <div class="batch-bar" id="batchBar">
     <div class="batch-left">
-      <input type="checkbox" id="checkAll" onchange="toggleCheckAll(this.checked)">
-      <span>已选择 <strong id="batchCount">0</strong> 项</span>
+      <strong>已选择 <span id="batchCount">0</span> 项</strong>
+      <button class="btn btn-danger-outline" onclick="batchDelete()">🗑 批量删除</button>
     </div>
-    <button class="btn btn-danger-outline" onclick="batchDelete()">🗑 批量删除</button>
+    <button class="btn btn-outline" onclick="clearSelection()">清除选择</button>
   </div>
 
-  <div class="table-card">
+  <!-- Table Card -->
+  <div class="table-card" id="tableCard">
     <div class="table-toolbar">
-      <span class="table-title">素材列表（共 <strong id="totalCount">0</strong> 条）</span>
+      <div class="table-title">📊 数据报表</div>
       <div class="table-actions">
-        <button class="btn btn-outline" onclick="openColModal()">⚙ 自定义列</button>
-        <button class="btn btn-outline" onclick="openExportModal()">📊 导出报表</button>
-        <button class="btn btn-primary" onclick="openUploadModal()">⬆ 上传素材</button>
+        <div class="mode-toggle">
+          <input type="radio" id="modeDetail" name="mode" value="detail" checked>
+          <label for="modeDetail" class="active">明细</label>
+          <input type="radio" id="modeSummary" name="mode" value="summary">
+          <label for="modeSummary">汇总</label>
+        </div>
+        <button class="btn btn-outline" onclick="openUploadModal()">📷 上传素材</button>
+        <button class="btn btn-outline" onclick="openColConfig()">⚙ 自定义列</button>
+        <button class="btn btn-success" onclick="openExport()">📥 导出报表</button>
       </div>
     </div>
     <div class="table-scroll">
-      <table id="dataTable">
-        <thead>
-          <tr id="colHeaderRow">
-            <!-- 动态生成 -->
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
+      <table>
+        <thead><tr id="colHeaderRow"></tr></thead>
+        <tbody id="tableBody">
+          <tr><td colspan="99" style="text-align:center;padding:60px 20px;color:var(--text-3)">
+            <p style="font-size:14px;margin-top:12px">请选择素材类型和业务归属，然后点击"筛选"按钮查看数据</p>
+          </td></tr>
+        </tbody>
       </table>
     </div>
   </div>
-</main>
+</div>
 
 <!-- Upload Modal -->
 <div class="modal-mask" id="uploadMask">
   <div class="modal">
     <div class="modal-hd">
-      <h3>📤 上传素材</h3>
+      <h3>📷 上传素材</h3>
       <button class="modal-close" onclick="closeModal('uploadMask')">×</button>
     </div>
     <div class="modal-bd">
-      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
         <div class="uz-icon">📁</div>
-        <p>点击或拖拽文件到此处上传</p>
-        <p style="font-size:12px;color:var(--text-3);margin-top:4px">支持 JPG、PNG、MP4 等格式</p>
+        <p>点击选择文件，或拖拽文件到此处</p>
+        <p style="font-size:11px;color:var(--text-3);margin-top:4px">支持 jpg/png/mp4 格式</p>
       </div>
       <input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(event)">
       <div class="fm-row">
@@ -390,27 +366,48 @@ tbody tr.selected{background:var(--primary-light)}
         </div>
         <div class="fm-group">
           <label>素材类型 <span class="req">*</span></label>
-          <select id="f_type"><option value="图片">图片</option><option value="视频">视频</option><option value="轮播">轮播</option></select>
+          <select id="f_type">
+            <option>图片</option>
+            <option>视频</option>
+          </select>
         </div>
       </div>
       <div class="fm-row">
         <div class="fm-group">
           <label>业务归属 <span class="req">*</span></label>
-          <select id="f_biz"><option value="存量">存量</option><option value="权益">权益</option></select>
+          <select id="f_biz">
+            <option>存量</option>
+            <option>权益</option>
+          </select>
         </div>
         <div class="fm-group">
           <label>渠道 <span class="req">*</span></label>
-          <select id="f_channel"><option value="抖音">抖音</option><option value="微信">微信</option><option value="小红书">小红书</option><option value="百度">百度</option><option value="B站">B站</option></select>
+          <select id="f_channel">
+            <option>抖音</option>
+            <option>微信</option>
+            <option>小红书</option>
+            <option>百度</option>
+            <option>B站</option>
+          </select>
         </div>
       </div>
       <div class="fm-row">
         <div class="fm-group">
           <label>优化师 <span class="req">*</span></label>
-          <select id="f_optimizer"><option value="张伟">张伟</option><option value="王芳">王芳</option><option value="刘强">刘强</option><option value="赵明">赵明</option></select>
+          <select id="f_optimizer">
+            <option>张伟</option>
+            <option>王芳</option>
+            <option>刘强</option>
+            <option>赵明</option>
+          </select>
         </div>
         <div class="fm-group">
           <label>设计师 <span class="req">*</span></label>
-          <select id="f_designer"><option value="李明">李明</option><option value="陈晓">陈晓</option><option value="赵丽">赵丽</option></select>
+          <select id="f_designer">
+            <option>李明</option>
+            <option>陈晓</option>
+            <option>赵丽</option>
+          </select>
         </div>
       </div>
       <div class="fm-group">
@@ -527,7 +524,7 @@ tbody tr.selected{background:var(--primary-light)}
 
 <script>
 /* ============ CONSTANTS ============ */
-const TYPES = ['图片','视频','轮播'];
+const TYPES = ['图片','视频'];
 const BIZS = ['存量','权益'];
 const OPTIMIZERS = ['张伟','王芳','刘强','赵明'];
 const DESIGNERS = ['李明','陈晓','赵丽'];
@@ -550,17 +547,30 @@ var ALL_COLS = [
   {key:'tags',        label:'标签',       show:true,  exp:true},
   {key:'url',         label:'落地页URL', show:true,  exp:true},
   {key:'createTime',  label:'创建时间',   show:true,  exp:true},
-  {key:'cost',        label:'消耗',       show:true,  exp:true,  group:'数据指标'},
-  {key:'impressions', label:'展示量',     show:true,  exp:true,  group:'数据指标'},
-  {key:'clicks',      label:'点击量',     show:true,  exp:true,  group:'数据指标'},
-  {key:'ctr',         label:'CTR',        show:true,  exp:true,  group:'数据指标'},
-  {key:'cpc',         label:'CPC',       show:true,  exp:true,  group:'数据指标'},
-  {key:'conversions', label:'转化量',     show:true,  exp:true,  group:'数据指标'},
-  {key:'cpa',         label:'CPA',       show:true,  exp:true,  group:'数据指标'},
-  {key:'roas',        label:'ROAS',      show:true,  exp:true,  group:'数据指标'},
-  {key:'v3',          label:'3s完播率',  show:true,  exp:true,  group:'完播率指标'},
-  {key:'v7',          label:'7s完播率',  show:true,  exp:true,  group:'完播率指标'},
-  {key:'v15',         label:'15s完播率', show:true,  exp:true,  group:'完播率指标'},
+  // 通用数据指标
+  {key:'cost',            label:'消耗',          show:true,  exp:true,  group:'数据指标'},
+  {key:'impressions',    label:'展示量',        show:true,  exp:true,  group:'数据指标'},
+  {key:'cpm',            label:'千展成本',      show:true,  exp:true,  group:'数据指标'},
+  {key:'clicks',         label:'点击量',        show:true,  exp:true,  group:'数据指标'},
+  {key:'ctr',            label:'点击率',        show:true,  exp:true,  group:'数据指标'},
+  {key:'conversions',    label:'目标转化量',    show:true,  exp:true,  group:'数据指标'},
+  {key:'cvr',            label:'目标转化率',    show:true,  exp:true,  group:'数据指标'},
+  // 视频专属指标
+  {key:'effectivePlays',      label:'有效播放数',      show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'effectivePlayRate',  label:'有效播放率',      show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'v3Count',           label:'3s完播次数',     show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'v3Rate',            label:'3s播放率',       show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'v5Count',           label:'5s完播次数',     show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'v5Rate',            label:'5s播放率',       show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'v7Count',           label:'7s完播次数',     show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'v7Rate',            label:'7s播放率',       show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'p10Count',          label:'10%进度播放次数', show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'p25Count',          label:'25%进度播放次数', show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'p50Count',          label:'50%进度播放次数', show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'p75Count',          label:'75%进度播放次数', show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'p90Count',          label:'90%进度播放次数', show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'p95Count',          label:'95%进度播放次数', show:false, exp:true,  group:'视频指标', videoOnly:true},
+  {key:'p100Count',         label:'100%进度播放次数',show:false, exp:true,  group:'视频指标', videoOnly:true},
 ];
 
 /* ============ STATE ============ */
@@ -573,11 +583,12 @@ var exportCols = [];
 var editingId = null;
 var sortKey = 'createTime'; // 当前排序字段，默认按创建时间
 var sortOrder = 'desc'; // 'asc' | 'desc'，默认降序
+var filterApplied = false; // 是否已经点击筛选按钮
 
 /* ============ DATA GENERATION ============ */
 function randomDate(){
   var start = new Date('2025-01-01');
-  var end = new Date('2026-06-10');
+  var end = new Date('2026-06-16');
   return new Date(start.getTime() + Math.random()*(end.getTime()-start.getTime())).toISOString().slice(0,10);
 }
 function randomTags(){
@@ -586,26 +597,52 @@ function randomTags(){
   while(s.size<n) s.add(TAG_POOL[Math.floor(Math.random()*TAG_POOL.length)]);
   return Array.from(s);
 }
-function randomMetrics(){
+function randomMetrics(isVideo){
   var impressions = Math.floor(Math.random()*500000)+1000;
   var clicks = Math.floor(impressions*(0.01+Math.random()*0.08));
   var ctr = (clicks/impressions*100).toFixed(2);
-  var cpc = (0.3+Math.random()*4).toFixed(2);
+  var cost = (Math.random()*10000).toFixed(2);
+  var cpm = (parseFloat(cost) / impressions * 1000).toFixed(2);
   var conversions = Math.floor(clicks*(0.02+Math.random()*0.15));
-  var cpa = clicks>0 ? (parseFloat(cpc)*impressions/conversions).toFixed(1) : '0';
-  var roas = (0.5+Math.random()*5).toFixed(1);
-  var v3 = (30+Math.random()*65).toFixed(1);
-  var v7 = (15+Math.random()*50).toFixed(1);
-  var v15 = (5+Math.random()*40).toFixed(1);
-  var cost = (Math.random()*10000).toFixed(2); // 消耗，单位：元
-  return {impressions:impressions,clicks:clicks,ctr:ctr,cpc:cpc,conversions:conversions,cpa:cpa,roas:roas,v3:v3,v7:v7,v15:v15,cost:cost};
+  var cvr = (conversions/clicks*100).toFixed(2);
+  
+  var metrics = {
+    impressions:impressions,
+    clicks:clicks,
+    ctr:ctr,
+    cost:cost,
+    cpm:cpm,
+    conversions:conversions,
+    cvr:cvr
+  };
+  
+  if(isVideo){
+    metrics.effectivePlays = Math.floor(clicks*(0.5+Math.random()*0.5));
+    metrics.effectivePlayRate = (metrics.effectivePlays/impressions*100).toFixed(2);
+    metrics.v3Count = Math.floor(impressions*(0.3+Math.random()*0.4));
+    metrics.v3Rate = (metrics.v3Count/impressions*100).toFixed(2);
+    metrics.v5Count = Math.floor(impressions*(0.25+Math.random()*0.35));
+    metrics.v5Rate = (metrics.v5Count/impressions*100).toFixed(2);
+    metrics.v7Count = Math.floor(impressions*(0.2+Math.random()*0.3));
+    metrics.v7Rate = (metrics.v7Count/impressions*100).toFixed(2);
+    metrics.p10Count = Math.floor(impressions*(0.15+Math.random()*0.25));
+    metrics.p25Count = Math.floor(impressions*(0.1+Math.random()*0.2));
+    metrics.p50Count = Math.floor(impressions*(0.05+Math.random()*0.15));
+    metrics.p75Count = Math.floor(impressions*(0.03+Math.random()*0.1));
+    metrics.p90Count = Math.floor(impressions*(0.02+Math.random()*0.08));
+    metrics.p95Count = Math.floor(impressions*(0.01+Math.random()*0.05));
+    metrics.p100Count = Math.floor(impressions*(0.005+Math.random()*0.03));
+  }
+  
+  return metrics;
 }
 
 function generateData(){
   data = [];
   for(var i=1;i<=120;i++){
-    var m = randomMetrics();
-    var type = TYPES[Math.floor(Math.random()*TYPES.length)];
+    var isVideo = Math.random() > 0.5;
+    var m = randomMetrics(isVideo);
+    var type = isVideo ? '视频' : '图片';
     // 让部分素材名称重复，以便汇总模式有聚合效果
     var nameIdx = (i % 40 === 0) ? Math.floor(i/40) : i;
     var name = '素材_' + (nameIdx).toString().padStart(4,'0');
@@ -622,20 +659,31 @@ function generateData(){
       designer:DESIGNERS[Math.floor(Math.random()*DESIGNERS.length)],
       channel:CHANNELS[Math.floor(Math.random()*CHANNELS.length)],
       tags:randomTags(),
+      url:'https://landing.example.com/p/' + i, // 落地页URL由报表匹配得来
       createTime:randomDate(),
       thumb:type==='视频' ? 'https://picsum.photos/seed/vid'+i+'/160/120' : 'https://picsum.photos/seed/img'+i+'/160/120',
-      url:'https://landing.example.com/p/' + i, // 落地页URL由报表匹配得来
-      cost:m.cost,
+      cost:parseFloat(m.cost),
       impressions:m.impressions,
+      cpm:parseFloat(m.cpm),
       clicks:m.clicks,
       ctr:m.ctr,
-      cpc:m.cpc,
       conversions:m.conversions,
-      cpa:m.cpa,
-      roas:m.roas,
-      v3:m.v3,
-      v7:m.v7,
-      v15:m.v15
+      cvr:m.cvr,
+      effectivePlays:m.effectivePlays || 0,
+      effectivePlayRate:m.effectivePlayRate || '0.00',
+      v3Count:m.v3Count || 0,
+      v3Rate:m.v3Rate || '0.00',
+      v5Count:m.v5Count || 0,
+      v5Rate:m.v5Rate || '0.00',
+      v7Count:m.v7Count || 0,
+      v7Rate:m.v7Rate || '0.00',
+      p10Count:m.p10Count || 0,
+      p25Count:m.p25Count || 0,
+      p50Count:m.p50Count || 0,
+      p75Count:m.p75Count || 0,
+      p90Count:m.p90Count || 0,
+      p95Count:m.p95Count || 0,
+      p100Count:m.p100Count || 0
     });
   }
 }
@@ -662,16 +710,28 @@ function aggregateByName(items){
         allTags:{},
         urls:[],
         createTimes:[],
+        cost:0,
         impressions:0,
         clicks:0,
         conversions:0,
         ctr_vals:[],
-        cpc_vals:[],
-        cpa_vals:[],
-        roas_vals:[],
-        v3_vals:[],
-        v7_vals:[],
-        v15_vals:[],
+        cpm_vals:[],
+        cvr_vals:[],
+        effectivePlays_vals:[],
+        effectivePlayRate_vals:[],
+        v3Count_vals:[],
+        v3Rate_vals:[],
+        v5Count_vals:[],
+        v5Rate_vals:[],
+        v7Count_vals:[],
+        v7Rate_vals:[],
+        p10Count_vals:[],
+        p25Count_vals:[],
+        p50Count_vals:[],
+        p75Count_vals:[],
+        p90Count_vals:[],
+        p95Count_vals:[],
+        p100Count_vals:[],
         count:0
       };
     }
@@ -685,16 +745,30 @@ function aggregateByName(items){
     item.tags.forEach(function(t){ g.allTags[t] = (g.allTags[t]||0)+1; });
     g.urls.push(item.url);
     g.createTimes.push(item.createTime);
+    g.cost += item.cost;
     g.impressions += item.impressions;
     g.clicks += item.clicks;
     g.conversions += item.conversions;
     g.ctr_vals.push(parseFloat(item.ctr));
-    g.cpc_vals.push(parseFloat(item.cpc));
-    g.cpa_vals.push(parseFloat(item.cpa));
-    g.roas_vals.push(parseFloat(item.roas));
-    g.v3_vals.push(parseFloat(item.v3));
-    g.v7_vals.push(parseFloat(item.v7));
-    g.v15_vals.push(parseFloat(item.v15));
+    g.cpm_vals.push(parseFloat(item.cpm));
+    g.cvr_vals.push(parseFloat(item.cvr));
+    if(item.type==='视频'){
+      g.effectivePlays_vals.push(item.effectivePlays);
+      g.effectivePlayRate_vals.push(parseFloat(item.effectivePlayRate));
+      g.v3Count_vals.push(item.v3Count);
+      g.v3Rate_vals.push(parseFloat(item.v3Rate));
+      g.v5Count_vals.push(item.v5Count);
+      g.v5Rate_vals.push(parseFloat(item.v5Rate));
+      g.v7Count_vals.push(item.v7Count);
+      g.v7Rate_vals.push(parseFloat(item.v7Rate));
+      g.p10Count_vals.push(item.p10Count);
+      g.p25Count_vals.push(item.p25Count);
+      g.p50Count_vals.push(item.p50Count);
+      g.p75Count_vals.push(item.p75Count);
+      g.p90Count_vals.push(item.p90Count);
+      g.p95Count_vals.push(item.p95Count);
+      g.p100Count_vals.push(item.p100Count);
+    }
     g.count++;
   }
   var result = [];
@@ -703,12 +777,23 @@ function aggregateByName(items){
     var g = groups[keys[j]];
     var sum = function(arr){ return arr.reduce(function(a,b){return a+b;},0); };
     var avgCtr    = g.ctr_vals.length ? (sum(g.ctr_vals)/g.ctr_vals.length).toFixed(2) : '0.00';
-    var avgCpc    = g.cpc_vals.length ? (sum(g.cpc_vals)/g.cpc_vals.length).toFixed(2) : '0.00';
-    var avgCpa    = g.cpa_vals.length ? (sum(g.cpa_vals)/g.cpa_vals.length).toFixed(1) : '0.0';
-    var avgRoas   = g.roas_vals.length ? (sum(g.roas_vals)/g.roas_vals.length).toFixed(1) : '0.0';
-    var avgV3     = g.v3_vals.length ? (sum(g.v3_vals)/g.v3_vals.length).toFixed(1) : '0.0';
-    var avgV7     = g.v7_vals.length ? (sum(g.v7_vals)/g.v7_vals.length).toFixed(1) : '0.0';
-    var avgV15    = g.v15_vals.length ? (sum(g.v15_vals)/g.v15_vals.length).toFixed(1) : '0.0';
+    var avgCpm    = g.cpm_vals.length ? (sum(g.cpm_vals)/g.cpm_vals.length).toFixed(2) : '0.00';
+    var avgCvr    = g.cvr_vals.length ? (sum(g.cvr_vals)/g.cvr_vals.length).toFixed(2) : '0.00';
+    var avgEffectivePlays = g.effectivePlays_vals.length ? Math.round(sum(g.effectivePlays_vals)/g.effectivePlays_vals.length) : 0;
+    var avgEffectivePlayRate = g.effectivePlayRate_vals.length ? (sum(g.effectivePlayRate_vals)/g.effectivePlayRate_vals.length).toFixed(2) : '0.00';
+    var avgV3Count = g.v3Count_vals.length ? Math.round(sum(g.v3Count_vals)/g.v3Count_vals.length) : 0;
+    var avgV3Rate = g.v3Rate_vals.length ? (sum(g.v3Rate_vals)/g.v3Rate_vals.length).toFixed(2) : '0.00';
+    var avgV5Count = g.v5Count_vals.length ? Math.round(sum(g.v5Count_vals)/g.v5Count_vals.length) : 0;
+    var avgV5Rate = g.v5Rate_vals.length ? (sum(g.v5Rate_vals)/g.v5Rate_vals.length).toFixed(2) : '0.00';
+    var avgV7Count = g.v7Count_vals.length ? Math.round(sum(g.v7Count_vals)/g.v7Count_vals.length) : 0;
+    var avgV7Rate = g.v7Rate_vals.length ? (sum(g.v7Rate_vals)/g.v7Rate_vals.length).toFixed(2) : '0.00';
+    var avgP10 = g.p10Count_vals.length ? Math.round(sum(g.p10Count_vals)/g.p10Count_vals.length) : 0;
+    var avgP25 = g.p25Count_vals.length ? Math.round(sum(g.p25Count_vals)/g.p25Count_vals.length) : 0;
+    var avgP50 = g.p50Count_vals.length ? Math.round(sum(g.p50Count_vals)/g.p50Count_vals.length) : 0;
+    var avgP75 = g.p75Count_vals.length ? Math.round(sum(g.p75Count_vals)/g.p75Count_vals.length) : 0;
+    var avgP90 = g.p90Count_vals.length ? Math.round(sum(g.p90Count_vals)/g.p90Count_vals.length) : 0;
+    var avgP95 = g.p95Count_vals.length ? Math.round(sum(g.p95Count_vals)/g.p95Count_vals.length) : 0;
+    var avgP100 = g.p100Count_vals.length ? Math.round(sum(g.p100Count_vals)/g.p100Count_vals.length) : 0;
     var topChannel = '';
     var maxC = 0;
     var chKeys = Object.keys(g.channels);
@@ -731,16 +816,28 @@ function aggregateByName(items){
       tags:allTagsArr,
       url: g.urls[0]||'',
       createTime: g.createTimes.sort().reverse()[0]||'',
+      cost:g.cost,
       impressions:g.impressions,
+      cpm:avgCpm,
       clicks:g.clicks,
       ctr:avgCtr,
-      cpc:avgCpc,
       conversions:g.conversions,
-      cpa:avgCpa,
-      roas:avgRoas,
-      v3:avgV3,
-      v7:avgV7,
-      v15:avgV15,
+      cvr:avgCvr,
+      effectivePlays:avgEffectivePlays,
+      effectivePlayRate:avgEffectivePlayRate,
+      v3Count:avgV3Count,
+      v3Rate:avgV3Rate,
+      v5Count:avgV5Count,
+      v5Rate:avgV5Rate,
+      v7Count:avgV7Count,
+      v7Rate:avgV7Rate,
+      p10Count:avgP10,
+      p25Count:avgP25,
+      p50Count:avgP50,
+      p75Count:avgP75,
+      p90Count:avgP90,
+      p95Count:avgP95,
+      p100Count:avgP100,
       _rawIds: g.ids
     });
   }
@@ -770,7 +867,7 @@ function applySort(items){
     var va = a[key];
     var vb = b[key];
     // 处理数字字段
-    if(['cost','impressions','clicks','ctr','cpc','conversions','cpa','roas','v3','v7','v15'].indexOf(key)!==-1){
+    if(['cost','impressions','cpm','clicks','conversions','effectivePlays','v3Count','v5Count','v7Count','p10Count','p25Count','p50Count','p75Count','p90Count','p95Count','p100Count'].indexOf(key)!==-1){
       va = parseFloat(va) || 0;
       vb = parseFloat(vb) || 0;
     }
@@ -787,32 +884,32 @@ function applySort(items){
 
 /* ============ FILTER ============ */
 function applyFilter(){
+  var type = document.getElementById('typeFilter').value;
+  var biz = document.getElementById('bizFilter').value;
+  
+  // 检查是否选择了素材类型和业务归属
+  if(!type || !biz){
+    showToast('请选择素材类型和业务归属', 'error');
+    return;
+  }
+  
+  filterApplied = true;
+  
   var s = document.getElementById('searchInput').value.trim().toLowerCase();
-  var t = document.getElementById('typeFilter').value;
-  var b = document.getElementById('bizFilter').value;
   var ch = document.getElementById('channelFilter').value;
   var o = document.getElementById('optimizerFilter').value;
   var d = document.getElementById('designerFilter').value;
-  var dateStart = document.getElementById('dateCreatedStart').value;
-  var dateEnd = document.getElementById('dateCreatedEnd').value;
-  var rangeStart = document.getElementById('dateRangeStart').value;
-  var rangeEnd = document.getElementById('dateRangeEnd').value;
 
   filtered = data.filter(function(item){
     if(s && item.name.toLowerCase().indexOf(s)===-1) return false;
-    if(t && item.type!==t) return false;
-    if(b && item.biz!==b) return false;
+    if(type && item.type!==type) return false;
+    if(biz && item.biz!==biz) return false;
     if(ch && item.channel!==ch) return false;
     if(o && item.optimizer!==o) return false;
     if(d && item.designer!==d) return false;
-    if(dateStart && item.createTime < dateStart) return false;
-    if(dateEnd && item.createTime > dateEnd) return false;
-    // Note: dateRangeStart/End are for "数据范围", which is a conceptual filter
-    // For prototype purposes, we treat them as additional createTime filters
-    if(rangeStart && item.createTime < rangeStart) return false;
-    if(rangeEnd && item.createTime > rangeEnd) return false;
     return true;
   });
+  
   selected = new Set();
   render();
 }
@@ -824,44 +921,51 @@ function resetFilters(){
   document.getElementById('channelFilter').value = '';
   document.getElementById('optimizerFilter').value = '';
   document.getElementById('designerFilter').value = '';
-  document.getElementById('dateCreatedStart').value = '';
-  document.getElementById('dateCreatedEnd').value = '';
-  document.getElementById('dateRangeStart').value = '';
-  document.getElementById('dateRangeEnd').value = '';
   document.getElementById('modeDetail').checked = true;
   document.getElementById('modeSummary').checked = false;
   var labels = document.querySelectorAll('.mode-toggle label');
   labels.forEach(function(l){ l.classList.remove('active'); });
   document.querySelector('label[for="modeDetail"]').classList.add('active');
   displayMode = 'detail';
-  applyFilter();
-}
-
-/* ============ MODE TOGGLE ============ */
-function onModeChange(){
-  var detail = document.getElementById('modeDetail').checked;
-  displayMode = detail ? 'detail' : 'summary';
-  var labels = document.querySelectorAll('.mode-toggle label');
-  labels.forEach(function(l){ l.classList.remove('active'); });
-  if(detail){
-    document.querySelector('label[for="modeDetail"]').classList.add('active');
-  } else {
-    document.querySelector('label[for="modeSummary"]').classList.add('active');
-  }
+  filterApplied = false;
+  filtered = [];
   selected = new Set();
   render();
 }
 
 /* ============ RENDER ============ */
 function render(){
-  var cols = ALL_COLS.filter(function(c){ return c.show; });
+  var cols = ALL_COLS.filter(function(c){ 
+    // 视频专属列只在类型为视频时显示
+    if(c.videoOnly){
+      // 检查当前筛选是否有视频类型
+      var hasVideo = filtered.some(function(item){ return item.type==='视频'; }) || 
+                      data.some(function(item){ return item.type==='视频'; });
+      return c.show && hasVideo;
+    }
+    return c.show; 
+  });
+  
   var thead = document.getElementById('colHeaderRow');
   var thHtml = '';
+  
+  if(!filterApplied){
+    // 未筛选时显示提示
+    document.getElementById('tableBody').innerHTML = 
+      '<tr><td colspan="99" style="text-align:center;padding:60px 20px;color:var(--text-3)">' +
+      '<p style="font-size:14px;margin-top:12px">请选择素材类型和业务归属，然后点击"筛选"按钮查看数据</p>' +
+      '</td></tr>';
+    thead.innerHTML = '';
+    document.getElementById('totalCount').textContent = '0';
+    updateBatchBar();
+    return;
+  }
+  
   if(displayMode==='detail'){
     thHtml += '<th style="width:40px;text-align:center"><input type="checkbox" ' + (selected.size===filtered.length&&filtered.length>0?'checked':'') + ' onchange="toggleCheckAll(this.checked)"></th>';
   }
   cols.forEach(function(c){
-    var isNum = ['cost','impressions','clicks','ctr','cpc','conversions','cpa','roas','v3','v7','v15'].indexOf(c.key)!==-1;
+    var isNum = ['cost','impressions','cpm','clicks','conversions','effectivePlays','v3Count','v5Count','v7Count','p10Count','p25Count','p50Count','p75Count','p90Count','p95Count','p100Count'].indexOf(c.key)!==-1;
     var sortable = isNum || c.key==='name' || c.key==='createTime';
     var sortIcon = '';
     if(sortable){
@@ -909,19 +1013,18 @@ function render(){
           '<button class="action-btn edit" onclick="openEdit(' + item.id + ')">✏编辑</button> ' +
           '<button class="action-btn del" onclick="deleteOne(' + item.id + ')">🗑删除</button>' +
           '</td>';
-        tr += '</tr>';
       } else {
         tr = '<tr>';
         for(var j=0;j<cols.length;j++){
           tr += renderCell(item, cols[j].key, true);
         }
-        tr += '</tr>';
       }
+      tr += '</tr>';
       rows.push(tr);
     }
     tb.innerHTML = rows.join('');
   }
-
+  
   document.getElementById('totalCount').textContent = data.length;
   updateBatchBar();
 }
@@ -932,16 +1035,11 @@ function renderCell(item, key, isSummary){
     return '<td><img class="cell-thumb" src="' + item.thumb + '" alt="" onclick="openPreview(' + item.id + ')"></td>';
   }
   if(key==='name'){
-    if(isSummary){
-      return '<td><span class="cell-name">' + item.name + '</span></td>';
-    }
+    if(isSummary) return '<td><a class="cell-name" onclick="showSummaryDetail(\'' + item.name + '\')">' + item.name + '</a>' + (item._isSummary ? '<span class="summary-hint">（汇总 ' + item._count + ' 条）</span>' : '') + '</td>';
     return '<td><span class="cell-name" onclick="openPreview(' + item.id + ')">' + item.name + '</span></td>';
   }
-  if(key==='creativeId'||key==='adId'||key==='projectId'||key==='accountId'){
-    return '<td><span class="mono" title="' + item[key] + '">' + item[key] + '</span></td>';
-  }
   if(key==='type'){
-    var cls = item.type==='图片'?'tag-type-img':(item.type==='视频'?'tag-type-vid':'tag-type-car');
+    var cls = item.type==='图片'?'tag-type-img':'tag-type-vid';
     return '<td><span class="tag-inline ' + cls + '">' + item.type + '</span></td>';
   }
   if(key==='biz'){ return '<td>' + item.biz + '</td>'; }
@@ -962,10 +1060,11 @@ function renderCell(item, key, isSummary){
     return '<td style="text-align:right;font-weight:600;color:var(--danger)">¥' + Number(item.cost).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>';
   }
   if(key==='impressions'){ return '<td style="text-align:right">' + Number(item.impressions).toLocaleString() + '</td>'; }
+  if(key==='cpm'){ return '<td style="text-align:right">¥' + parseFloat(item.cpm).toFixed(2) + '</td>'; }
   if(key==='clicks'){ return '<td style="text-align:right">' + Number(item.clicks).toLocaleString() + '</td>'; }
-  if(key==='ctr'||key==='cpc'||key==='cpa'||key==='roas'){ return '<td style="text-align:right">' + item[key] + '</td>'; }
+  if(key==='ctr'||key==='cvr'||key==='effectivePlayRate'||key==='v3Rate'||key==='v5Rate'||key==='v7Rate'){ return '<td style="text-align:right">' + item[key] + '%</td>'; }
   if(key==='conversions'){ return '<td style="text-align:right">' + item.conversions + '</td>'; }
-  if(key==='v3'||key==='v7'||key==='v15'){ return '<td style="text-align:right">' + item[key] + '%</td>'; }
+  if(key==='effectivePlays'||key==='v3Count'||key==='v5Count'||key==='v7Count'||key==='p10Count'||key==='p25Count'||key==='p50Count'||key==='p75Count'||key==='p90Count'||key==='p95Count'||key==='p100Count'){ return '<td style="text-align:right">' + Number(item[key]).toLocaleString() + '</td>'; }
   return '<td>' + (item[key]||'') + '</td>';
 }
 
@@ -999,6 +1098,18 @@ function updateHeaderCheckbox(){
   var c2 = document.getElementById('checkAll2');
   if(c1) c1.checked = allChecked;
   if(c2) c2.checked = allChecked;
+}
+function clearSelection(){
+  selected = new Set();
+  render();
+}
+function batchDelete(){
+  if(selected.size===0) return;
+  if(!confirm('确定要删除选中的 ' + selected.size + ' 条素材吗？')) return;
+  data = data.filter(function(item){ return !selected.has(item.id); });
+  selected = new Set();
+  applyFilter();
+  showToast('成功删除 ' + selected.size + ' 条素材');
 }
 
 /* ============ UPLOAD ============ */
@@ -1042,7 +1153,7 @@ function submitUpload(){
   var tags = [];
   var tagEls = document.querySelectorAll('#tagWrap .ti-tag');
   for(var i=0;i<tagEls.length;i++){ tags.push(tagEls[i].textContent.replace('×','').trim()); }
-  var m = randomMetrics();
+  var m = randomMetrics(type==='视频');
   var newId = data.length+1;
   var newItem = {
     id:newId,
@@ -1057,20 +1168,31 @@ function submitUpload(){
     designer:designer,
     channel:channel,
     tags:tags.length?tags:['新素材'],
-    status:'投放中',
     url:'https://landing.example.com/p/'+newId, // 落地页URL由报表匹配得来
     createTime:new Date().toISOString().slice(0,10),
     thumb:type==='视频' ? 'https://picsum.photos/seed/vidnew/160/120' : 'https://picsum.photos/seed/imgnew/160/120',
+    cost:parseFloat(m.cost),
     impressions:m.impressions,
+    cpm:parseFloat(m.cpm),
     clicks:m.clicks,
     ctr:m.ctr,
-    cpc:m.cpc,
     conversions:m.conversions,
-    cpa:m.cpa,
-    roas:m.roas,
-    v3:m.v3,
-    v7:m.v7,
-    v15:m.v15
+    cvr:m.cvr,
+    effectivePlays:m.effectivePlays || 0,
+    effectivePlayRate:m.effectivePlayRate || '0.00',
+    v3Count:m.v3Count || 0,
+    v3Rate:m.v3Rate || '0.00',
+    v5Count:m.v5Count || 0,
+    v5Rate:m.v5Rate || '0.00',
+    v7Count:m.v7Count || 0,
+    v7Rate:m.v7Rate || '0.00',
+    p10Count:m.p10Count || 0,
+    p25Count:m.p25Count || 0,
+    p50Count:m.p50Count || 0,
+    p75Count:m.p75Count || 0,
+    p90Count:m.p90Count || 0,
+    p95Count:m.p95Count || 0,
+    p100Count:m.p100Count || 0
   };
   data.unshift(newItem);
   closeModal('uploadMask');
@@ -1092,15 +1214,15 @@ function openPreview(id){
   var infoHtml = '';
   infoHtml += '<p><strong>素材名称：</strong>' + item.name + '</p>';
   infoHtml += '<p><strong>素材ID：</strong>' + item.creativeId + '</p>';
-  infoHtml += '<p><strong>类型：</strong>' + item.type + '　<strong>状态：</strong>' + (item.status||'投放中') + '</p>';
-  infoHtml += '<p><strong>业务归属：</strong>' + item.biz + '　<strong>渠道：</strong>' + item.channel + '</p>';
+  infoHtml += '<p><strong>类型：</strong>' + item.type + '　<strong>业务归属：</strong>' + item.biz + '</p>';
   infoHtml += '<p><strong>优化师：</strong>' + item.optimizer + '　<strong>设计师：</strong>' + item.designer + '</p>';
-  infoHtml += '<p><strong>创建时间：</strong>' + item.createTime + '</p>';
+  infoHtml += '<p><strong>渠道：</strong>' + item.channel + '　<strong>创建时间：</strong>' + item.createTime + '</p>';
   infoHtml += '<p><strong>落地页：</strong><a href="' + item.url + '" target="_blank" style="color:var(--primary)">' + item.url + '</a></p>';
   infoHtml += '<p><strong>标签：</strong>' + item.tags.join(' ') + '</p>';
-  infoHtml += '<p style="margin-top:8px"><strong>数据指标：</strong>展示 ' + Number(item.impressions).toLocaleString() + ' / 点击 ' + Number(item.clicks).toLocaleString() + ' / CTR ' + item.ctr + '% / CPC ¥' + item.cpc + ' / 转化 ' + item.conversions + ' / CPA ¥' + item.cpa + ' / ROAS ' + item.roas + '</p>';
+  infoHtml += '<p style="margin-top:8px"><strong>数据指标：</strong>消耗 ¥' + Number(item.cost).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' / 展示 ' + Number(item.impressions).toLocaleString() + ' / 千展成本 ¥' + parseFloat(item.cpm).toFixed(2) + ' / 点击 ' + Number(item.clicks).toLocaleString() + ' / 点击率 ' + item.ctr + '% / 目标转化 ' + item.conversions + ' / 目标转化率 ' + item.cvr + '%</p>';
   if(item.type==='视频'){
-    infoHtml += '<p><strong>完播率：</strong>3s ' + item.v3 + '% / 7s ' + item.v7 + '% / 15s ' + item.v15 + '%</p>';
+    infoHtml += '<p><strong>视频指标：</strong>有效播放 ' + item.effectivePlays + '（' + item.effectivePlayRate + '%）/ 3s完播 ' + item.v3Count + '（' + item.v3Rate + '%）/ 5s完播 ' + item.v5Count + '（' + item.v5Rate + '%）/ 7s完播 ' + item.v7Count + '（' + item.v7Rate + '%）</p>';
+    infoHtml += '<p><strong>进度播放：</strong>10% ' + item.p10Count + ' / 25% ' + item.p25Count + ' / 50% ' + item.p50Count + ' / 75% ' + item.p75Count + ' / 90% ' + item.p90Count + ' / 95% ' + item.p95Count + ' / 100% ' + item.p100Count + '</p>';
   }
   if(isVideo){
     body.innerHTML = '<div style="width:100%;height:360px;background:#000;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:#fff;font-size:48px">▶</div>' +
@@ -1122,7 +1244,7 @@ function openEdit(id){
   var html = '';
   html += '<div class="fm-row">';
   html += '  <div class="fm-group"><label>素材名称</label><input type="text" id="e_name" value="' + item.name + '"></div>';
-  html += '  <div class="fm-group"><label>素材类型</label><select id="e_type"><option ' + (item.type==='图片'?'selected':'') + '>图片</option><option ' + (item.type==='视频'?'selected':'') + '>视频</option><option ' + (item.type==='轮播'?'selected':'') + '>轮播</option></select></div>';
+  html += '  <div class="fm-group"><label>素材类型</label><select id="e_type"><option ' + (item.type==='图片'?'selected':'') + '>图片</option><option ' + (item.type==='视频'?'selected':'') + '>视频</option></select></div>';
   html += '</div>';
   html += '<div class="fm-row">';
   html += '  <div class="fm-group"><label>业务归属</label><select id="e_biz"><option ' + (item.biz==='存量'?'selected':'') + '>存量</option><option ' + (item.biz==='权益'?'selected':'') + '>权益</option></select></div>';
@@ -1157,142 +1279,130 @@ function saveEdit(){
   item.tags = document.getElementById('e_tags').value.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s; });
   closeModal('editMask');
   applyFilter();
-  showToast('素材信息已更新');
+  showToast('素材「' + item.name + '」修改成功！');
 }
 
 /* ============ DELETE ============ */
 function deleteOne(id){
-  if(!confirm('确认删除该素材？')) return;
+  var item = null;
+  for(var i=0;i<data.length;i++){ if(data[i].id===id){ item=data[i]; break; } }
+  if(!item) return;
+  if(!confirm('确定要删除素材「' + item.name + '」吗？')) return;
   data = data.filter(function(d){ return d.id!==id; });
   selected.delete(id);
   applyFilter();
-  showToast('删除成功');
-}
-function batchDelete(){
-  if(selected.size===0){ showToast('请先选择素材','error'); return; }
-  if(!confirm('确认删除选中的 ' + selected.size + ' 个素材？')) return;
-  data = data.filter(function(d){ return !selected.has(d.id); });
-  selected = new Set();
-  applyFilter();
-  showToast('批量删除成功');
+  showToast('素材「' + item.name + '」已删除');
 }
 
 /* ============ COLUMN CONFIG ============ */
-function openColModal(){
+function openColConfig(){
   var grid = document.getElementById('colGrid');
   var html = '';
-  for(var i=0;i<ALL_COLS.length;i++){
-    var c = ALL_COLS[i];
-    if(c.key==='action'||c.key==='preview') continue;
-    html += '<div class="col-item ' + (c.show?'active':'') + '" onclick="toggleColItem(' + i + ')">' +
-      '<input type="checkbox" ' + (c.show?'checked':'') + ' onchange="event.stopPropagation()"> ' +
-      '<span>' + c.label + '</span>' +
-      '</div>';
-  }
+  // 按分组显示
+  var groups = {};
+  ALL_COLS.forEach(function(c){
+    var g = c.group || '基础信息';
+    if(!groups[g]) groups[g] = [];
+    groups[g].push(c);
+  });
+  var groupNames = Object.keys(groups);
+  // 先显示基础信息，然后是指标
+  var orderedGroups = ['基础信息'];
+  if(groups['数据指标']) orderedGroups.push('数据指标');
+  if(groups['视频指标']) orderedGroups.push('视频指标');
+  
+  orderedGroups.forEach(function(gName){
+    if(!groups[gName]) return;
+    html += '<div style="grid-column:1/-1;font-size:12px;color:var(--text-3);margin-top:8px;margin-bottom:4px;font-weight:500">' + gName + '</div>';
+    groups[gName].forEach(function(c){
+      html += '<div class="col-item" onclick="toggleCol(\'' + c.key + '\')" id="colOpt_' + c.key + '">' +
+        '<input type="checkbox" ' + (c.show?'checked':'') + '> ' + c.label +
+        '</div>';
+    });
+  });
   grid.innerHTML = html;
   document.getElementById('colMask').classList.add('show');
   document.body.style.overflow='hidden';
 }
-function toggleColItem(idx){
-  ALL_COLS[idx].show = !ALL_COLS[idx].show;
-  openColModal();
+function toggleCol(key){
+  var c = ALL_COLS.find(function(c){ return c.key===key; });
+  if(c){
+    c.show = !c.show;
+    var el = document.getElementById('colOpt_' + key);
+    el.querySelector('input').checked = c.show;
+  }
 }
-function saveCols(){ closeModal('colMask'); render(); showToast('列表字段配置已保存'); }
+function saveCols(){
+  closeModal('colMask');
+  render();
+  showToast('列配置已保存');
+}
 
 /* ============ EXPORT ============ */
-function openExportModal(){
-  exportRange='';
-  document.getElementById('expAll').classList.remove('active');
-  document.getElementById('expFiltered').classList.remove('active');
-  document.getElementById('expSelected').classList.remove('active');
-  document.getElementById('expFiltered').querySelector('p').textContent = '仅导出当前筛选后的数据（共 ' + filtered.length + ' 条）';
-  document.getElementById('expSelected').querySelector('p').textContent = '仅导出勾选的数据（共 ' + selected.size + ' 条）';
-  document.getElementById('expAll').querySelector('p').textContent = '导出全部 ' + data.length + ' 条数据';
-
-  var expColsDef = ALL_COLS.filter(function(c){ return c.exp; });
+function openExport(){
   var grid = document.getElementById('expColGrid');
-  var lastGroup = '';
   var html = '';
-  for(var i=0;i<expColsDef.length;i++){
-    var c = expColsDef[i];
-    if(c.group && c.group!==lastGroup){
-      html += '<div class="col-group-label">' + c.group + '</div>';
-      lastGroup = c.group;
-    } else if(!c.group && lastGroup){
-      html += '<div class="col-group-label">基础信息</div>';
-      lastGroup = '';
-    }
-    html += '<div class="exp-col-item active" onclick="toggleExpCol(this,' + i + ')">' +
-      '<input type="checkbox" checked> <span>' + c.label + '</span>' +
+  ALL_COLS.forEach(function(c){
+    if(!c.exp) return;
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border-light);border-radius:var(--radius-s)">' +
+      '<input type="checkbox" value="' + c.key + '" ' + (c.show?'checked':'') + '> ' + c.label +
       '</div>';
-  }
+  });
   grid.innerHTML = html;
-  exportCols = expColsDef.map(function(c){ return c.key; });
-
   document.getElementById('exportMask').classList.add('show');
   document.body.style.overflow='hidden';
 }
-
-function toggleExpCol(el, idx){
-  el.classList.toggle('active');
-  var expColsDef = ALL_COLS.filter(function(c){ return c.exp; });
-  var key = expColsDef[idx].key;
-  if(el.classList.contains('active')){
-    if(exportCols.indexOf(key)===-1) exportCols.push(key);
-  } else {
-    exportCols = exportCols.filter(function(k){ return k!==key; });
-  }
-}
-
-function expCheckAll(on){
-  var items = document.querySelectorAll('#expColGrid .exp-col-item');
-  var expColsDef = ALL_COLS.filter(function(c){ return c.exp; });
-  exportCols = [];
-  for(var i=0;i<items.length;i++){
-    if(on){
-      items[i].classList.add('active');
-      items[i].querySelector('input').checked = true;
-      exportCols.push(expColsDef[i].key);
-    } else {
-      items[i].classList.remove('active');
-      items[i].querySelector('input').checked = false;
-    }
-  }
-}
-
 function selExp(range){
   exportRange = range;
-  document.getElementById('expAll').classList.remove('active');
-  document.getElementById('expFiltered').classList.remove('active');
-  document.getElementById('expSelected').classList.remove('active');
-  var idMap = {all:'expAll',filtered:'expFiltered',selected:'expSelected'};
-  var el = document.getElementById(idMap[range]);
-  if(el) el.classList.add('active');
+  ['expAll','expFiltered','expSelected'].forEach(function(id){
+    document.getElementById(id).classList.remove('selected');
+  });
+  document.getElementById('exp' + range.charAt(0).toUpperCase() + range.slice(1)).classList.add('selected');
 }
-
+function expCheckAll(check){
+  var boxes = document.querySelectorAll('#expColGrid input[type="checkbox"]');
+  boxes.forEach(function(b){ b.checked = check; });
+}
 function doExport(){
   if(!exportRange){ showToast('请选择导出范围','error'); return; }
-  var count = 0;
-  if(exportRange==='all') count = data.length;
-  else if(exportRange==='filtered') count = filtered.length;
-  else if(exportRange==='selected') count = selected.size;
-  showToast('开始导出 ' + count + ' 条数据（字段：' + exportCols.length + ' 个），请稍候…');
+  var checkedCols = [];
+  var boxes = document.querySelectorAll('#expColGrid input[type="checkbox"]');
+  boxes.forEach(function(b){ if(b.checked) checkedCols.push(b.value); });
+  if(checkedCols.length===0){ showToast('请选择至少一个导出字段','error'); return; }
   closeModal('exportMask');
+  showToast('正在导出数据，请稍候…');
+  setTimeout(function(){
+    showToast('导出成功！文件已保存到本地');
+  }, 1500);
 }
+
+/* ============ MODE TOGGLE ============ */
+(function(){
+  var labels = document.querySelectorAll('.mode-toggle label');
+  labels.forEach(function(l){
+    l.addEventListener('click', function(){
+      labels.forEach(function(ll){ ll.classList.remove('active'); });
+      l.classList.add('active');
+      displayMode = l.getAttribute('for')==='modeDetail' ? 'detail' : 'summary';
+      render();
+    });
+  });
+})();
 
 /* ============ TOAST ============ */
 function showToast(msg, type){
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (type==='error'?' error':'');
-  t.style.display = 'flex';
-  setTimeout(function(){ t.classList.add('show'); }, 10);
-  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ t.style.display='none'; }, 300); }, 2500);
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.background = (type==='error') ? 'var(--danger)' : '#333';
+  toast.classList.add('show');
+  setTimeout(function(){ toast.classList.remove('show'); }, 2500);
 }
 
 /* ============ INIT ============ */
 generateData();
-applyFilter();
+document.getElementById('totalCount').textContent = data.length;
+updateBatchBar();
+
 </script>
 </body>
 </html>
