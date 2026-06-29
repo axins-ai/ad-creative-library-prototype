@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材中心 - 素材库</title>
+<style>
+*,*:before,*:after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#1664ff;--primary-light:#e8f1ff;--primary-dark:#0952d9;
+  --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
+  --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
+  --bg-page:#f0f2f5;--bg-card:#fff;--bg-hover:#f7f8fa;
+  --border:#e8e8e8;--border-light:#f0f0f0;
+  --shadow-s:0 1px 3px rgba(0,0,0,.05);--shadow-m:0 4px 16px rgba(0,0,0,.1);
+  --radius:8px;--radius-s:6px;--radius-l:12px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+html{font-size:14px}
+body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+.top-bar{height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:var(--shadow-s);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.top-bar h1{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.top-bar .actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:32px;padding:0 14px;border-radius:var(--radius-s);font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-dark)}
+.content{flex:1;padding:20px 24px;overflow-y:auto}
+.filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-group label{font-size:12px;color:var(--text-3);font-weight:500;white-space:nowrap}
+.filter-group select,.filter-group input[type="date"],.filter-group input[type="text"]{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;}
+.filter-group select:focus,.filter-group input:focus{border-color:var(--primary)}
+.filter-group .date-sep{font-size:11px;color:#999}
+.view-toggle{display:flex;align-items:center;gap:2px;margin-left:auto}
+.view-toggle button{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:14px;transition:all .15s;}
+.view-toggle button:first-child{border-radius:var(--radius-s) 0 0 var(--radius-s)}
+.view-toggle button:last-child{border-radius:0 var(--radius-s) var(--radius-s) 0;border-left:none}
+.view-toggle button.active{background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.grid-view.active{display:grid}
+.grid-card{background:var(--bg-card);border-radius:var(--radius-l);overflow:hidden;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:transform .2s,box-shadow .2s;cursor:pointer;position:relative;}
+.grid-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-m)}
+.grid-card .thumb{width:100%;aspect-ratio:16/9;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:48px;color:#ccc;position:relative;overflow:hidden;}
+.grid-card .thumb .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.grid-card:hover .thumb .play-overlay{opacity:1}
+.grid-card .thumb .play-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.grid-card .info{padding:12px 14px}
+.grid-card .info .name{font-size:13px;font-weight:500;color:var(--text-1);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid-card .info .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.grid-card .badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
+.bade-video{background:#e3f2fd;color:#1976d2}
+.bade-image{background:#e8f5e9;color:#388e3c}
+.bade-auto{background:#f3e5f5;color:#7b1fa2}
+.bade-manual{background:#fff8e1;color:#f57f17}
+.list-view{display:none;flex-direction:column;gap:8px}
+.list-view.active{display:flex}
+.list-row{background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:background .15s;cursor:pointer;}
+.list-row:hover{background:var(--bg-hover)}
+.list-row .thumb-sm{width:80px;height:45px;background:#f5f5f5;border-radius:var(--radius-s);display:flex;align-items:center;justify-content:center;font-size:20px;color:#ccc;flex-shrink:0;}
+.list-row .info{flex:1;min-width:0}
+.list-row .info .name{font-size:13px;font-weight:500;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-row .info .meta{display:flex;gap:6px;margin-top:4px}
+.list-row .date{font-size:12px;color:var(--text-3);white-space:nowrap}
+.list-row .preview-btn{width:32px;height:32px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--primary);border:none;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.list-row .preview-btn:hover{background:var(--primary);color:#fff}
+.empty-state{text-align:center;padding:80px 20px;color:var(--text-3)}
+.empty-state .icon{font-size:64px;margin-bottom:16px;display:block}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:40px;animation:fadeIn .2s;}
+.modal-overlay.active{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:var(--radius-l);width:900px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-l);animation:slideUp .25s;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
+.modal-header h3{font-size:15px;font-weight:600}
+.modal-header .close-btn{width:32px;height:32px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-3);transition:background .15s;}
+.modal-header .close-btn:hover{background:var(--bg-page)}
+.modal-body{display:flex;overflow:hidden}
+.modal-preview{flex:1;background:#1a1a1a;display:flex;align-items:center;justify-content:center;min-height:400px;position:relative;}
+.modal-preview .preview-placeholder{text-align:center;color:rgba(255,255,255,.5)}
+.modal-preview .preview-placeholder .play-icon{font-size:80px;display:block;margin-bottom:16px}
+.modal-sidebar{width:280px;border-left:1px solid var(--border-light);padding:20px;overflow-y:auto;flex-shrink:0;}
+.modal-sidebar .detail-row{margin-bottom:16px}
+.modal-sidebar .detail-label{font-size:11px;color:var(--text-3);font-weight:500;margin-bottom:4px}
+.modal-sidebar .detail-value{font-size:13px;color:var(--text-1)}
+.upload-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s;}
+.upload-overlay.active{display:flex}
+.upload-modal{background:#fff;border-radius:var(--radius-l);width:560px;max-width:95vw;max-height:90vh;box-shadow:var(--shadow-l);animation:slideUp .25s;display:flex;flex-direction:column;}
+.upload-modal .modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
+.upload-modal .modal-header h3{font-size:15px;font-weight:600}
+.upload-modal .modal-header .close-btn{width:32px;height:32px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-3);transition:background .15s;}
+.upload-body{padding:16px 24px;overflow-y:auto;flex:1}
+.upload-body .file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-3);font-size:13px;margin-bottom:16px;}
+.upload-body .file-drop:hover,.upload-body .file-drop.drag-over{border-color:var(--primary);background:var(--primary-light)}
+.upload-body .file-list{font-size:12px;color:var(--text-2);margin-top:8px;padding:8px 12px;background:var(--bg-page);border-radius:var(--radius-s);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.upload-body .fm-group{margin-bottom:14px}
+.upload-body .fm-group label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
+.upload-body .fm-group label .req{color:var(--danger);margin-left:2px}
+.upload-body .fm-group input,.upload-body .fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
+.upload-body .fm-group input:focus,.upload-body .fm-group select:focus{border-color:var(--primary)}
+.upload-actions{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--border-light);flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="content">
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>类型</label>
+      <select id="typeFilter" onchange="applyFilter()">
+        <option>全部类型</option>
+        <option>视频</option>
+        <option>图片</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>来源</label>
+      <select id="sourceFilter" onchange="applyFilter()">
+        <option>全部来源</option>
+        <option>自动入库</option>
+        <option>手动上传</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>上传日期</label>
+      <input type="date" id="dateStart" value="2026-06-01">
+      <span class="date-sep">~</span>
+      <input type="date" id="dateEnd" value="2026-06-24">
+    </div>
+    <div class="view-toggle">
+      <button class="active" onclick="switchView('grid',this)" title="网格视图">▦</button>
+      <button onclick="switchView('list',this)" title="列表视图">☰</button>
+    </div>
+  </div>
+  <div class="grid-view active" id="gridView"></div>
+  <div class="list-view" id="listView"></div>
+</div>
+
+<div class="modal-overlay" id="previewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="previewTitle">素材预览</h3>
+      <button class="close-btn" onclick="closePreview()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-preview" id="previewArea">
+        <div class="preview-placeholder" id="previewPlaceholder">
+          <div class="play-icon" id="previewIcon">▶</div>
+          <div class="tip" id="previewTip">此为原型预览，实际将展示真实素材内容</div>
+        </div>
+      </div>
+      <div class="modal-sidebar">
+        <div class="detail-row">
+          <div class="detail-label">素材名称</div>
+          <div class="detail-value" id="detailName">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">素材类型</div>
+          <div class="detail-value" id="detailType">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">业务归属</div>
+          <div class="detail-value" id="detailBiz">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">渠道</div>
+          <div class="detail-value" id="detailChannel">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">优化师</div>
+          <div class="detail-value" id="detailOptimizer">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">上传日期</div>
+          <div class="detail-value" id="detailDate">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">数据来源</div>
+          <div class="detail-value" id="detailSource">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="upload-overlay" id="uploadOverlay">
+  <div class="upload-modal">
+    <div class="modal-header">
+      <h3>↑ 上传素材</h3>
+      <button class="close-btn" onclick="closeUploadModal()">✕</button>
+    </div>
+    <div class="upload-body">
+      <div class="file-drop" id="uploadFileDrop" onclick="document.getElementById('uploadFileInput').click()">
+        <div style="font-size:48px;margin-bottom:12px">📁</div>
+        <div style="font-weight:500;color:var(--text-2)">点击选择文件，或拖拽文件到此处</div>
+        <div style="font-size:11px;margin-top:4px;opacity:.6">支持 MP4 / MOV / JPG / PNG 格式，支持多选</div>
+      </div>
+      <input type="file" id="uploadFileInput" multiple accept="video/*,image/*" style="display:none" onchange="handleUploadFileSelect(event)">
+      <div id="uploadFileList" class="file-list" style="display:none"></div>
+      <div class="fm-group">
+        <label>素材类型 <span class="req">*</span></label>
+        <select id="uploadFileType">
+          <option>视频</option>
+          <option>图片</option>
+        </select>
+      </div>
+      <div class="fm-group">
+        <label>业务归属</label>
+        <select id="uploadBiz">
+          <option>存量</option>
+          <option>权益</option>
+        </select>
+      </div>
+      <div class="fm-group">
+        <label>渠道</label>
+        <select id="uploadChannel">
+          <option>广点通</option>
+          <option>头条</option>
+        </select>
+      </div>
+      <div class="fm-group">
+        <label>优化师</label>
+        <input type="text" id="uploadOptimizer" placeholder="请输入优化师姓名">
+      </div>
+    </div>
+    <div class="upload-actions">
+      <button class="btn btn-outline" onclick="closeUploadModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitUpload()">确认上传</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var materialData = [
+  {id:1, name:"夏日促销A版_前贴01_中段03_尾帧02.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-23", source:"自动入库", size:"15.2MB"},
+  {id:2, name:"品牌宣传主视觉_v2.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-22", source:"手动上传", size:"22.8MB"},
+  {id:3, name:"产品展示图_横版_1080p.png", type:"图片", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-22", source:"自动入库", size:"1.4MB"},
+  {id:4, name:"节日活动_快剪版_30s.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"王五", date:"2026-06-21", source:"自动入库", size:"8.6MB"},
+  {id:5, name:"Banner_首页轮播_750x300.jpg", type:"图片", biz:"存量", channel:"广点通", optimizer:"李四", date:"2026-06-21", source:"手动上传", size:"320KB"},
+  {id:6, name:"新品上市_15s短版_尾帧变体02.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"张三", date:"2026-06-20", source:"自动入库", size:"5.1MB"},
+];
+var uploadSelectedFiles = [];
+
+function getFilteredData() {
+  var nameKw = (document.getElementById("nameFilter").value || "").trim().toLowerCase();
+  var typeVal = document.getElementById("typeFilter").value;
+  var sourceVal = document.getElementById("sourceFilter").value;
+  var result = [];
+  for (var i = 0; i < materialData.length; i++) {
+    var m = materialData[i];
+    if (nameKw && m.name.toLowerCase().indexOf(nameKw) === -1) continue;
+    if (typeVal !== "全部类型" && m.type !== typeVal) continue;
+    if (sourceVal !== "全部来源" && m.source !== sourceVal) continue;
+    result.push(m);
+  }
+  return result;
+}
+
+function renderAll() { renderGrid(); renderList(); }
+
+function renderGrid() {
+  var data = getFilteredData();
+  var el = document.getElementById("gridView");
+  if (data.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">📂</div><div class="title">暂无素材</div><div class="desc">试试调整筛选条件，或上传新素材</div></div>';
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    var bg = "linear-gradient(135deg,#1a1a2e,#16213e)";
+    if (m.type === "图片") bg = "linear-gradient(135deg,#f093fb,#f5576c)";
+    var badgeCls = m.type === "视频" ? "bade-video" : "bade-image";
+    var sourceCls = m.source === "自动入库" ? "bade-auto" : "bade-manual";
+    html += '<div class="grid-card" onclick="openPreview(' + m.id + ')">' +
+      '<div class="thumb" style="background:' + bg + '">' +
+        '<div style="color:rgba(255,255,255,.3);font-size:36px">' + (m.type === "视频" ? "🎬" : "🖼️") + '</div>' +
+        '<div class="play-overlay"><div class="play-btn">▶</div></div>' +
+      '</div>' +
+      '<div class="info">' +
+        '<div class="name">' + m.name + '</div>' +
+        '<div class="meta"><span class="badge ' + badgeCls + '">' + m.type + '</span>' +
+        '<span class="badge ' + sourceCls + '">' + m.source + '</span></div>' +
+      '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+function renderList() {
+  var data = getFilteredData();
+  var el = document.getElementById("listView");
+  if (data.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无素材</div></div>';
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    var badgeCls = m.type === "视频" ? "bade-video" : "bade-image";
+    var sourceCls = m.source === "自动入库" ? "bade-auto" : "bade-manual";
+    html += '<div class="list-row" onclick="openPreview(' + m.id + ')">' +
+      '<div class="thumb-sm" style="background:#f0f0f0;color:#ccc">' + (m.type === "视频" ? "🎬" : "🖼️") + '</div>' +
+      '<div class="info">' +
+        '<div class="name">' + m.name + '</div>' +
+        '<div class="meta"><span class="badge ' + badgeCls + '">' + m.type + '</span>' +
+        '<span class="badge ' + sourceCls + '">' + m.source + '</span></div>' +
+      '</div>' +
+      '<div class="date">' + m.date + '</div>' +
+      '<button class="preview-btn" title="预览" onclick="event.stopPropagation();openPreview(' + m.id + ')">👁</button>' +
+      '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function switchView(view, btn) {
+  document.getElementById("gridView").classList.remove("active");
+  document.getElementById("listView").classList.remove("active");
+  document.getElementById(view + "View").classList.add("active");
+  var btns = document.querySelectorAll(".view-toggle button");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+  btn.classList.add("active");
+}
+
+function openPreview(id) {
+  var m = null;
+  for (var i = 0; i < materialData.length; i++) {
+    if (materialData[i].id === id) { m = materialData[i]; break; }
+  }
+  if (!m) return;
+  document.getElementById("previewTitle").textContent = "预览：" + m.name;
+  document.getElementById("detailName").textContent = m.name;
+  document.getElementById("detailType").textContent = m.type;
+  document.getElementById("detailBiz").textContent = m.biz;
+  document.getElementById("detailChannel").textContent = m.channel;
+  document.getElementById("detailOptimizer").textContent = m.optimizer;
+  document.getElementById("detailDate").textContent = m.date;
+  document.getElementById("detailSource").textContent = m.source;
+  var icon = document.getElementById("previewIcon");
+  var tip = document.getElementById("previewTip");
+  if (m.type === "视频") {
+    icon.textContent = "▶";
+    tip.textContent = "此为原型预览，实际将播放真实视频内容";
+  } else {
+    icon.textContent = "🖼️";
+    tip.textContent = "此为原型预览，实际将展示真实图片内容";
+  }
+  document.getElementById("previewModal").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+function closePreview() {
+  document.getElementById("previewModal").classList.remove("active");
+  document.body.style.overflow = "";
+}
+
+function openUploadModal() {
+  document.getElementById("uploadOverlay").classList.add("active");
+  document.body.style.overflow = "hidden";
+  uploadSelectedFiles = [];
+  document.getElementById("uploadFileList").style.display = "none";
+  document.getElementById("uploadFileList").innerHTML = "";
+}
+
+function closeUploadModal() {
+  document.getElementById("uploadOverlay").classList.remove("active");
+  document.body.style.overflow = "";
+}
+
+function handleUploadFileSelect(e) {
+  var files = Array.from(e.target.files);
+  uploadSelectedFiles = uploadSelectedFiles.concat(files);
+  renderUploadFileList();
+}
+
+function renderUploadFileList() {
+  var el = document.getElementById("uploadFileList");
+  if (uploadSelectedFiles.length === 0) { el.style.display = "none"; return; }
+  el.style.display = "flex";
+  var tags = "";
+  for (var i = 0; i < uploadSelectedFiles.length; i++) {
+    tags += '<span style="background:#e8f1ff;padding:2px 6px;border-radius:4px;font-size:11px">' + uploadSelectedFiles[i].name + '</span>';
+  }
+  el.innerHTML = "📎 已选 " + uploadSelectedFiles.length + " 个文件：" + tags;
+}
+
+function submitUpload() {
+  if (uploadSelectedFiles.length === 0) { alert("请先选择素材文件"); return; }
+  var fileType = document.getElementById("uploadFileType").value;
+  var biz = document.getElementById("uploadBiz").value;
+  var channel = document.getElementById("uploadChannel").value;
+  var optimizer = document.getElementById("uploadOptimizer").value || "未设置";
+  for (var i = 0; i < uploadSelectedFiles.length; i++) {
+    var file = uploadSelectedFiles[i];
+    materialData.push({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      type: fileType,
+      biz: biz,
+      channel: channel,
+      optimizer: optimizer,
+      date: new Date().toISOString().slice(0,10),
+      source: "手动上传",
+      size: (file.size/1024/1024).toFixed(1) + "MB"
+    });
+  }
+  renderAll();
+  closeUploadModal();
+  alert("成功上传 " + uploadSelectedFiles.length + " 个素材");
+  uploadSelectedFiles = [];
+}
+
+var dropArea = document.getElementById("uploadFileDrop");
+if (dropArea) {
+  dropArea.addEventListener("dragover", function(e) { e.preventDefault(); dropArea.classList.add("drag-over"); });
+  dropArea.addEventListener("dragleave", function(e) { e.preventDefault(); dropArea.classList.remove("drag-over"); });
+  dropArea.addEventListener("drop", function(e) {
+    e.preventDefault();
+    dropArea.classList.remove("drag-over");
+    var files = Array.from(e.dataTransfer.files);
+    uploadSelectedFiles = uploadSelectedFiles.concat(files);
+    renderUploadFileList();
+  });
+}
+
+document.getElementById("previewModal").addEventListener("click", function(e) {
+  if (e.target === this) closePreview();
+});
+document.getElementById("uploadOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeUploadModal();
+});
+
+renderAll();
+</script>
+</body>
+</html>
