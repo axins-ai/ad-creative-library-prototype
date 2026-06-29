@@ -24,8 +24,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   display:flex;align-items:center;padding:0 24px;
   box-shadow:var(--shadow-s);position:sticky;top:0;z-index:100;flex-shrink:0;
 }
-.top-bar .back-link{color:var(--primary);text-decoration:none;font-size:13px;margin-right:16px;display:flex;align-items:center;gap:4px;transition:opacity .15s}
-.top-bar .back-link:hover{opacity:.7}
 .top-bar .page-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
 .top-bar .tag{
   margin-left:4px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;
@@ -366,7 +364,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <body>
 
 <header class="top-bar">
-  <a class="back-link" href="../index.html">← 返回导航</a>
+  
   <h1 class="page-title">
     生产工作台
     <span class="tag">生产任务管理</span>
@@ -422,27 +420,27 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
     <div>
 
-    <div class="basic-attrs-card">
+    <div>
       <div class="section-head"><span class="step-num">1</span> 选择基础属性</div>
-      <div class="basic-attrs-grid">
-        <div class="basic-attr-item">
-          <label>业务类型</label>
+      <div class="basic-attrs-cards">
+        <div class="basic-attr-card" id="cardBiz">
+          <div class="attr-label">📦 业务类型</div>
           <select id="pBiz" onchange="updateBasicAttrs()">
             <option value="">全部</option>
             <option>存量</option>
             <option>权益</option>
           </select>
         </div>
-        <div class="basic-attr-item">
-          <label>渠道</label>
+        <div class="basic-attr-card" id="cardChannel">
+          <div class="attr-label">📡 渠道</div>
           <select id="pChannel" onchange="updateBasicAttrs()">
             <option value="">全部</option>
             <option>广点通</option>
             <option>头条</option>
           </select>
         </div>
-        <div class="basic-attr-item">
-          <label>优化师</label>
+        <div class="basic-attr-card" id="cardOptimizer">
+          <div class="attr-label">👤 优化师</div>
           <select id="pOptimizer" onchange="updateBasicAttrs()">
             <option value="">全部</option>
             <option>张三</option>
@@ -1344,6 +1342,10 @@ function updateBasicAttrs() {
   gBasicAttrs.biz = document.getElementById("pBiz").value;
   gBasicAttrs.channel = document.getElementById("pChannel").value;
   gBasicAttrs.optimizer = document.getElementById("pOptimizer").value;
+  // 更新卡片选中状态
+  document.getElementById("cardBiz").classList.toggle("selected", !!gBasicAttrs.biz);
+  document.getElementById("cardChannel").classList.toggle("selected", !!gBasicAttrs.channel);
+  document.getElementById("cardOptimizer").classList.toggle("selected", !!gBasicAttrs.optimizer);
   // 更新提示
   var hint = "";
   if (gBasicAttrs.biz) hint += "业务:" + gBasicAttrs.biz + " ";
