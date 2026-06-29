@@ -241,14 +241,14 @@ function renderMsGrid() {
 }
 
 function openUploadModal() {
-  document.getElementById("msUploadOverlay").classList.add("show");
+  document.getElementById("msUploadOverlay").classlist.add("show");
   msSelectedFiles = [];
   document.getElementById("msUploadFileInfo").style.display = "none";
 }
 
 function closeUploadModal(e) {
   if (e && e.target !== document.getElementById("msUploadOverlay")) return;
-  document.getElementById("msUploadOverlay").classList.remove("show");
+  document.getElementById("msUploadOverlay").classlist.remove("show");
 }
 
 function handleMaterialFileSelect(e) {
@@ -304,6 +304,6 @@ function showToast(msg, type) {
 }
 
 renderMsGrid();
-<\/script>
+</script>
 </body>
 </html>
