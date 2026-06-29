@@ -360,6 +360,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 .empty-s{text-align:center;padding:32px 16px;color:var(--text-3);font-size:13px}
 </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
 
@@ -876,8 +878,8 @@ function exportTask(id) {
     showToast("该任务暂无输出素材", "w");
     return;
   }
-  downloadCSV(task.name + "_素材清单", task.outputs);
-  showToast("已导出 " + task.name, "s");
+  downloadFiles(task.name + "_素材清单", task.outputs);
+  showToast("已导出 「" + task.name + "」 的成品素材", "s");
 }
 
 function batchExport() {
@@ -898,30 +900,52 @@ function batchExport() {
     showToast("选中任务暂无输出素材", "w");
     return;
   }
-  downloadCSV("批量导出_" + names.join("+"), allOut, true);
-  showToast("已批量导出 " + allOut.length + " 个素材", "s");
+  downloadFiles("批量导出_" + names.join("+"), allOut, true);
+  showToast("已批量导出 " + allOut.length + " 个成品素材文件", "s");
 }
 
-function downloadCSV(fileName, data, hasTaskName) {
+// 导出成品素材文件（ZIP 压缩包）
+function downloadFiles(fileName, data, hasTaskName) {
   hasTaskName = !!hasTaskName;
-  var BOM = "\uFEFF";
-  var header = hasTaskName ? "任务名称,素材名称,原料组合,参数\n" : "素材名称,原料组合,参数\n";
-  var content = BOM + header;
+  var zip = new JSZip();
+  var folder = zip.folder("成品素材");
+  
   for (var i = 0; i < data.length; i++) {
     var item = hasTaskName ? data[i] : data[i];
-    var row = "";
-    if (hasTaskName) row += "\"" + (item.taskName || "") + "\",";
-    row += "\"" + (item.output ? item.output.name : item.name) + "\",";
-    row += "\"" + (item.output ? item.output.combo : item.combo) + "\",";
-    row += "\"" + (item.output ? item.output.params : item.params) + "\"";
-    content += row + "\n";
+    var out = item.output ? item.output : item;
+    var name = out.name || ("素材_" + (i+1));
+    var ext = (out.params && out.params.indexOf("MP4") !== -1) ? "mp4" : "mp4";
+    
+    // 生成占位文件内容（模拟实际素材文件）
+    var fileContent = "素材名称: " + name + "\n" +
+                     "原料组合: " + out.combo + "\n" +
+                     "参数: " + out.params + "\n" +
+                     "导出时间: " + new Date().toLocaleString() + "\n";
+    if (hasTaskName) {
+      fileContent += "所属任务: " + item.taskName + "\n";
+    }
+    fileContent += "\n(此为原型占位文件，实际导出时为真实素材文件)\n";
+    
+    // 添加到 ZIP
+    var fileName2 = name + "." + ext;
+    // 如果文件名已存在，添加序号
+    var baseName = name;
+    var counter = 1;
+    while (folder.files[fileName2] || folder.files[encodeURIComponent(fileName2)]) {
+      fileName2 = baseName + "_" + counter + "." + ext;
+      counter++;
+    }
+    folder.file(fileName2, fileContent);
   }
-  var blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
-  var link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = fileName + ".csv";
-  link.click();
-  URL.revokeObjectURL(link.href);
+  
+  // 生成 ZIP 并触发下载
+  zip.generateAsync({ type: "blob" }).then(function(blob) {
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName + ".zip";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
 }
 
 // ===== 原料卡片 =====
