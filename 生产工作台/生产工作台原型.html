@@ -383,7 +383,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <main class="page-body">
 
   <!-- 视图1：任务列表 -->
-  <div class="view active" id="viewList">
+  <div class="view active" id="viewList" style="display:flex;flex-direction:column;gap:16px">
     <div class="list-header">
       <div class="left"><h2>生产任务列表</h2></div>
       <div class="right">
@@ -418,7 +418,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   </div>
 
   <!-- 视图2：任务配置 -->
-  <div class="view" id="viewConfig">
+  <div class="view" id="viewConfig" style="display:none">
     <div class="config-back" onclick="goBackToList()">
       <span class="arrow">←</span> 返回任务列表
     </div>
@@ -661,13 +661,19 @@ function getMatById(id) {
 
 // ===== 视图切换 =====
 function switchView(name) {
-  document.getElementById("viewList").classList.remove("active");
-  document.getElementById("viewConfig").classList.remove("active");
+  var vl = document.getElementById("viewList");
+  var vc = document.getElementById("viewConfig");
+  vl.classList.remove("active");
+  vc.classList.remove("active");
+  vl.style.display = "none";
+  vc.style.display = "none";
   if (name === "list") {
-    document.getElementById("viewList").classList.add("active");
+    vl.classList.add("active");
+    vl.style.display = "flex";
     renderTaskList();
   } else {
-    document.getElementById("viewConfig").classList.add("active");
+    vc.classList.add("active");
+    vc.style.display = "flex";
   }
 }
 
