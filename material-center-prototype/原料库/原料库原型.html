@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>素材中心 - 原料库原型</title>
+<title>素材中心 - 原料库</title>
 <style>
-/* ===== Reset & Variables ===== */
 *,*:before,*:after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --primary:#1664ff;--primary-light:#e8f1ff;--primary-dark:#0952d9;
-  --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
   --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
   --bg-page:#f0f2f5;--bg-card:#fff;--bg-hover:#f7f8fa;
   --border:#e8e8e8;--border-light:#f0f0f0;
@@ -19,163 +17,74 @@
 }
 html{font-size:14px}
 body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;margin:0;padding:0}
-
-/* ===== Header ===== */
-.app-header{
-  height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 24px;
-  box-shadow:var(--shadow-s);position:sticky;top:0;z-index:100;flex-shrink:0;
-}
+.app-header{height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;box-shadow:var(--shadow-s);position:sticky;top:0;z-index:100;flex-shrink:0;}
 .app-header .back-link{color:var(--primary);text-decoration:none;font-size:13px;margin-right:16px;display:flex;align-items:center;gap:4px}
 .app-header .back-link:hover{text-decoration:underline}
 .app-header .page-title{font-size:15px;font-weight:600;color:var(--text-1)}
-.app-header .module-tag{
-  margin-left:12px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;
-  background:#e8f5e9;color:#52c41a;border:1px solid #b7eb8f;
-}
-
-/* ===== Main Content ===== */
-.main-content{flex:1;display:flex;flex-direction:column;padding:20px 24px;gap:16px;min-height:0;overflow:auto}
-
-/* ===== Filter Card ===== */
-.ms-filter-card{
-  background:var(--bg-card);border-radius:var(--radius-l);
-  padding:14px 16px;box-shadow:var(--shadow-s);flex-shrink:0;
-}
-.ms-filter-body{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-.ms-filter-item{display:flex;flex-direction:column;gap:4px;min-width:0}
+.main-content{flex:1;display:flex;flex-direction:column;padding:16px 20px;gap:12px;min-height:0;overflow:auto}
+.ms-filter-card{background:var(--bg-card);border-radius:var(--radius-l);padding:12px 14px;box-shadow:var(--shadow-s);flex-shrink:0;}
+.ms-filter-body{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.ms-filter-item{display:flex;flex-direction:column;gap:3px;min-width:0}
 .ms-filter-item label{font-size:11px;color:var(--text-3);font-weight:500;padding-left:1px}
-.ms-filter-item select,.ms-filter-item input[type="date"]{
-  height:32px;padding:0 10px;font-size:13px;border:1px solid var(--border);
-  border-radius:var(--radius-s);outline:none;background:#fff;transition:border .2s;min-width:130px;
-}
+.ms-filter-item select,.ms-filter-item input[type="date"]{height:30px;padding:0 8px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;background:#fff;transition:border .2s;min-width:110px;}
 .ms-filter-item select:focus,.ms-filter-item input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,100,255,.12)}
-.ms-filter-actions{display:flex;gap:8px;align-items:flex-end;margin-left:auto}
-.ms-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  height:32px;padding:0 14px;border:none;border-radius:var(--radius-s);
-  font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;user-select:none;white-space:nowrap;
-}
+.ms-filter-item .date-sep{font-size:11px;color:var(--text-3);white-space:nowrap;flex-shrink:0;line-height:30px}
+.ms-filter-actions{display:flex;gap:6px;align-items:flex-end;margin-left:auto}
+.ms-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:30px;padding:0 12px;border:none;border-radius:var(--radius-s);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;user-select:none;white-space:nowrap;}
 .ms-btn-primary{background:var(--primary);color:#fff}
 .ms-btn-primary:hover{background:var(--primary-dark)}
 .ms-btn-outline{background:#fff;color:var(--text-2);border:1px solid var(--border)}
 .ms-btn-outline:hover{background:var(--bg-hover);color:var(--text-1)}
-
-/* ===== Upload Bar ===== */
-.ms-upload-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  background:var(--bg-card);border-radius:var(--radius-l);
-  padding:12px 16px;box-shadow:var(--shadow-s);flex-shrink:0;
-}
-.ms-upload-bar .title{font-size:14px;font-weight:600;color:var(--text-1)}
-
-/* ===== List Area ===== */
-.ms-list-area{
-  background:var(--bg-card);border-radius:var(--radius-l);
-  box-shadow:var(--shadow-s);flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;
-}
-.ms-list-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;border-bottom:1px solid var(--border-light);flex-shrink:0;
-}
+.ms-upload-bar{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border-radius:var(--radius-l);padding:10px 14px;box-shadow:var(--shadow-s);flex-shrink:0;}
+.ms-upload-bar .title{font-size:13px;font-weight:600;color:var(--text-1)}
+.ms-list-area{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-s);flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+.ms-list-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
 .ms-list-header .title{font-size:13px;font-weight:600;color:var(--text-1)}
 .ms-list-header .count{font-size:12px;color:var(--text-3)}
-.ms-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:16px;padding:16px;overflow-y:auto;flex:1;
-}
-.ms-card{
-  background:var(--bg-page);border-radius:var(--radius);padding:12px;
-  border:1px solid var(--border-light);transition:all .2s;cursor:default;
-}
+.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;padding:12px;overflow-y:auto;flex:1;}
+.ms-card{background:var(--bg-page);border-radius:var(--radius);padding:8px;border:1px solid var(--border-light);transition:all .2s;cursor:default;}
 .ms-card:hover{border-color:var(--primary);box-shadow:var(--shadow-m)}
-.ms-card .thumb{
-  width:100%;height:110px;display:flex;align-items:center;justify-content:center;
-  background:var(--border);border-radius:var(--radius-s);margin-bottom:8px;font-size:11px;color:var(--text-3);
-}
-.ms-card .type-tag{
-  display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;margin-bottom:6px;
-}
+.ms-card .thumb{width:100%;height:68px;display:flex;align-items:center;justify-content:center;background:var(--border);border-radius:var(--radius-s);margin-bottom:5px;font-size:10px;color:var(--text-3);}
+.ms-card .type-tag{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:500;margin-bottom:4px;}
 .type-qiantie{background:#e6f7ff;color:#1890ff}
 .type-zhongduan{background:#f6ffed;color:#52c41a}
 .type-weiqiang{background:#fff7e6;color:#fa8c16}
-.ms-card .name{font-size:13px;font-weight:500;color:var(--text-1);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ms-card .meta{font-size:11px;color:var(--text-3)}
-.ms-card .meta-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:2px}
+.ms-card .name{font-size:12px;font-weight:500;color:var(--text-1);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-card .meta{font-size:10px;color:var(--text-3)}
+.ms-card .meta-row{display:flex;justify-content:space-between;font-size:10px;color:var(--text-3);margin-top:1px}
 .ms-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-3)}
-
-/* ===== Upload Modal ===== */
-.ms-modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;
-  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;
-}
+.ms-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
 .ms-modal-overlay.show{opacity:1;pointer-events:auto}
-.ms-modal{
-  background:var(--bg-card);border-radius:var(--radius-l);
-  box-shadow:var(--shadow-l);width:540px;max-height:85vh;
-  display:flex;flex-direction:column;transform:translateY(20px);transition:transform .25s;
-}
+.ms-modal{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-l);width:540px;max-height:85vh;display:flex;flex-direction:column;transform:translateY(20px);transition:transform .25s;}
 .ms-modal-overlay.show .ms-modal{transform:translateY(0)}
-.ms-modal-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;border-bottom:1px solid var(--border-light);flex-shrink:0;
-}
+.ms-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
 .ms-modal-hd h3{font-size:15px;font-weight:600}
-.ms-modal-hd .close-btn{
-  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
-  border:none;background:transparent;cursor:pointer;border-radius:var(--radius-s);
-  color:var(--text-3);font-size:18px;transition:all .2s;
-}
+.ms-modal-hd .close-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;border-radius:var(--radius-s);color:var(--text-3);font-size:18px;transition:all .2s;}
 .ms-modal-hd .close-btn:hover{background:var(--bg-hover);color:var(--text-1)}
 .ms-modal-bd{padding:16px 20px;overflow-y:auto;flex:1}
-.ms-modal-ft{
-  display:flex;justify-content:flex-end;gap:10px;
-  padding:12px 20px;border-top:1px solid var(--border-light);flex-shrink:0;
-}
+.ms-modal-ft{display:flex;justify-content:flex-end;gap:10px;padding:12px 20px;border-top:1px solid var(--border-light);flex-shrink:0;}
 .ms-fm-group{margin-bottom:14px}
 .ms-fm-group label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
 .ms-fm-group label .req{color:var(--danger);margin-left:2px}
-.ms-fm-group input,.ms-fm-group select,.ms-fm-group textarea{
-  width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);
-  border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);
-}
-.ms-fm-group input:focus,.ms-fm-group select:focus,.ms-fm-group textarea:focus{border-color:var(--primary)}
-.ms-fm-group textarea{resize:vertical;min-height:60px}
-.ms-file-drop{
-  border:2px dashed var(--border);border-radius:var(--radius);
-  padding:24px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-3);font-size:13px;
-}
+.ms-fm-group input,.ms-fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
+.ms-fm-group input:focus,.ms-fm-group select:focus{border-color:var(--primary)}
+.ms-file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-3);font-size:13px;}
 .ms-file-drop:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 .ms-file-drop.dragover{border-color:var(--primary);background:var(--primary-light)}
 .ms-file-info{font-size:12px;color:var(--text-2);margin-top:8px;padding:8px 12px;background:var(--bg-page);border-radius:var(--radius-s);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-
-/* ===== Toast ===== */
 .toast-container{position:fixed;top:64px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast{
-  padding:10px 16px;border-radius:var(--radius);font-size:13px;
-  box-shadow:var(--shadow-m);display:flex;align-items:center;gap:8px;
-  animation:toastIn .3s ease;max-width:320px;
-}
+.toast{padding:10px 16px;border-radius:var(--radius);font-size:13px;box-shadow:var(--shadow-m);display:flex;align-items:center;gap:8px;animation:toastIn .3s ease;max-width:320px;}
 .toast-success{background:#f6ffed;border:1px solid #b7eb8f;color:var(--success)}
-.toast-error{background:#fff1f0;border:1px solid #ffa39e;color:var(--danger)}
-.toast-info{background:var(--primary-light);border:1px solid #91caff;color:var(--primary)}
 .toast-warning{background:#fffbe6;border:1px solid #ffe58f;color:var(--warning)}
 @keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
 </style>
 </head>
 <body>
-
-<!-- ===== Header ===== -->
 <header class="app-header">
   <a class="back-link" href="../index.html">← 返回导航</a>
   <span class="page-title">原料库</span>
-  <span class="module-tag">模块定义：原料管理与批量上传</span>
 </header>
-
-<!-- ===== Main ===== -->
 <main class="main-content">
-
-  <!-- Filter -->
   <div class="ms-filter-card">
     <div class="ms-filter-body">
       <div class="ms-filter-item">
@@ -213,7 +122,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
       <div class="ms-filter-item">
         <label>上传日期</label>
-        <input type="date">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="date" id="filterDateStart">
+          <span class="date-sep">~</span>
+          <input type="date" id="filterDateEnd">
+        </div>
       </div>
       <div class="ms-filter-actions">
         <button class="ms-btn ms-btn-outline">重置</button>
@@ -221,26 +134,19 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
     </div>
   </div>
-
-  <!-- Upload Bar -->
   <div class="ms-upload-bar">
     <div class="title">原料列表</div>
-    <button class="ms-btn ms-btn-primary" onclick="openUploadModal()">⬆ 上传原料</button>
+    <button class="ms-btn ms-btn-primary" onclick="openUploadModal()">↑ 上传原料</button>
   </div>
-
-  <!-- Grid List -->
   <div class="ms-list-area">
     <div class="ms-list-header">
       <span class="title">全部原料</span>
-      <span class="count">共 12 个原料</span>
+      <span class="count" id="msCount">共 12 个原料</span>
     </div>
-    <div class="ms-grid" id="msGrid">
-      <!-- JS 渲染 -->
-    </div>
+    <div class="ms-grid" id="msGrid"></div>
   </div>
 </main>
 
-<!-- ===== Upload Modal ===== -->
 <div class="ms-modal-overlay" id="msUploadOverlay" onclick="closeUploadModal(event)">
   <div class="ms-modal" onclick="event.stopPropagation()">
     <div class="ms-modal-hd">
@@ -253,11 +159,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <div class="ms-file-drop" id="msFileDrop" onclick="document.getElementById('msFileInput').click()">
           📁<br>
           <div>点击选择或拖拽文件到此处</div>
-          <div style="font-size:11px;margin-top:4px;opacity:.6">支持 MP4 / MOV 格式</div>
-          <button type="button" style="margin-top:8px;font-size:12px;padding:4px 12px;border:1px solid #1664ff;background:#fff;color:#1664ff;border-radius:6px;cursor:pointer" onclick="event.stopPropagation();document.getElementById('msFolderInput').click()">选择文件夹</button>
+          <div style="font-size:11px;margin-top:4px;opacity:.6">支持 MP4 / MOV 格式，支持多选</div>
         </div>
         <input type="file" id="msFileInput" accept="video/*,image/*" multiple style="display:none" onchange="handleMaterialFileSelect(event)">
-        <input type="file" id="msFolderInput" webkitdirectory style="display:none" onchange="handleFolderSelect(event)">
         <div id="msUploadFileInfo" class="ms-file-info" style="display:none"></div>
       </div>
       <div class="ms-fm-group">
@@ -294,116 +198,112 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   </div>
 </div>
 
-<!-- ===== Toast ===== -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// ===== Data =====
 var msMaterials = [
-  {id:1, name:'开场动画A', type:'前贴', biz:'存量', channel:'广点通', optimizer:'张三', date:'2026-06-20', size:'2.3MB'},
-  {id:2, name:'产品介绍B', type:'中段', biz:'权益', channel:'头条', optimizer:'李四', date:'2026-06-19', size:'5.1MB'},
-  {id:3, name:'行动号召C', type:'尾帧', biz:'存量', channel:'广点通', optimizer:'张三', date:'2026-06-18', size:'1.8MB'},
-  {id:4, name:'前贴片-夏日版', type:'前贴', biz:'权益', channel:'头条', optimizer:'王五', date:'2026-06-17', size:'3.2MB'},
-  {id:5, name:'中段-功能演示', type:'中段', biz:'存量', channel:'广点通', optimizer:'张三', date:'2026-06-16', size:'8.4MB'},
-  {id:6, name:'尾帧-下载引导', type:'尾帧', biz:'权益', channel:'头条', optimizer:'李四', date:'2026-06-15', size:'1.2MB'},
+  {id:1, name:"开场动画A", type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", size:"2.3MB"},
+  {id:2, name:"产品介绍B", type:"中段", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-19", size:"5.1MB"},
+  {id:3, name:"行动号召C", type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-18", size:"1.8MB"},
+  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条", optimizer:"王五", date:"2026-06-17", size:"3.2MB"},
+  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-16", size:"8.4MB"},
+  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-15", size:"1.2MB"},
+  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条", optimizer:"张三", date:"2026-06-14", size:"2.9MB"},
+  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-13", size:"4.1MB"},
+  {id:9, name:"尾帧-立即行动", type:"尾帧", biz:"存量", channel:"头条", optimizer:"王五", date:"2026-06-12", size:"1.5MB"},
+  {id:10, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"张三", date:"2026-06-11", size:"2.7MB"},
+  {id:11, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"李四", date:"2026-06-10", size:"6.3MB"},
+  {id:12, name:"尾帧-关注引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"张三", date:"2026-06-09", size:"1.1MB"},
 ];
-
 var msSelectedFiles = [];
 
-// ===== Render Grid =====
 function renderMsGrid() {
-  var grid = document.getElementById('msGrid');
+  var grid = document.getElementById("msGrid");
   if (msMaterials.length === 0) {
     grid.innerHTML = '<div class="ms-empty">暂无原料，请点击「上传原料」添加</div>';
+    document.getElementById("msCount").textContent = "共 0 个原料";
     return;
   }
-  grid.innerHTML = msMaterials.map(function(m) {
-    var tagClass = 'type-' + m.type;
-    return '<div class="ms-card">' +
-      '<div class="thumb">🎬 视频缩略图</div>' +
+  var html = "";
+  for (var i = 0; i < msMaterials.length; i++) {
+    var m = msMaterials[i];
+    var tagClass = "type-" + m.type;
+    html += '<div class="ms-card">' +
+      '<div class="thumb">🎬</div>' +
       '<div class="type-tag ' + tagClass + '">' + m.type + '</div>' +
       '<div class="name">' + m.name + '</div>' +
       '<div class="meta-row"><span>' + m.biz + '</span><span>' + m.channel + '</span></div>' +
       '<div class="meta">' + m.optimizer + ' · ' + m.date + '</div>' +
-    '</div>';
-  }).join('');
+      '</div>';
+  }
+  grid.innerHTML = html;
+  document.getElementById("msCount").textContent = "共 " + msMaterials.length + " 个原料";
 }
 
-// ===== Upload Modal =====
 function openUploadModal() {
-  document.getElementById('msUploadOverlay').classList.add('show');
+  document.getElementById("msUploadOverlay").classList.add("show");
   msSelectedFiles = [];
-  document.getElementById('msUploadFileInfo').style.display = 'none';
-}
-function closeUploadModal(e) {
-  if (e && e.target !== document.getElementById('msUploadOverlay')) return;
-  document.getElementById('msUploadOverlay').classList.remove('show');
+  document.getElementById("msUploadFileInfo").style.display = "none";
 }
 
-// ===== File Select =====
+function closeUploadModal(e) {
+  if (e && e.target !== document.getElementById("msUploadOverlay")) return;
+  document.getElementById("msUploadOverlay").classList.remove("show");
+}
+
 function handleMaterialFileSelect(e) {
   var files = Array.from(e.target.files);
   msSelectedFiles = msSelectedFiles.concat(files);
   renderUploadFileInfo();
 }
-function handleFolderSelect(e) {
-  var files = Array.from(e.target.files);
-  files = files.filter(function(f) { return f.type.startsWith('video/') || f.type.startsWith('image/'); });
-  if (files.length === 0) { showToast('文件夹中没有找到视频或图片文件', 'warning'); e.target.value = ''; return; }
-  msSelectedFiles = msSelectedFiles.concat(files);
-  var seen = {};
-  msSelectedFiles = msSelectedFiles.filter(function(f) {
-    var key = f.name + '_' + f.size;
-    if (seen[key]) return false;
-    seen[key] = true;
-    return true;
-  });
-  renderUploadFileInfo();
-  showToast('已添加 ' + files.length + ' 个文件（从文件夹）', 'success');
-  e.target.value = '';
-}
+
 function renderUploadFileInfo() {
-  var el = document.getElementById('msUploadFileInfo');
-  if (msSelectedFiles.length === 0) { el.style.display = 'none'; return; }
-  el.style.display = 'flex';
-  el.innerHTML = '📎 已选 ' + msSelectedFiles.length + ' 个文件：' +
-    msSelectedFiles.map(function(f) { return '<span style="background:#e8f1ff;padding:2px 6px;border-radius:4px;font-size:11px">' + f.name + '</span>'; }).join('');
+  var el = document.getElementById("msUploadFileInfo");
+  if (msSelectedFiles.length === 0) { el.style.display = "none"; return; }
+  el.style.display = "flex";
+  var tags = "";
+  for (var i = 0; i < msSelectedFiles.length; i++) {
+    tags += '<span style="background:#e8f1ff;padding:2px 6px;border-radius:4px;font-size:11px">' + msSelectedFiles[i].name + '</span>';
+  }
+  el.innerHTML = "📎 已选 " + msSelectedFiles.length + " 个文件：" + tags;
 }
 
-// ===== Submit Upload =====
 function submitUpload() {
-  if (msSelectedFiles.length === 0) { showToast('请先选择原料文件', 'warning'); return; }
-  var type = document.getElementById('msUploadType').value;
-  var biz = document.getElementById('msUploadBiz').value;
-  var channel = document.getElementById('msUploadChannel').value;
-  var optimizer = document.getElementById('msUploadOptimizer').value || '未设置';
-  msSelectedFiles.forEach(function(file) {
+  if (msSelectedFiles.length === 0) { showToast("请先选择原料文件", "warning"); return; }
+  var type = document.getElementById("msUploadType").value;
+  var biz = document.getElementById("msUploadBiz").value;
+  var channel = document.getElementById("msUploadChannel").value;
+  var optimizer = document.getElementById("msUploadOptimizer").value || "未设置";
+  for (var i = 0; i < msSelectedFiles.length; i++) {
+    var file = msSelectedFiles[i];
     msMaterials.push({
       id: Date.now() + Math.random(),
-      name: file.name.replace(/\.[^.]+$/, ''),
-      type: type, biz: biz, channel: channel, optimizer: optimizer,
-      date: new Date().toISOString().slice(0,10), size: (file.size/1024/1024).toFixed(1)+'MB'
+      name: file.name.replace(/\.[^.]+$/, ""),
+      type: type,
+      biz: biz,
+      channel: channel,
+      optimizer: optimizer,
+      date: new Date().toISOString().slice(0,10),
+      size: (file.size/1024/1024).toFixed(1) + "MB"
     });
-  });
+  }
   renderMsGrid();
   closeUploadModal();
-  showToast('成功上传 ' + msSelectedFiles.length + ' 个原料', 'success');
+  showToast("成功上传 " + msSelectedFiles.length + " 个原料", "success");
   msSelectedFiles = [];
 }
 
-// ===== Toast =====
 function showToast(msg, type) {
-  type = type || 'info';
-  var container = document.getElementById('toastContainer');
-  var el = document.createElement('div');
-  el.className = 'toast toast-' + type;
+  type = type || "info";
+  var container = document.getElementById("toastContainer");
+  var el = document.createElement("div");
+  el.className = "toast toast-" + type;
   el.textContent = msg;
   container.appendChild(el);
   setTimeout(function() { el.remove(); }, 2500);
 }
 
-// ===== Init =====
 renderMsGrid();
-</script>
+<\/script>
 </body>
 </html>
