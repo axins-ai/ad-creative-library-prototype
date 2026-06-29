@@ -421,12 +421,46 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     </div>
 
     <div>
-      <div class="section-head"><span class="step-num">1</span> 选择原料（前贴 ＋ 中段 ＋ 尾帧）</div>
+
+    <div class="basic-attrs-card">
+      <div class="section-head"><span class="step-num">1</span> 选择基础属性</div>
+      <div class="basic-attrs-grid">
+        <div class="basic-attr-item">
+          <label>业务类型</label>
+          <select id="pBiz" onchange="updateBasicAttrs()">
+            <option value="">全部</option>
+            <option>存量</option>
+            <option>权益</option>
+          </select>
+        </div>
+        <div class="basic-attr-item">
+          <label>渠道</label>
+          <select id="pChannel" onchange="updateBasicAttrs()">
+            <option value="">全部</option>
+            <option>广点通</option>
+            <option>头条</option>
+          </select>
+        </div>
+        <div class="basic-attr-item">
+          <label>优化师</label>
+          <select id="pOptimizer" onchange="updateBasicAttrs()">
+            <option value="">全部</option>
+            <option>张三</option>
+            <option>李四</option>
+            <option>王五</option>
+          </select>
+        </div>
+      </div>
+      <div class="basic-attrs-hint" id="basicAttrsHint">📌 选择基础属性后，原料选择弹窗将只展示匹配的原料</div>
+    </div>
+    <div>
+      <div class="section-head"><span class="step-num">2</span> 选择原料（前贴 ＋ 中段 ＋ 尾帧）</div>
       <div class="mat-cards" id="matCards"></div>
     </div>
 
+    </div>
     <div class="config-card">
-      <div class="section-head"><span class="step-num">2</span> 配置输出参数</div>
+      <div class="section-head"><span class="step-num">3</span> 配置输出参数</div>
       <div class="params-grid">
         <div class="param-item">
           <label>分辨率</label>
@@ -537,14 +571,14 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <script>
 // ===== 原料数据 =====
 var MATERIALS_DB = [
-  {id:1, name:"开场动画A",    type:"前贴", biz:"存量", channel:"广点通", date:"2026-06-20", duration:"00:15", size:"12.3 MB"},
-  {id:2, name:"产品介绍B",    type:"中段", biz:"权益", channel:"头条",   date:"2026-06-21", duration:"00:30", size:"28.7 MB"},
-  {id:3, name:"行动号召C",    type:"尾帧", biz:"存量", channel:"广点通", date:"2026-06-20", duration:"00:10", size:"8.1 MB"},
-  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条",   date:"2026-06-22", duration:"00:18", size:"15.2 MB"},
-  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", date:"2026-06-21", duration:"00:35", size:"32.4 MB"},
-  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条",   date:"2026-06-22", duration:"00:12", size:"9.6 MB"},
-  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条",   date:"2026-06-23", duration:"00:20", size:"18.9 MB"},
-  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", date:"2026-06-23", duration:"00:25", size:"22.1 MB"},
+  {id:1, name:"开场动画A",    type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:15", size:"12.3 MB"},
+  {id:2, name:"产品介绍B",    type:"中段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-21", duration:"00:30", size:"28.7 MB"},
+  {id:3, name:"行动号召C",    type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:10", size:"8.1 MB"},
+  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-22", duration:"00:18", size:"15.2 MB"},
+  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-21", duration:"00:35", size:"32.4 MB"},
+  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-22", duration:"00:12", size:"9.6 MB"},
+  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB"},
+  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB"},
 ];
 
 // ===== 弹窗状态 =====
@@ -556,6 +590,7 @@ var gModal = {
 
 // ===== 配置页状态 =====
 var gSelected = { "前贴":[], "中段":[], "尾帧":[] };
+var gBasicAttrs = { biz:"", channel:"", optimizer:"" };
 var gActiveParams = ["原料名称","日期","优化师","设计师","序号"];
 
 // ===== 任务数据 =====
@@ -604,6 +639,9 @@ initTaskMaterials();
 var gNextTaskId = 4;
 var gEditingTaskId = null;
 var gBatchSelected = [];
+
+// 基础属性筛选键
+var BASIC_ATTRS_KEYS = ["biz","channel","optimizer"];
 
 // ===== 工具函数 =====
 function esc(s) {
@@ -729,7 +767,12 @@ function newTask() {
   gEditingTaskId = null;
   document.getElementById("taskNameInput").value = "";
   gSelected = { "前贴":[], "中段":[], "尾帧":[] };
+  gBasicAttrs = { biz:"", channel:"", optimizer:"" };
   gActiveParams = ["原料名称","日期","优化师","设计师","序号"];
+  document.getElementById("pBiz").value = "";
+  document.getElementById("pChannel").value = "";
+  document.getElementById("pOptimizer").value = "";
+  document.getElementById("basicAttrsHint").textContent = "📌 选择基础属性后，原料选择弹窗将只展示匹配的原料";
   document.getElementById("pResolution").value = "1080p";
   document.getElementById("pFramerate").value = "25fps";
   document.getElementById("pBitrate").value = "5 Mbps";
@@ -756,6 +799,15 @@ function openTask(id) {
       }
     }
   }
+  // 加载基础属性
+  gBasicAttrs = { biz:"", channel:"", optimizer:"" };
+  if (task.basicAttrs) {
+    gBasicAttrs = { biz:task.basicAttrs.biz||"", channel:task.basicAttrs.channel||"", optimizer:task.basicAttrs.optimizer||"" };
+  }
+  document.getElementById("pBiz").value = gBasicAttrs.biz;
+  document.getElementById("pChannel").value = gBasicAttrs.channel;
+  document.getElementById("pOptimizer").value = gBasicAttrs.optimizer;
+  updateBasicAttrs();
   document.getElementById("pResolution").value = task.params.resolution;
   document.getElementById("pFramerate").value = task.params.framerate;
   document.getElementById("pBitrate").value = task.params.bitrate;
@@ -799,6 +851,7 @@ function saveTask() {
       format:    document.getElementById("pFormat").value,
     },
     namingParams: [],
+    basicAttrs: { biz:gBasicAttrs.biz, channel:gBasicAttrs.channel, optimizer:gBasicAttrs.optimizer },
     outputs: []
   };
   var keys = ["前贴","中段","尾帧"];
@@ -830,6 +883,7 @@ function saveTask() {
       materials: td.materials,
       params: td.params,
       namingParams: td.namingParams,
+      basicAttrs: td.basicAttrs,
       outputs: []
     });
     gEditingTaskId = nid;
@@ -1076,6 +1130,10 @@ function renderModalList() {
     if (ch && m.channel !== ch) continue;
     if (dS && m.date < dS) continue;
     if (dE && m.date > dE) continue;
+    // 基础属性筛选
+    if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
+    if (gBasicAttrs.channel && m.channel !== gBasicAttrs.channel) continue;
+    if (gBasicAttrs.optimizer && m.optimizer !== gBasicAttrs.optimizer) continue;
     result.push(m);
   }
 
@@ -1279,6 +1337,22 @@ function startProduction() {
 
   btn.disabled = false;
   btn.textContent = "⚙ 开始生产";
+}
+
+// ===== 基础属性更新 =====
+function updateBasicAttrs() {
+  gBasicAttrs.biz = document.getElementById("pBiz").value;
+  gBasicAttrs.channel = document.getElementById("pChannel").value;
+  gBasicAttrs.optimizer = document.getElementById("pOptimizer").value;
+  // 更新提示
+  var hint = "";
+  if (gBasicAttrs.biz) hint += "业务:" + gBasicAttrs.biz + " ";
+  if (gBasicAttrs.channel) hint += "渠道:" + gBasicAttrs.channel + " ";
+  if (gBasicAttrs.optimizer) hint += "优化师:" + gBasicAttrs.optimizer;
+  document.getElementById("basicAttrsHint").textContent = hint ? "🔒 已锁定：" + hint.trim() : "📌 选择基础属性后，原料选择弹窗将只展示匹配的原料";
+  // 清空已选原料（属性变更后需要重新选择）
+  gSelected = { "前贴":[], "中段":[], "尾帧":[] };
+  renderCards();
 }
 
 // ===== Toast =====
