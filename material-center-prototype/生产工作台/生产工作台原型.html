@@ -681,12 +681,15 @@ function getMatById(id) {
 function switchView(name) {
   document.getElementById("viewList").classList.remove("active");
   document.getElementById("viewConfig").classList.remove("active");
-  var tid = (name === "list") ? "viewList" : "viewConfig";
-  document.getElementById(tid).classList.add("active");
-  if (name === "list") renderTaskList();
+  if (name === "list") {
+    document.getElementById("viewList").classList.add("active");
+    renderTaskList();
+  } else {
+    document.getElementById("viewConfig").classList.add("active");
+  }
 }
 
-// ===== 任务列表 =====
+// ===== 任务列表渲染 =====
 function renderTaskList() {
   var kw = (document.getElementById("taskSearch").value || "").trim().toLowerCase();
   var filtered = [];
@@ -696,11 +699,7 @@ function renderTaskList() {
   }
   var tbody = document.getElementById("taskTableBody");
   if (filtered.length === 0) {
-    tbody.innerHTML = "<tr><td colspan="7"><div class="empty-list">" +
-      "<div class="empty-icon">📋</div>" +
-      "<p>" + (kw ? "没有找到匹配的任务" : "暂无生产任务") + "</p>" +
-      "<p class="sub">" + (kw ? "试试其他关键词" : "点击「新建生产任务」开始创建") + "</p>" +
-      "</div></td></tr>";
+    tbody.innerHTML = "<tr><td colspan=\"7\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw ? "试试其他关键词" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
     updateBatchBar();
     return;
   }
@@ -716,20 +715,18 @@ function renderTaskList() {
     var oc = t.outputs ? t.outputs.length : 0;
     var sc = t.status === "draft" ? "status-draft" : t.status === "processing" ? "status-processing" : "status-done";
     var st = t.status === "draft" ? "⏳ 草稿" : t.status === "processing" ? "⚙️ 生产中" : "✅ 已完成";
-    html += "<tr class="" + (isSel ? "selected" : "") + "" onclick="openTask(" + t.id + ")">" +
-      "<td onclick="event.stopPropagation()"><input type="checkbox" class="task-cb" " + (isSel ? "checked" : "") + " onchange="toggleBatchSelect(" + t.id + ", this)"></td>" +
-      "<td><span class="task-name">" + esc(t.name) + "</span></td>" +
-      "<td><span class="status-badge " + sc + "">" + st + "</span></td>" +
+    html += "<tr class=\"" + (isSel ? "selected" : "") + "\" onclick=\"openTask(" + t.id + ")\">" +
+      "<td onclick=\"event.stopPropagation()\"><input type=\"checkbox\" class=\"task-cb\" " + (isSel ? "checked" : "") + " onchange=\"toggleBatchSelect(" + t.id + ", this)\"></td>" +
+      "<td><span class=\"task-name\">" + esc(t.name) + "</span></td>" +
+      "<td><span class=\"status-badge " + sc + "\">" + st + "</span></td>" +
       "<td>" + mc + " 个</td>" +
       "<td>" + oc + " 个</td>" +
-      "<td style="color:var(--text-3);font-size:12px">" + t.createTime + "</td>" +
-      "<td onclick="event.stopPropagation()">" +
-        "<div class="action-btns">" +
-          (t.status === "done" ? "<button class="action-btn export-btn" onclick="exportTask(" + t.id + ")">⬇ 导出</button>" : "") +
-          "<button class="action-btn" onclick="openTask(" + t.id + ")">编辑</button>" +
-          "<button class="action-btn del-btn" onclick="deleteTask(" + t.id + ")">删除</button>" +
-        "</div>" +
-      "</td>" +
+      "<td style=\"color:var(--text-3);font-size:12px\">" + t.createTime + "</td>" +
+      "<td onclick=\"event.stopPropagation()\"><div class=\"action-btns\">" +
+        (t.status === "done" ? "<button class=\"action-btn export-btn\" onclick=\"exportTask(" + t.id + ")\">⬇ 导出</button>" : "") +
+        "<button class=\"action-btn\" onclick=\"openTask(" + t.id + ")\">编辑</button>" +
+        "<button class=\"action-btn del-btn\" onclick=\"deleteTask(" + t.id + ")\">删除</button>" +
+      "</div></td>" +
       "</tr>";
   }
   tbody.innerHTML = html;
@@ -830,10 +827,10 @@ function openTask(id) {
     document.getElementById("outputCount").textContent = "共 " + task.outputs.length + " 个成品";
     var lh = "";
     for (var o = 0; o < task.outputs.length; o++) {
-      lh += "<div class="output-item">" +
-        "<div class="name">" + esc(task.outputs[o].name) + "</div>" +
-        "<div class="detail">组合：" + esc(task.outputs[o].combo) + "　参数：" + task.outputs[o].params + "</div>" +
-        "<div class="status">● 已完成</div>" +
+      lh += "<div class=\"output-item\">" +
+        "<div class=\"name\">" + esc(task.outputs[o].name) + "</div>" +
+        "<div class=\"detail\">组合：" + esc(task.outputs[o].combo) + "　参数：" + task.outputs[o].params + "</div>" +
+        "<div class=\"status\">● 已完成</div>" +
         "</div>";
     }
     document.getElementById("outputList").innerHTML = lh;
@@ -845,7 +842,7 @@ function openTask(id) {
   switchView("config");
 }
 
-// ===== 保存/删除 =====
+// ===== 保存/删除任务 =====
 function saveTask() {
   var name = document.getElementById("taskNameInput").value.trim();
   if (!name) { showToast("请输入任务名称", "w"); return; }
@@ -969,20 +966,17 @@ function batchExport() {
 
 function downloadCSV(fileName, data, hasTaskName) {
   hasTaskName = !!hasTaskName;
-  var BOM = "﻿";
-  var header = hasTaskName ? "任务名称,素材名称,原料组合,参数
-" : "素材名称,原料组合,参数
-";
+  var BOM = "\uFEFF";
+  var header = hasTaskName ? "任务名称,素材名称,原料组合,参数\n" : "素材名称,原料组合,参数\n";
   var content = BOM + header;
   for (var i = 0; i < data.length; i++) {
     var item = hasTaskName ? data[i] : data[i];
     var row = "";
-    if (hasTaskName) row += """ + (item.taskName || "") + "",";
-    row += """ + (item.output ? item.output.name : item.name) + "",";
-    row += """ + (item.output ? item.output.combo : item.combo) + "",";
-    row += """ + (item.output ? item.output.params : item.params) + """;
-    content += row + "
-";
+    if (hasTaskName) row += "\"" + (item.taskName || "") + "\",";
+    row += "\"" + (item.output ? item.output.name : item.name) + "\",";
+    row += "\"" + (item.output ? item.output.combo : item.combo) + "\",";
+    row += "\"" + (item.output ? item.output.params : item.params) + "\"";
+    content += row + "\n";
   }
   var blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
   var link = document.createElement("a");
@@ -1007,15 +1001,15 @@ function renderCards() {
     var tags = "";
     for (var i = 0; i < list.length; i++) {
       var m = list[i];
-      tags += "<span class="tag " + tagCls + "">" + esc(m.name) +
-        " <span class="rm" onclick="event.stopPropagation();rmMat(" + m.id + ", '" + type + "')">×</span></span>";
+      tags += "<span class=\"tag " + tagCls + "\">" + esc(m.name) +
+        " <span class=\"rm\" onclick=\"event.stopPropagation();rmMat(" + m.id + ", '" + type + "')\">×</span></span>";
     }
     var cc = "mat-card " + cls + (list.length > 0 ? " selected" : "");
-    html += "<div class="" + cc + "" onclick="openModal('" + type + "')">" +
-      "<div class="card-top"><span class="type-label">" + type + "</span>" +
-      "<span class="count-badge">" + list.length + " 个</span></div>" +
-      "<div class="sel-btn">点击选择原料（支持多选）</div>" +
-      (tags ? "<div class="tags-wrap">" + tags + "</div>" : "") +
+    html += "<div class=\"" + cc + "\" onclick=\"openModal('" + type + "')\">" +
+      "<div class=\"card-top\"><span class=\"type-label\">" + type + "</span>" +
+      "<span class=\"count-badge\">" + list.length + " 个</span></div>" +
+      "<div class=\"sel-btn\">点击选择原料（支持多选）</div>" +
+      (tags ? "<div class=\"tags-wrap\">" + tags + "</div>" : "") +
       "</div>";
   }
   c.innerHTML = html;
@@ -1030,7 +1024,7 @@ function rmMat(id, type) {
   renderCards();
 }
 
-// ===== 弹窗逻辑（修复版）=====
+// ===== 弹窗：类型锁定（修复版）=====
 function openModal(lockType) {
   gModal.lockedType = lockType || "";
   gModal.activeTab = gModal.lockedType;
@@ -1044,11 +1038,13 @@ function openModal(lockType) {
   }
 
   if (gModal.lockedType) {
+    // 锁定：隐藏类型tabs，显示锁定标签
     document.getElementById("typeTabs").style.display = "none";
     document.getElementById("lockedLabel").style.display = "flex";
     document.getElementById("lockedTypeName").textContent = gModal.lockedType;
     document.getElementById("modalTitle").textContent = "选择" + gModal.lockedType + "原料（支持多选）";
   } else {
+    // 未锁定：显示tabs，重置到"全部"
     document.getElementById("typeTabs").style.display = "flex";
     document.getElementById("lockedLabel").style.display = "none";
     document.getElementById("modalTitle").textContent = "选择原料（支持多选）";
@@ -1058,6 +1054,7 @@ function openModal(lockType) {
     }
   }
 
+  // 清空筛选
   document.getElementById("searchInput").value = "";
   document.getElementById("channelFilter").value = "";
   document.getElementById("dateStart").value = "";
@@ -1122,15 +1119,15 @@ function renderModalList() {
     var m = result[i];
     var isSel = gModal.tempSel.indexOf(m.id) !== -1;
     var tc = m.type === "前贴" ? "tag-qt" : m.type === "中段" ? "tag-zd" : "tag-wq";
-    html += "<div class="modal-item " + (isSel ? "selected" : "") + "" onclick="toggleItem(" + m.id + ")">" +
-      "<div class="cb">" + (isSel ? "✓" : "") + "</div>" +
-      "<span class="mname"><span class="mname-text" onclick="event.stopPropagation();openPreview(" + m.id + ")" title="点击预览">" + esc(m.name) + "</span></span>" +
-      "<span class="mtype-tag " + tc + "">" + m.type + "</span>" +
-      "<span class="mdetail">" + m.biz + " · " + m.channel + " · " + m.date + "</span>" +
-      "<button class="preview-btn" onclick="event.stopPropagation();openPreview(" + m.id + ")" title="预览">预览</button>" +
-      "</div>";
+    html += '<div class="modal-item ' + (isSel ? 'selected' : '') + '" onclick="toggleItem(' + m.id + ')">' +
+      '<div class="cb">' + (isSel ? '✓' : '') + '</div>' +
+      '<span class="mname"><span class="mname-text" onclick="event.stopPropagation();openPreview(' + m.id + ')" title="点击预览">' + esc(m.name) + '</span></span>' +
+      '<span class="mtype-tag ' + tc + '">' + m.type + '</span>' +
+      '<span class="mdetail">' + m.biz + ' · ' + m.channel + ' · ' + m.date + '</span>' +
+      '<button class="preview-btn" onclick="event.stopPropagation();openPreview(' + m.id + ')" title="预览">预览</button>' +
+      '</div>';
   }
-  if (!html) html = "<div class="empty-s">没有找到匹配的原料</div>";
+  if (!html) html = '<div class="empty-s">没有找到匹配的原料</div>';
   document.getElementById("modalBody").innerHTML = html;
   updateSelInfo();
 }
@@ -1165,27 +1162,27 @@ function updateSelInfo() {
   document.getElementById("selInfo").textContent = "已选 " + gModal.tempSel.length + " 个";
 }
 
-// ===== 预览 =====
+// ===== 预览功能 =====
 function openPreview(id) {
   var mat = getMatById(id);
   if (!mat) return;
   var tc = mat.type === "前贴" ? "tag-qt" : mat.type === "中段" ? "tag-zd" : "tag-wq";
   var body = document.getElementById("previewBody");
   body.innerHTML =
-    "<div class="preview-video" title="点击播放（原型演示）"><div class="play-icon">▶</div></div>" +
-    "<div style="display:flex;gap:16px">" +
-      "<div class="preview-field" style="flex:1"><div class="field-label">原料名称</div><div class="field-value">" + esc(mat.name) + "</div></div>" +
-      "<div class="preview-field" style="flex:1"><div class="field-label">类型</div><div class="field-value"><span class="preview-tag " + tc + "">" + mat.type + "</span></div></div>" +
-    "</div>" +
-    "<div style="display:flex;gap:16px">" +
-      "<div class="preview-field" style="flex:1"><div class="field-label">业务</div><div class="field-value">" + esc(mat.biz) + "</div></div>" +
-      "<div class="preview-field" style="flex:1"><div class="field-label">渠道</div><div class="field-value">" + esc(mat.channel) + "</div></div>" +
-    "</div>" +
-    "<div style="display:flex;gap:16px">" +
-      "<div class="preview-field" style="flex:1"><div class="field-label">上传日期</div><div class="field-value">" + esc(mat.date) + "</div></div>" +
-      "<div class="preview-field" style="flex:1"><div class="field-label">时长</div><div class="field-value">" + (mat.duration || "—") + "</div></div>" +
-      "<div class="preview-field" style="flex:1"><div class="field-label">大小</div><div class="field-value">" + (mat.size || "—") + "</div></div>" +
-    "</div>";
+    '<div class="preview-video" title="点击播放（原型演示）"><div class="play-icon">▶</div></div>' +
+    '<div style="display:flex;gap:16px">' +
+      '<div class="preview-field" style="flex:1"><div class="field-label">原料名称</div><div class="field-value">' + esc(mat.name) + '</div></div>' +
+      '<div class="preview-field" style="flex:1"><div class="field-label">类型</div><div class="field-value"><span class="preview-tag ' + tc + '">' + mat.type + '</span></div></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:16px">' +
+      '<div class="preview-field" style="flex:1"><div class="field-label">业务</div><div class="field-value">' + esc(mat.biz) + '</div></div>' +
+      '<div class="preview-field" style="flex:1"><div class="field-label">渠道</div><div class="field-value">' + esc(mat.channel) + '</div></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:16px">' +
+      '<div class="preview-field" style="flex:1"><div class="field-label">上传日期</div><div class="field-value">' + esc(mat.date) + '</div></div>' +
+      '<div class="preview-field" style="flex:1"><div class="field-label">时长</div><div class="field-value">' + (mat.duration || "—") + '</div></div>' +
+      '<div class="preview-field" style="flex:1"><div class="field-label">大小</div><div class="field-value">' + (mat.size || "—") + '</div></div>' +
+    '</div>';
   document.getElementById("previewTitle").textContent = "预览：" + mat.name;
   document.getElementById("previewOverlay").classList.add("show");
 }
@@ -1195,7 +1192,7 @@ function closePreview(e) {
   document.getElementById("previewOverlay").classList.remove("show");
 }
 
-// ===== 成品数量 =====
+// ===== 成品数量计算 =====
 function updateCount() {
   var q = gSelected["前贴"].length;
   var z = gSelected["中段"].length;
@@ -1224,7 +1221,7 @@ function renderNamingTags() {
   for (var i = 0; i < NAMING_PARAMS.length; i++) {
     var p = NAMING_PARAMS[i];
     var ia = gActiveParams.indexOf(p.key) !== -1;
-    html += "<div class="naming-tag " + (ia ? "active" : "") + "" onclick="toggleNamingParam('" + p.key + "', this)">" + p.key + "</div>";
+    html += '<div class="naming-tag ' + (ia ? 'active' : '') + '" onclick="toggleNamingParam(\'' + p.key + '\', this)">' + p.key + '</div>';
   }
   box.innerHTML = html;
   updateNamingPreview();
@@ -1245,7 +1242,7 @@ function toggleNamingParam(key, el) {
 function updateNamingPreview() {
   if (gActiveParams.length === 0) {
     document.getElementById("namingPreview").innerHTML =
-      "<span class="preview-label">命名预览：</span><span class="pv-placeholder">请勾选下方参数…</span>";
+      '<span class="preview-label">命名预览：</span><span class="pv-placeholder">请勾选下方参数…</span>';
     return;
   }
   var sample = {
@@ -1258,11 +1255,11 @@ function updateNamingPreview() {
     pv += (sample[gActiveParams[i]] || gActiveParams[i]);
   }
   document.getElementById("namingPreview").innerHTML =
-    "<span class="preview-label">命名预览：</span><span class="pv">" + pv + "</span>" +
-    "<span style="color:var(--text-3);font-size:11px;margin-left:4px">（示例）</span>";
+    '<span class="preview-label">命名预览：</span><span class="pv">' + pv + '</span>' +
+    '<span style="color:var(--text-3);font-size:11px;margin-left:4px">（示例）</span>';
 }
 
-// ===== 开始生产 =====
+// ===== 开始生产（含表单校验）=====
 function startProduction() {
   var btn = document.getElementById("startBtn");
   btn.disabled = true;
@@ -1337,10 +1334,10 @@ function startProduction() {
   document.getElementById("outputCount").textContent = "共 " + out.length + " 个成品";
   var lh = "";
   for (var i = 0; i < out.length; i++) {
-    lh += "<div class="output-item">" +
-      "<div class="name">" + esc(out[i].name) + "</div>" +
-      "<div class="detail">组合：" + esc(out[i].combo) + "　参数：" + out[i].params + "</div>" +
-      "<div class="status">● 已完成</div>" +
+    lh += "<div class=\"output-item\">" +
+      "<div class=\"name\">" + esc(out[i].name) + "</div>" +
+      "<div class=\"detail\">组合：" + esc(out[i].combo) + "　参数：" + out[i].params + "</div>" +
+      "<div class=\"status\">● 已完成</div>" +
       "</div>";
   }
   document.getElementById("outputList").innerHTML = lh;
