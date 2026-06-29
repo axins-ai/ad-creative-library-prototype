@@ -3,50 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>素材中心 - 业务流程图</title>
+<title>素材中心 · 业务流程图 & 模块定义</title>
 <style>
 *,*:before,*:after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f5f7fa;color:#333;padding:20px}
-h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
-.subtitle{text-align:center;font-size:13px;color:#888;margin-bottom:24px}
-
-/* 纵向步骤图 */
-.flow-v{max-width:900px;margin:0 auto 32px;background:#fff;border-radius:16px;padding:28px 32px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-.flow-v .flow-title{font-size:15px;font-weight:600;color:#1664ff;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #1664ff;display:flex;align-items:center;gap:8px}
-.flow-v .step{display:flex;align-items:flex-start;gap:16px;margin-bottom:14px;position:relative}
-.flow-v .step-num{
-  width:28px;height:28px;border-radius:50%;background:#1664ff;color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;
+:root{
+  --primary:#1664ff;--primary-light:#e8f1ff;--primary-dark:#0952d9;
+  --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
+  --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
+  --bg-page:#f5f7fa;--bg-card:#fff;
+  --border:#e8e8e8;--border-light:#f0f0f0;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 }
-.flow-v .step-content{flex:1;background:#f8f9fc;border-radius:8px;padding:12px 16px;border-left:3px solid #1664ff}
-.flow-v .step-content .step-title{font-size:13px;font-weight:600;color:#333;margin-bottom:4px}
-.flow-v .step-content .step-desc{font-size:12px;color:#666;line-height:1.6}
-.flow-v .step-arrow{display:flex;justify-content:center;color:#1664ff;font-size:14px;margin:2px 0 2px 36px}
-.flow-v .step-arrow::before{content:'↓';font-size:18px}
+body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;padding:32px 40px;max-width:1100px;margin:0 auto}
+h1{font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:4px}
+.subtitle{font-size:12px;color:var(--text-3);margin-bottom:28px}
 
-/* 数据流向图 */
-.data-flow{max-width:900px;margin:0 auto 32px;background:#fff;border-radius:16px;padding:28px 32px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-.data-flow .df-title{font-size:15px;font-weight:600;color:#1664ff;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #1664ff}
-.df-row{display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap}
-.df-box{
-  padding:10px 18px;border-radius:8px;font-size:12px;font-weight:500;
-  border:1.5px solid #c0d0f0;background:#f8f9fc;min-width:100px;text-align:center;
-}
-.df-arrow{color:#1664ff;font-size:18px}
-.df-label{font-size:11px;color:#888;margin-top:4px;text-align:center;width:100%}
+/* ===== 纵向步骤流 ===== */
+.flow-v{margin-bottom:36px}
+.flow-title{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-content{flex:1;background:var(--bg-card);border-radius:10px;padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid var(--border-light)}
+.step-title{font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--text-2);line-height:1.7}
+.step-arrow{width:2px;height:18px;background:var(--primary);opacity:.25;margin-left:13px;border-radius:1px}
 
-/* 模块定义表 */
-.def-table{max-width:900px;margin:0 auto 32px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-.def-table .table-title{font-size:15px;font-weight:600;color:#fff;background:#1664ff;padding:12px 24px;display:flex;align-items:center;gap:8px}
-.def-table table{width:100%;border-collapse:collapse}
-.def-table th{background:#f0f4ff;padding:10px 16px;text-align:left;font-size:12px;color:#555;font-weight:600;border-bottom:1px solid #e0e0e0}
-.def-table td{padding:10px 16px;font-size:12px;color:#444;border-bottom:1px solid #f0f0f0;vertical-align:top;line-height:1.6}
-.def-table tr:hover td{background:#f8f9fc}
-.tag-def{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;margin-right:4px}
-.t-front{background:#e3f2fd;color:#1976d2;border:1px solid #90caf9}
-.t-mid{background:#e8f5e9;color:#388e3c;border:1px solid #a5d6a7}
-.t-tail{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
-.t-new{background:#f3e5f5;color:#7b1fa2;border:1px solid #ce93d8}
+/* ===== 数据流向图 ===== */
+.data-flow{margin-bottom:36px}
+.df-title{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.df-row{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:4px}
+.df-box{padding:12px 18px;border-radius:10px;border:2px solid;font-size:13px;font-weight:500;text-align:center;min-width:120px}
+.df-arrow{font-size:18px;color:var(--primary);font-weight:700}
+
+/* ===== 模块定义表 ===== */
+.def-table{margin-bottom:36px}
+.table-title{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+table{width:100%;border-collapse:collapse;background:var(--bg-card);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:13px}
+thead{background:var(--bg-page)}
+th{padding:10px 14px;text-align:left;font-weight:600;color:var(--text-2);border-bottom:1px solid var(--border-light);font-size:12px}
+td{padding:11px 14px;border-bottom:1px solid var(--border-light);color:var(--text-2);line-height:1.7;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.tag-def{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.t-raw{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.t-lib{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+.t-workshop{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.t-report1{background:#f5f5f5;color:#666;border:1px solid #ddd}
+.t-report2{background:#e8f1ff;color:#1664ff;border:1px solid #91caff}
+
+/* ===== 分期规划 ===== */
+.phase-section{margin-bottom:36px}
+.phase-title{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.phase-box{padding:16px 20px;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid}
+.phase-1{background:#e8f5e9;border-color:#a5d6a7}
+.phase-2{background:#e3f2fd;border-color:#90caf9}
+.phase-3{background:#f3e5f5;border-color:#ce93d8}
+.phase-box .phase-label{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.phase-box .phase-items{font-size:13px;color:var(--text-2);line-height:1.8;padding-left:22px}
+.phase-box .phase-items li{margin-bottom:2px}
 
 .footer{text-align:center;font-size:11px;color:#aaa;margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0}
 </style>
@@ -54,9 +67,9 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
 <body>
 
 <h1>📋 素材中心 · 业务流程图 & 模块定义</h1>
-<p class="subtitle">产品版本：v17 ｜ 文档日期：2026-06-29 ｜ 作者：产品通</p>
+<p class="subtitle">产品版本：v18 ｜ 文档日期：2026-06-29 ｜ 作者：产品团队</p>
 
-<!-- ===== 一、用户操作流程（纵向步骤图）===== -->
+<!-- ===== 一、用户操作流程 ===== -->
 <div class="flow-v">
   <div class="flow-title">📱 一、用户操作流程（端到端）</div>
 
@@ -64,7 +77,7 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
     <div class="step-num">1</div>
     <div class="step-content">
       <div class="step-title">📤 上传原料</div>
-      <div class="step-desc">设计师进入「原料库」，点击"上传原料"，选择文件或文件夹，填写属性（类型/业务/渠道/优化师），确认上传。</div>
+      <div class="step-desc">设计师进入「原料库」，点击"上传原料"，选择文件或文件夹（支持批量+拖拽），填写属性（素材类型/业务归属/渠道/优化师），确认上传。文件名自动读取，无需手动填写。</div>
     </div>
   </div>
   <div class="step-arrow"></div>
@@ -72,8 +85,8 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
   <div class="step">
     <div class="step-num">2</div>
     <div class="step-content">
-      <div class="step-title">📋 原料管理</div>
-      <div class="step-desc">在原料库中查看已上传原料，按类型/业务/渠道/优化师/上传日期筛选。原料以网格卡片展示，类型以颜色标签区分。</div>
+      <div class="step-title">📂 原料管理</div>
+      <div class="step-desc">在原料库中按类型/业务归属/渠道/优化师/上传日期区间筛选原料。原料以紧凑网格卡片展示（支持上千条），类型以颜色标签区分（前贴蓝/中段绿/尾帧橙）。</div>
     </div>
   </div>
   <div class="step-arrow"></div>
@@ -82,7 +95,7 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
     <div class="step-num">3</div>
     <div class="step-content">
       <div class="step-title">🎬 新建生产任务</div>
-      <div class="step-desc">设计师进入「生产工作台」任务列表，点击"新建生产任务"，进入任务配置页，选择前贴/中段/尾帧原料（支持批量选择），系统自动计算成品数量（前贴数 × 中段数 × 尾帧数）。</div>
+      <div class="step-desc">设计师进入「生产工作台」任务列表，点击"新建生产任务"，进入任务配置页。依次选择前贴/中段/尾帧原料（弹窗按类型锁定，支持搜索+全选+批量选择），系统自动计算成品数量（前贴数 × 中段数 × 尾帧数）。</div>
     </div>
   </div>
   <div class="step-arrow"></div>
@@ -91,7 +104,7 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
     <div class="step-num">4</div>
     <div class="step-content">
       <div class="step-title">⚙️ 参数配置 & 开始生产</div>
-      <div class="step-desc">在任务配置页配置输出参数（分辨率/帧率/码率/命名格式/输出格式），点击"开始生产"，系统按组合逻辑生成成品素材列表。生产完成后可在任务列表导出素材 CSV 清单，支持批量导出多个任务。</div>
+      <div class="step-desc">在任务配置页配置输出参数（分辨率/帧率/码率/命名格式/输出格式），点击"开始生产"，系统按组合逻辑生成成品素材列表。生产完成后可在任务列表导出成品素材文件（ZIP 压缩包），支持批量导出多个任务。</div>
     </div>
   </div>
   <div class="step-arrow"></div>
@@ -100,7 +113,7 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
     <div class="step-num">5</div>
     <div class="step-content">
       <div class="step-title">📁 成品入库</div>
-      <div class="step-desc">生产完成的成品自动入库至「素材库」。设计师也可在素材库中手动上传成品素材（视频/图片）。</div>
+      <div class="step-desc">生产完成的成品自动入库至「素材库」。设计师也可在素材库中手动上传成品素材（视频/图片），需填写素材类型/业务归属/渠道/优化师等配置信息，支持批量上传。</div>
     </div>
   </div>
   <div class="step-arrow"></div>
@@ -109,7 +122,7 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
     <div class="step-num">6</div>
     <div class="step-content">
       <div class="step-title">👁️ 预览成品素材</div>
-      <div class="step-desc">在「素材库」中以网格/列表视图浏览成品，点击预览视频或图片（不支持下载）。查看素材来源（自动入库/手动上传）。</div>
+      <div class="step-desc">在「素材库」中以网格/列表视图浏览成品，支持名称搜索，点击预览视频或图片（弹窗展示详情）。查看素材来源（自动入库/手动上传）。</div>
     </div>
   </div>
   <div class="step-arrow"></div>
@@ -117,8 +130,17 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
   <div class="step">
     <div class="step-num">7</div>
     <div class="step-content">
-      <div class="step-title">📊 素材投放 & 数据查看</div>
-      <div class="step-desc">成品素材投放后，数据回流至「素材报表」。优化师在素材报表中查看消耗、点击率、转化率、使用状态、关联广告数、视频完播指标等。</div>
+      <div class="step-title">📊 素材报表（V1 基础底表）</div>
+      <div class="step-desc">成品素材投放后，数据回流至「素材报表 V1」。优化师在素材报表中查看基础底表数据，包含消耗、点击率、转化率、使用状态、关联广告数、视频完播指标等。V1 提供数据查看能力，交互功能（汇总/排序/导出）在 V2 开放。</div>
+    </div>
+  </div>
+  <div class="step-arrow"></div>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-content">
+      <div class="step-title">📈 素材报表（V2 完整版）</div>
+      <div class="step-desc">优化师使用「素材报表 V2」，支持明细/汇总模式切换、列自定义显示/隐藏、使用状态和关联广告数查看、视频指标专属列、排序、维度切换、导出 Excel 等完整数据分析能力。</div>
     </div>
   </div>
 </div>
@@ -148,110 +170,163 @@ h1{text-align:center;font-size:20px;margin-bottom:8px;color:#1664ff}
   <div style="text-align:center;color:#aaa;font-size:12px;margin:4px 0 12px">↓ 数据回流</div>
   <div class="df-row" style="justify-content:center">
     <div class="df-box" style="background:#f5f5f5;border-color:#9e9e9e;min-width:300px">
-      📊 素材报表<br>
+      📊 素材报表 V1 & V2<br>
       <span style="font-size:11px;color:#888">使用状态 · 关联广告数 · 消耗 · 转化量 · 视频完播指标</span>
     </div>
   </div>
 </div>
 
-<!-- ===== 三、模块定义表（开发对照）===== -->
+<!-- ===== 三、模块定义表 ===== -->
 <div class="def-table">
-  <div class="table-title">🧩 三、模块定义（开发对照表）</div>
+  <div class="table-title">🧩 三、模块定义（产品功能对照表）</div>
   <table>
     <thead>
       <tr>
         <th>模块</th>
         <th>核心功能</th>
         <th>数据来源</th>
-        <th>开发要点</th>
+        <th>开发要点（产品侧）</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><span class="tag-def t-front">原料库</span></td>
+        <td><span class="tag-def t-raw">原料库</span></td>
         <td>
-          • 网格卡片展示原料<br>
-          • 5维筛选（类型/业务/渠道/优化师/日期）<br>
-          • 上传弹窗（文件+属性配置）<br>
-          • 支持文件夹上传
+          • 紧凑网格卡片展示原料（支持上千条）<br>
+          • 5 维筛选（类型/业务归属/渠道/优化师/上传日期区间）<br>
+          • 上传弹窗（批量+拖拽+文件夹，自动读取文件名）<br>
+          • 配置字段：素材类型/业务归属/渠道/优化师<br>
+          • 支持删除原料
         </td>
         <td>原料表<br>（materials）</td>
         <td>
-          • 文件上传用 webkitdirectory 支持文件夹<br>
-          • 文件名自动读取，无需填名称<br>
+          • 卡片尺寸缩小以适应大批量原料展示<br>
+          • 上传日期改为日期区间筛选<br>
+          • 文件名自动读取，不需填写名称<br>
           • 筛选条件按原料属性过滤
         </td>
       </tr>
       <tr>
-        <td><span class="tag-def t-mid">生产工作台</span></td>
+        <td><span class="tag-def t-workshop">生产工作台</span></td>
         <td>
-          • 原料选择（前贴/中段/尾帧）<br>
-          • 批量选择弹窗（搜索+全选）<br>
-          • 成品数量自动计算<br>
-          • 输出参数配置<br>
-          • 输出列表展示
+          • 任务列表（表格视图，支持单选/批量操作）<br>
+          • 原料选择弹窗（按类型锁定+搜索+全选+批量）<br>
+          • 成品数量自动计算（前贴数 × 中段数 × 尾帧数）<br>
+          • 输出参数配置（分辨率/帧率/码率/命名格式/格式）<br>
+          • 输出列表展示<br>
+          • 导出成品素材文件（ZIP 压缩包）<br>
+          • 批量操作（批量删除/批量导出）
         </td>
-        <td>原料表 + 成品任务表</td>
+        <td>原料表 + 生产任务表 + 成品表</td>
         <td>
           • 成品数 = 前贴数 × 中段数 × 尾帧数<br>
           • 生产任务需要后台处理（视频合成）<br>
-          • 命名格式支持变量替换
+          • 命名格式支持变量替换<br>
+          • 导出为真实文件（ZIP），非 CSV 清单<br>
+          • 弹窗类型锁定：点击前贴只显示前贴原料
         </td>
       </tr>
       <tr>
-        <td><span class="tag-def t-new">素材库<br>（新模块）</span></td>
+        <td><span class="tag-def t-lib">素材库<br>（成品库）</span></td>
         <td>
           • 网格/列表视图切换<br>
-          • 成品素材预览（视频/图片）<br>
-          • 手动上传成品素材<br>
+          • 名称搜索筛选<br>
+          • 按类型/来源/上传日期筛选<br>
+          • 成品素材预览（视频/图片，弹窗详情）<br>
+          • 手动上传成品素材（需填写配置信息）<br>
           • 自动展示生产工作台入库的成品<br>
-          • 按类型/日期/来源筛选
+          • 无高级筛选按钮（已移除）<br>
+          • 无素材纵览统计卡片（已移除）
         </td>
         <td>成品素材表<br>（finished_materials）</td>
         <td>
           • 视频预览用 HTML5 video 标签<br>
           • 图片预览直接展示<br>
           • 不支持下载（产品定义）<br>
-          • 数据源：生产工作台自动入库 + 手动上传
+          • 数据源：生产工作台自动入库 + 手动上传<br>
+          • 上传弹窗需填写：素材类型/业务归属/渠道/优化师
         </td>
       </tr>
       <tr>
-        <td><span class="tag-def" style="background:#f5f5f5;color:#666;border:1px solid #ddd">素材报表 V1<br>（第二期）</span></td>
+        <td><span class="tag-def t-report1">素材报表 V1<br>（第一期）</span></td>
         <td>
           • 基础底表数据查看<br>
-          • 日期筛选 + 列显示控制<br>
+          • 日期筛选 + 名称搜索<br>
           • 全部数据列展示（含视频指标）<br>
-          <span style="color:#999">不含：汇总模式、排序、导出</span>
+          • 使用状态 & 关联广告数列显示<br>
+          <span style="color:#999">不含：明细/汇总切换、列自定义、排序、导出</span>
         </td>
         <td>素材表 + 投放数据表</td>
         <td>
           • 第一期只提供基础数据查看能力<br>
           • 所有数据列一次性展示（大数据已拉回全量）<br>
-          • 交互功能在第二期开放
+          • 交互功能在 V2 开放<br>
+          • 不含汇总模式和导出功能
         </td>
       </tr>
       <tr>
-        <td><span class="tag-def" style="background:#e8f1ff;color:#1664ff;border:1px solid #91caff">素材报表 V2<br>（第三期）</span></td>
+        <td><span class="tag-def t-report2">素材报表 V2<br>（第二期）</span></td>
         <td>
           • 明细/汇总模式切换<br>
           • 列自定义显示/隐藏<br>
           • 使用状态 & 关联广告数<br>
-          • 视频指标专属列<br>
-          • 排序 & 维度切换 & 导出 Excel
+          • 视频指标专属列（仅视频素材显示）<br>
+          • 排序 & 维度切换 & 导出 Excel<br>
+          • 完整数据分析能力
         </td>
         <td>素材表 + 投放数据表 + 广告计划关联表</td>
         <td>
           • 汇总模式按素材名称 GROUP BY<br>
           • 视频指标列仅视频素材显示<br>
-          • 依赖广告计划 API 对接
+          • 依赖广告计划 API 对接<br>
+          • 支持导出 Excel 文件
         </td>
       </tr>
     </tbody>
   </table>
 </div>
 
+<!-- ===== 四、分期规划 ===== -->
+<div class="phase-section">
+  <div class="phase-title">🗓️ 四、分期规划（三期）</div>
+
+  <div class="phase-box phase-1">
+    <div class="phase-label">🟢 一期（核心功能）—— 原料库 + 素材库 + 生产工作台</div>
+    <ul class="phase-items">
+      <li>原料库：上传原料（批量+拖拽+配置）、网格卡片展示、5 维筛选、删除</li>
+      <li>素材库：网格/列表视图、名称搜索、成品预览、手动上传成品（含配置字段）、按类型/来源/日期筛选</li>
+      <li>生产工作台：任务列表、新建/编辑任务、原料选择（按类型锁定+批量选择）、参数配置、成品数量计算、开始生产、导出成品文件（ZIP）、批量操作</li>
+      <li>三个模块的数据联通：生产工作台 → 自动入库素材库</li>
+    </ul>
+  </div>
+
+  <div class="phase-box phase-2">
+    <div class="phase-label">🔵 二期（数据底表）—— 素材报表 V1（基础底表）</div>
+    <ul class="phase-items">
+      <li>素材报表 V1：基础数据底表查看</li>
+      <li>日期筛选 + 名称搜索</li>
+      <li>全部数据列展示（消耗/点击/转化/使用状态/关联广告数/视频指标等）</li>
+      <li>提供数据查看能力，交互功能（汇总/排序/导出）在 V2 开放</li>
+      <li>依赖：投放数据 API 对接（消耗/点击/转化等数据回流）</li>
+    </ul>
+  </div>
+
+  <div class="phase-box phase-3">
+    <div class="phase-label">🟣 三期（数据分析）—— 素材报表 V2（完整版）</div>
+    <ul class="phase-items">
+      <li>素材报表 V2：明细/汇总模式切换</li>
+      <li>列自定义显示/隐藏</li>
+      <li>使用状态 & 关联广告数</li>
+      <li>视频指标专属列（仅视频素材显示）</li>
+      <li>排序 & 维度切换 & 导出 Excel</li>
+      <li>完整数据分析能力</li>
+      <li>依赖：广告计划 API 对接（关联广告数）</li>
+    </ul>
+  </div>
+</div>
+
 <div class="footer">
-  素材中心产品文档 v1.0 ｜ 如有问题请联系产品团队
+  素材中心产品文档 v1.8 ｜ 如有问题请联系产品团队
 </div>
 
 </body>
