@@ -179,6 +179,28 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .tag .rm{font-size:13px;cursor:pointer;opacity:.5;transition:opacity .15s;margin-left:2px}
 .tag .rm:hover{opacity:1;color:var(--danger)}
 
+.basic-attrs-cards{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:12px;
+}
+.basic-attr-card{
+  background:var(--bg-card);border-radius:var(--radius-l);
+  box-shadow:var(--shadow-s);padding:16px 18px;
+  border:2px solid var(--border);transition:all .2s;
+}
+.basic-attr-card:hover{border-color:var(--primary);box-shadow:var(--shadow-m)}
+.basic-attr-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.basic-attr-card .attr-label{
+  font-size:11px;color:var(--text-3);font-weight:500;margin-bottom:8px;
+  display:flex;align-items:center;gap:4px;
+}
+.basic-attr-card select{
+  width:100%;height:34px;padding:0 8px;font-size:13px;
+  border:1px solid var(--border);border-radius:var(--radius-s);
+  background:#fff;color:var(--text-1);outline:none;cursor:pointer;transition:border .15s;
+}
+.basic-attr-card select:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,100,255,.12)}
+.basic-attrs-hint{font-size:11px;color:var(--text-3);margin-top:4px;padding:6px 10px;background:var(--bg-page);border-radius:var(--radius-s)}
+
 .config-card{
   background:var(--bg-card);border-radius:var(--radius-l);
   box-shadow:var(--shadow-s);padding:18px 20px;
@@ -418,9 +440,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <button class="save-btn" onclick="saveTask()">💾 保存任务</button>
     </div>
 
-    <div>
-
-    <div>
+    <div class="step-block">
       <div class="section-head"><span class="step-num">1</span> 选择基础属性</div>
       <div class="basic-attrs-cards">
         <div class="basic-attr-card" id="cardBiz">
@@ -457,7 +477,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     </div>
 
     </div>
-    <div class="config-card">
+    <div class="config-card" style="margin-top:16px">
       <div class="section-head"><span class="step-num">3</span> 配置输出参数</div>
       <div class="params-grid">
         <div class="param-item">
