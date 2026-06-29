@@ -619,13 +619,13 @@ function getMatById(id) {
 
 // ===== 视图切换 =====
 function switchView(name) {
-  document.getElementById("viewList").classlist.remove("active");
-  document.getElementById("viewConfig").classlist.remove("active");
+  document.getElementById("viewList").classList.remove("active");
+  document.getElementById("viewConfig").classList.remove("active");
   if (name === "list") {
-    document.getElementById("viewList").classlist.add("active");
+    document.getElementById("viewList").classList.add("active");
     renderTaskList();
   } else {
-    document.getElementById("viewConfig").classlist.add("active");
+    document.getElementById("viewConfig").classList.add("active");
   }
 }
 
@@ -678,11 +678,11 @@ function updateBatchBar() {
   var info = document.getElementById("batchInfo");
   var btn = document.getElementById("batchExportBtn");
   if (gBatchSelected.length > 0) {
-    bar.classlist.add("show");
+    bar.classList.add("show");
     info.textContent = "已选择 " + gBatchSelected.length + " 个任务";
     btn.disabled = false;
   } else {
-    bar.classlist.remove("show");
+    bar.classList.remove("show");
     btn.disabled = true;
   }
 }
@@ -1014,7 +1014,7 @@ function openModal(lockType) {
     document.getElementById("modalTitle").textContent = "选择原料（支持多选）";
     var tabs = document.getElementById("typeTabs").children;
     for (var i = 0; i < tabs.length; i++) {
-      tabs[i].classlist.toggle("active", tabs[i].getAttribute("data-type") === "");
+      tabs[i].classList.toggle("active", tabs[i].getAttribute("data-type") === "");
     }
   }
 
@@ -1025,11 +1025,11 @@ function openModal(lockType) {
   document.getElementById("dateEnd").value = "";
 
   renderModalList();
-  document.getElementById("overlay").classlist.add("show");
+  document.getElementById("overlay").classList.add("show");
 }
 
 function closeModal() {
-  document.getElementById("overlay").classlist.remove("show");
+  document.getElementById("overlay").classList.remove("show");
   gModal.lockedType = "";
 }
 
@@ -1045,7 +1045,7 @@ function unlockType() {
   document.getElementById("modalTitle").textContent = "选择原料（支持多选）";
   var tabs = document.getElementById("typeTabs").children;
   for (var i = 0; i < tabs.length; i++) {
-    tabs[i].classlist.toggle("active", tabs[i].getAttribute("data-type") === "");
+    tabs[i].classList.toggle("active", tabs[i].getAttribute("data-type") === "");
   }
   renderModalList();
 }
@@ -1055,7 +1055,7 @@ function switchTypeTab(el, type) {
   gModal.activeTab = type;
   var tabs = document.getElementById("typeTabs").children;
   for (var i = 0; i < tabs.length; i++) {
-    tabs[i].classlist.toggle("active", tabs[i].getAttribute("data-type") === type);
+    tabs[i].classList.toggle("active", tabs[i].getAttribute("data-type") === type);
   }
   renderModalList();
 }
@@ -1165,10 +1165,10 @@ function toggleNamingParam(key, el) {
   var idx = gActiveParams.indexOf(key);
   if (idx !== -1) {
     gActiveParams.splice(idx, 1);
-    el.classlist.remove("active");
+    el.classList.remove("active");
   } else {
     gActiveParams.push(key);
-    el.classlist.add("active");
+    el.classList.add("active");
   }
   updateNamingPreview();
 }
