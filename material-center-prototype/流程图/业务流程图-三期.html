@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材中心 · 三期业务流程图</title>
+<style>
+*,*:before,*:after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#1664ff;--primary-light:#e8f1ff;--primary-dark:#0952d9;
+  --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
+  --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
+  --bg-page:#f5f7fa;--bg-card:#fff;
+  --border:#e8e8e8;--border-light:#f0f0f0;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;padding:32px 40px;max-width:1100px;margin:0 auto}
+h1{font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:4px}
+.subtitle{font-size:12px;color:var(--text-3);margin-bottom:28px}
+
+.flow-v{margin-bottom:36px}
+.flow-title{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-content{flex:1;background:var(--bg-card);border-radius:10px;padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid var(--border-light)}
+.step-title{font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--text-2);line-height:1.7}
+.step-arrow{width:2px;height:18px;background:var(--primary);opacity:.25;margin-left:13px;border-radius:1px}
+
+.data-flow{margin-bottom:36px}
+.df-title{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.df-row{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:4px}
+.df-box{padding:12px 18px;border-radius:10px;border:2px solid;font-size:13px;font-weight:500;text-align:center;min-width:120px}
+.df-arrow{font-size:18px;color:var(--primary);font-weight:700}
+
+.def-table{margin-bottom:36px}
+.table-title{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+table{width:100%;border-collapse:collapse;background:var(--bg-card);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:13px}
+thead{background:var(--bg-page)}
+th{padding:10px 14px;text-align:left;font-weight:600;color:var(--text-2);border-bottom:1px solid var(--border-light);font-size:12px}
+td{padding:11px 14px;border-bottom:1px solid var(--border-light);color:var(--text-2);line-height:1.7;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.tag-def{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.t-raw{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.t-lib{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+.t-workshop{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.t-report1{background:#f5f5f5;color:#666;border:1px solid #ddd}
+.t-report2{background:#e8f1ff;color:#1664ff;border:1px solid #91caff}
+
+.phase-section{margin-bottom:36px}
+.phase-title{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.phase-box{padding:16px 20px;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid}
+.phase-1{background:#e8f5e9;border-color:#a5d6a7}
+.phase-2{background:#e3f2fd;border-color:#90caf9}
+.phase-3{background:#f3e5f5;border-color:#ce93d8}
+.phase-box .phase-label{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.phase-box .phase-items{font-size:13px;color:var(--text-2);line-height:1.8;padding-left:22px}
+.phase-box .phase-items li{margin-bottom:2px}
+
+.footer{text-align:center;font-size:11px;color:#aaa;margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0}
+
+</style>
+</head>
+<body>
+<h1>📈 素材中心 · 三期业务流程图</h1>
+<p class="subtitle">产品版本：v18 ｜ 文档日期：2026-06-29 ｜ 分期：三期（数据分析）</p>
+
+<div class="flow-v">
+  <div class="flow-title">📱 一、用户操作流程（三期：素材报表 V2）</div>
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-content">
+      <div class="step-title">📈 素材报表（V2 完整版）</div>
+      <div class="step-desc">优化师使用「素材报表 V2」，支持明细/汇总模式切换、列自定义显示/隐藏、使用状态和关联广告数查看、视频指标专属列、排序、维度切换、导出 Excel 等完整数据分析能力。</div>
+    </div>
+  </div>
+</div>
+
+<div class="data-flow">
+  <div class="df-title">🔄 二、数据流向图（三期）</div>
+  <div class="df-row">
+    <div class="df-box" style="background:#f5f5f5;border-color:#9e9e9e;min-width:160px">
+      📊 素材报表 V1（基础底表）<br>
+      <span style="font-size:11px;color:#888">基础数据查看</span>
+    </div>
+    <div class="df-arrow">→</div>
+    <div class="df-box" style="background:#e8f1ff;border-color:#1664ff;min-width:160px">
+      📈 素材报表 V2（完整版）<br>
+      <span style="font-size:11px;color:#888">汇总 · 排序 · 导出 · 完整分析</span>
+    </div>
+  </div>
+</div>
+
+<div class="def-table">
+  <div class="table-title">🧩 三、模块定义（三期）</div>
+  <table>
+    <thead>
+      <tr>
+        <th>模块</th>
+        <th>核心功能</th>
+        <th>数据来源</th>
+        <th>产品要点</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tag-def t-report2">素材报表 V2（第二期）</span></td>
+        <td>
+          • 明细/汇总模式切换<br>
+          &nbsp;&nbsp;- 明细模式：每条素材一行数据<br>
+          &nbsp;&nbsp;- 汇总模式：按素材名称 GROUP BY，聚合展示<br>
+          • 列自定义显示/隐藏<br>
+          &nbsp;&nbsp;- 支持勾选需要显示的列<br>
+          &nbsp;&nbsp;- 使用状态、关联广告数列在明细模式下隐藏（仅在汇总模式显示）<br>
+          • 使用状态 & 关联广告数<br>
+          &nbsp;&nbsp;- 使用状态：显示素材是否被广告计划引用<br>
+          &nbsp;&nbsp;- 关联广告数：显示素材被多少个广告计划引用<br>
+          • 视频指标专属列<br>
+          &nbsp;&nbsp;- 仅视频素材显示：视频完播率、平均观看时长等<br>
+          &nbsp;&nbsp;- 图片素材不显示视频指标列<br>
+          • 排序功能<br>
+          &nbsp;&nbsp;- 支持按任意列排序（升序/降序）<br>
+          &nbsp;&nbsp;- 默认按更新时间降序<br>
+          • 维度切换<br>
+          &nbsp;&nbsp;- 按素材维度 / 按广告计划维度切换<br>
+          • 导出 Excel<br>
+          &nbsp;&nbsp;- 导出当前视图数据（含汇总/明细模式）<br>
+          &nbsp;&nbsp;- 导出文件为 .xlsx 格式
+        </td>
+        <td>素材表 + 投放数据表 + 广告计划关联表</td>
+        <td>
+          • 汇总模式按素材名称 GROUP BY<br>
+          • 视频指标列仅视频素材显示<br>
+          • 依赖广告计划 API 对接（关联广告数）<br>
+          • 依赖投放数据 API（消耗/点击/转化等数据回流）<br>
+          • 支持导出 Excel 文件<br>
+          • 使用状态和关联广告数仅在汇总模式显示
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="phase-section">
+  <div class="phase-title">🗓️ 四、分期规划（三期）</div>
+  <div class="phase-box phase-3">
+    <div class="phase-label">🟣 三期（数据分析）—— 素材报表 V2（完整版）</div>
+    <ul class="phase-items">
+      <li>素材报表 V2：明细/汇总模式切换</li>
+      <li>列自定义显示/隐藏</li>
+      <li>使用状态 & 关联广告数</li>
+      <li>视频指标专属列（仅视频素材显示）</li>
+      <li>排序 & 维度切换 & 导出 Excel</li>
+      <li>完整数据分析能力</li>
+      <li>依赖：广告计划 API 对接（关联广告数）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">
+  素材中心产品文档 v1.8 ｜ 如有问题请联系产品团队
+</div>
+</body>
+</html>
