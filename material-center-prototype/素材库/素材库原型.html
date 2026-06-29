@@ -321,12 +321,12 @@ function renderList() {
 }
 
 function switchView(view, btn) {
-  document.getElementById("gridView").classlist.remove("active");
-  document.getElementById("listView").classlist.remove("active");
-  document.getElementById(view + "View").classlist.add("active");
+  document.getElementById("gridView").classList.remove("active");
+  document.getElementById("listView").classList.remove("active");
+  document.getElementById(view + "View").classList.add("active");
   var btns = document.querySelectorAll(".view-toggle button");
-  for (var i = 0; i < btns.length; i++) btns[i].classlist.remove("active");
-  btn.classlist.add("active");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+  btn.classList.add("active");
 }
 
 function openPreview(id) {
@@ -352,17 +352,17 @@ function openPreview(id) {
     icon.textContent = "🖼️";
     tip.textContent = "此为原型预览，实际将展示真实图片内容";
   }
-  document.getElementById("previewModal").classlist.add("active");
+  document.getElementById("previewModal").classList.add("active");
   document.body.style.overflow = "hidden";
 }
 
 function closePreview() {
-  document.getElementById("previewModal").classlist.remove("active");
+  document.getElementById("previewModal").classList.remove("active");
   document.body.style.overflow = "";
 }
 
 function openUploadModal() {
-  document.getElementById("uploadOverlay").classlist.add("active");
+  document.getElementById("uploadOverlay").classList.add("active");
   document.body.style.overflow = "hidden";
   uploadSelectedFiles = [];
   document.getElementById("uploadFileList").style.display = "none";
@@ -370,7 +370,7 @@ function openUploadModal() {
 }
 
 function closeUploadModal() {
-  document.getElementById("uploadOverlay").classlist.remove("active");
+  document.getElementById("uploadOverlay").classList.remove("active");
   document.body.style.overflow = "";
 }
 
@@ -419,11 +419,11 @@ function submitUpload() {
 
 var dropArea = document.getElementById("uploadFileDrop");
 if (dropArea) {
-  dropArea.addEventListener("dragover", function(e) { e.preventDefault(); dropArea.classlist.add("drag-over"); });
-  dropArea.addEventListener("dragleave", function(e) { e.preventDefault(); dropArea.classlist.remove("drag-over"); });
+  dropArea.addEventListener("dragover", function(e) { e.preventDefault(); dropArea.classList.add("drag-over"); });
+  dropArea.addEventListener("dragleave", function(e) { e.preventDefault(); dropArea.classList.remove("drag-over"); });
   dropArea.addEventListener("drop", function(e) {
     e.preventDefault();
-    dropArea.classlist.remove("drag-over");
+    dropArea.classList.remove("drag-over");
     var files = Array.from(e.dataTransfer.files);
     uploadSelectedFiles = uploadSelectedFiles.concat(files);
     renderUploadFileList();
