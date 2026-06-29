@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材中心 · 第一期原型总览</title>
+<style>
+*,*:before,*:after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
+
+/* 顶部 */
+.header{
+  background:linear-gradient(135deg,#1664ff,#0952d9);color:#fff;padding:24px 32px;
+  box-shadow:0 2px 12px rgba(22,100,255,.3);
+}
+.header h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+.header .sub{font-size:12px;opacity:.8;margin-top:6px}
+
+/* 主内容 */
+.main{max-width:1200px;margin:0 auto;padding:32px 24px}
+
+/* 一期模块导航 */
+.phase-section{margin-bottom:40px}
+.phase-title{
+  font-size:16px;font-weight:600;color:var(--text-1);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+  padding-bottom:10px;border-bottom:2px solid var(--border);
+}
+.phase-title .badge{
+  display:inline-block;padding:2px 10px;border-radius:10px;
+  font-size:11px;font-weight:600;
+}
+.badge-v1{background:#e8f5e9;color:#52c41a}
+
+/* 模块卡片 */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.module-card{
+  background:#fff;border-radius:14px;padding:28px 24px;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+  transition:all .25s;cursor:pointer;text-decoration:none;color:inherit;
+  border-top:4px solid #1664ff;display:flex;flex-direction:column;gap:0;
+  position:relative;overflow:hidden;
+}
+.module-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(22,100,255,.18)}
+.module-card .card-icon{font-size:36px;margin-bottom:14px;display:block}
+.module-card .card-name{font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.module-card .card-name .ver{font-size:11px;font-weight:500;padding:2px 8px;border-radius:8px;background:#f5f5f5;color:#999}
+.module-card .card-desc{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:16px;flex:1}
+.module-card .card-features{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.module-card .feat{
+  display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:500;
+}
+.feat-blue{background:#e8f1ff;color:#1664ff}
+.feat-green{background:#f6ffed;color:#52c41a}
+.feat-orange{background:#fff8e1;color:#fa8c16}
+
+.module-card .card-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 0;width:100%;border-radius:8px;font-size:13px;font-weight:600;
+  background:var(--primary);color:#fff;border:none;cursor:pointer;transition:all .2s;
+  text-decoration:none;
+}
+.module-card .card-btn:hover{background:var(--primary-dark);box-shadow:0 4px 12px rgba(22,100,255,.3)}
+
+/* 流程总览 */
+.flow-overview{
+  background:#fff;border-radius:14px;padding:28px 32px;margin-bottom:32px;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+.flow-overview h3{font-size:15px;font-weight:600;color:#1664ff;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.flow-row{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:4px}
+.flow-item{
+  background:#f8f9fc;border:1.5px solid #d0d0f0;border-radius:8px;
+  padding:10px 18px;font-size:13px;text-align:center;min-width:110px;
+  transition:all .2s
+}
+.flow-item .fi-icon{font-size:20px;display:block;margin-bottom:4px}
+.flow-item .fi-name{font-weight:600;color:var(--text-1);font-size:13px}
+.flow-item .fi-desc{font-size:11px;color:var(--text-3);margin-top:2px}
+.flow-arrow{color:#1664ff;font-size:18px;padding:0 8px;font-weight:700}
+.flow-note{margin-top:16px;font-size:12px;color:var(--text-3);line-height:1.8;background:#f8f9fc;padding:10px 16px;border-radius:8px;border-left:3px solid #1664ff}
+
+.footer{text-align:center;font-size:11px;color:#aaa;padding:24px;margin-top:24px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📦 素材中心 · 第一期原型总览</h1>
+  <div class="sub">原型版本 v17 ｜ 2026-06-29 ｜ 原料库 + 生产工作台 + 素材库</div>
+</div>
+
+<div class="main">
+
+  <!-- 业务流程总览 -->
+  <div class="flow-overview">
+    <h3>🔄 第一期业务流程总览</h3>
+    <div class="flow-row">
+      <div class="flow-item"><span class="fi-icon">📦</span><span class="fi-name">原料库</span><span class="fi-desc">上传&管理原料</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item"><span class="fi-icon">🎬</span><span class="fi-name">生产工作台</span><span class="fi-desc">新建任务&生产</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item"><span class="fi-icon">📁</span><span class="fi-name">素材库</span><span class="fi-desc">预览成品素材</span></div>
+    </div>
+    <div class="flow-note">
+      <strong>流程说明：</strong>设计师在「原料库」上传视频原料（前贴/中段/尾帧）→ 在「生产工作台」新建生产任务、选择原料、配置参数、开始生产 → 成品自动入库到「素材库」，设计师可在线预览素材。
+    </div>
+  </div>
+
+  <!-- 第一期模块 -->
+  <div class="phase-section">
+    <div class="phase-title">第一期模块 <span class="badge badge-v1">Phase 1</span></div>
+    <div class="modules-grid">
+
+      <!-- 原料库 -->
+      <a class="module-card" href="原料库/原料库原型.html" target="_blank">
+        <span class="card-icon">📦</span>
+        <div class="card-name">原料库 <span class="ver">v10</span></div>
+        <div class="card-desc">
+          设计师管理视频原料（前贴/中段/尾帧）。支持批量上传、文件夹上传、属性配置（类型/业务/渠道/优化师/设计师）和多维度组合筛选。
+        </div>
+        <div class="card-features">
+          <span class="feat feat-blue">批量上传</span>
+          <span class="feat feat-green">文件夹上传</span>
+          <span class="feat feat-orange">类型标签</span>
+          <span class="feat feat-blue">多维筛选</span>
+        </div>
+        <span class="card-btn">打开原料库原型 →</span>
+      </a>
+
+      <!-- 生产工作台 -->
+      <a class="module-card" href="生产工作台/生产工作台原型.html" target="_blank">
+        <span class="card-icon">🎬</span>
+        <div class="card-name">生产工作台 <span class="ver">v17</span></div>
+        <div class="card-desc">
+          任务列表模式：新建生产任务 → 选择原料（前贴/中段/尾帧）→ 配置输出参数 → 开始生产。支持任务管理、单个/批量导出素材 CSV 清单。
+        </div>
+        <div class="card-features">
+          <span class="feat feat-blue">任务列表</span>
+          <span class="feat feat-green">批量导出</span>
+          <span class="feat feat-orange">原料类型锁定</span>
+          <span class="feat feat-blue">预览原料</span>
+        </div>
+        <span class="card-btn">打开生产工作台原型 →</span>
+      </a>
+
+      <!-- 素材库 -->
+      <a class="module-card" href="素材库/素材库原型.html" target="_blank">
+        <span class="card-icon">📁</span>
+        <div class="card-name">素材库 <span class="ver">v10</span></div>
+        <div class="card-desc">
+          成品素材在线预览。网格/列表视图浏览，支持点击预览（视频/图片），手动上传素材，自动展示生产工作台入库的成品。<br>
+          <span style="color:#999;font-size:12px">不含：下载功能</span>
+        </div>
+        <div class="card-features">
+          <span class="feat feat-green">在线预览</span>
+          <span class="feat feat-blue">网格/列表视图</span>
+          <span class="feat feat-orange">自动入库</span>
+        </div>
+        <span class="card-btn">打开素材库原型 →</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- 第二期预告 -->
+  <div class="phase-section">
+    <div class="phase-title">后续规划 <span class="badge" style="background:#e8f1ff;color:#1664ff">Phase 2+</span></div>
+    <div class="modules-grid">
+      <div class="module-card" style="opacity:.55;cursor:default;border-top-color:#ccc">
+        <span class="card-icon">📈</span>
+        <div class="card-name">素材报表 <span class="ver">规划中</span></div>
+        <div class="card-desc">
+          <strong>V1：</strong>基础底表、明细查看、日期筛选<br>
+          <strong>V2：</strong>汇总模式、视频指标、报表导出 Excel
+        </div>
+        <div class="card-features">
+          <span class="feat feat-green">明细数据</span>
+          <span class="feat feat-blue">汇总模式</span>
+          <span class="feat feat-orange">导出Excel</span>
+        </div>
+        <span class="card-btn" style="background:#ccc;pointer:default">规划中，待开发 →</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  素材中心 · 第一期原型 ｜ 版本 v17 ｜ 如有问题请联系产品团队
+</div>
+
+</body>
+</html>
