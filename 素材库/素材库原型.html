@@ -18,7 +18,8 @@
 }
 html{font-size:14px}
 body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;margin:0;padding:0}
-.top-bar{height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:var(--shadow-s);position:sticky;top:0;z-index:100;flex-shrink:0;}
+/* 本页面在 iframe 中加载，隐藏顶部栏（防止双菜单） */
+.top-bar{display:none !important}
 .top-bar h1{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
 .top-bar .actions{display:flex;gap:8px;align-items:center}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:32px;padding:0 14px;border-radius:var(--radius-s);font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .18s;white-space:nowrap;}
