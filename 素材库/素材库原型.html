@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v20260630-1017: fix getFilteredData null safety + hide top-bar -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -407,11 +408,16 @@ function applyFilter() {
 }
 
 function getFilteredData() {
-  var nameKw = (document.getElementById("nameFilter").value || "").trim().toLowerCase();
-  var typeVal = document.getElementById("typeFilter").value;
-  var sourceVal = document.getElementById("sourceFilter").value;
-  var optimizerVal = document.getElementById("optimizerFilter").value;
-  
+  var nameEl = document.getElementById("nameFilter");
+  var typeEl = document.getElementById("typeFilter");
+  var sourceEl = document.getElementById("sourceFilter");
+  var optEl = document.getElementById("optimizerFilter");
+
+  var nameKw = (nameEl && nameEl.value || "").trim().toLowerCase();
+  var typeVal = (typeEl && typeEl.value) || "全部类型";
+  var sourceVal = (sourceEl && sourceEl.value) || "全部来源";
+  var optimizerVal = (optEl && optEl.value) || "";
+
   var result = [];
   for (var i = 0; i < materialData.length; i++) {
     var m = materialData[i];
@@ -425,8 +431,10 @@ function getFilteredData() {
 }
 
 function renderGrid() {
+  try {
   var data = getFilteredData();
   var el = document.getElementById("gridView");
+  if (!el) { console.error("gridView not found"); return; }
   if (data.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无素材</div><div class="desc">试试调整筛选条件，或上传新素材</div></div>';
     return;
@@ -450,6 +458,11 @@ function renderGrid() {
       '</div></div>';
   }
   el.innerHTML = html;
+  } catch(e) {
+    console.error("renderGrid error:", e);
+    var el2 = document.getElementById("gridView");
+    if (el2) el2.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div class="title">渲染出错</div><div class="desc">' + e.message + '</div></div>';
+  }
 }
 
 function openPreview(id) {
