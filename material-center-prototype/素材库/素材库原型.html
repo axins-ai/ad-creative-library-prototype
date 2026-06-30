@@ -19,10 +19,6 @@
 }
 html{font-size:14px}
 body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;margin:0;padding:0}
-/* 本页面在 iframe 中加载，隐藏顶部栏（防止双菜单） */
-.top-bar{display:none !important}
-.top-bar h1{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
-.top-bar .actions{display:flex;gap:8px;align-items:center}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:32px;padding:0 14px;border-radius:var(--radius-s);font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .18s;white-space:nowrap;}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
 .btn-primary:hover{background:var(--primary-dark)}
@@ -104,12 +100,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 </style>
 </head>
 <body>
-
-<div class="top-bar" style="display:none!important">
-  <h1>📂 素材库</h1>
-  <div class="actions">
-  </div>
-</div>
 
 <div class="content">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
