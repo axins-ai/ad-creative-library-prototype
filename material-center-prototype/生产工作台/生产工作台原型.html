@@ -403,6 +403,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
             <th style="width:36px"><input type="checkbox" class="task-cb" id="selectAllCb" onchange="toggleSelectAll(this)"></th>
             <th>任务名称</th>
             <th>状态</th>
+            <th>创建人</th>
             <th>原料数量</th>
             <th>成品数量</th>
             <th>创建时间</th>
@@ -627,7 +628,7 @@ var gActiveParams = ["原料名称","日期","优化师","设计师","序号"];
 // ===== 任务数据 =====
 var gTasks = [
   {
-    id: 1, name: "618促销素材生产",
+    id: 1, name: "618促销素材生产", creator: "杨鑫",
     createTime: "2026-06-20 14:30", status: "done",
     materials: { "前贴":[], "中段":[], "尾帧":[] },
     params: { resolution:"1080p", framerate:"25fps", bitrate:"5 Mbps", format:"MP4" },
@@ -638,7 +639,7 @@ var gTasks = [
     ]
   },
   {
-    id: 2, name: "暑期活动素材包",
+    id: 2, name: "暑期活动素材包", creator: "杨鑫",
     createTime: "2026-06-22 09:15", status: "draft",
     materials: { "前贴":[], "中段":[], "尾帧":[] },
     params: { resolution:"1080p", framerate:"25fps", bitrate:"5 Mbps", format:"MP4" },
@@ -646,7 +647,7 @@ var gTasks = [
     outputs: []
   },
   {
-    id: 3, name: "品牌宣传视频素材",
+    id: 3, name: "品牌宣传视频素材", creator: "杨鑫",
     createTime: "2026-06-23 16:00", status: "processing",
     materials: { "前贴":[], "中段":[], "尾帧":[] },
     params: { bitrate:"8 Mbps", format:"MP4" },
@@ -716,7 +717,7 @@ function renderTaskList() {
   var tbody = document.getElementById("taskTableBody");
   if (!tbody) return;
   if (filtered.length === 0) {
-    tbody.innerHTML = "<tr><td colspan=\"7\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw ? "试试其他关键词" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
+    tbody.innerHTML = "<tr><td colspan=\"8\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw ? "试试其他关键词" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
     updateBatchBar();
     return;
   }
@@ -736,6 +737,7 @@ function renderTaskList() {
       "<td onclick=\"event.stopPropagation()\"><input type=\"checkbox\" class=\"task-cb\" " + (isSel ? "checked" : "") + " onchange=\"toggleBatchSelect(" + t.id + ", this)\"></td>" +
       "<td><span class=\"task-name\">" + esc(t.name) + "</span></td>" +
       "<td><span class=\"status-badge " + sc + "\">" + st + "</span></td>" +
+      "<td style=\"color:var(--text-2);font-size:12px\">" + esc(t.creator || "-") + "</td>" +
       "<td>" + mc + " 个</td>" +
       "<td>" + oc + " 个</td>" +
       "<td style=\"color:var(--text-3);font-size:12px\">" + t.createTime + "</td>" +
@@ -1423,7 +1425,7 @@ function startProduction() {
   if (!gEditingTaskId) {
     var nid = gNextTaskId++;
     gTasks.push({
-      id: nid, name: name, createTime: ts, status: "processing",
+      id: nid, name: name, creator: gBasicAttrs.optimizer || "杨鑫", createTime: ts, status: "processing",
       materials: { "前贴": gSelected["前贴"].slice(), "中段": midArr, "尾帧": gSelected["尾帧"].slice() },
       params: { resolution: document.getElementById("pResolution").value, framerate: document.getElementById("pFramerate").value, bitrate: document.getElementById("pBitrate").value, format: fmt },
       namingParams: gActiveParams.slice(),
