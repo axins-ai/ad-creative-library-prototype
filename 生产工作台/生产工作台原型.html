@@ -403,7 +403,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <span class="batch-info" id="batchInfo">已选择 0 个任务</span>
       <div class="batch-actions">
         <button class="ft-btn" style="padding:4px 12px;font-size:12px;border:1px solid var(--danger);color:var(--danger);background:#fff;cursor:pointer;border-radius:var(--radius-s)" onclick="batchDelete()">批量删除</button>
-        <button class="ft-btn primary" style="padding:4px 12px;font-size:12px" onclick="batchExport()">⬇ 批量导出素材</button>
+        <button class="ft-btn primary" id="batchExportBtn" style="padding:4px 12px;font-size:12px" onclick="batchExport()">⬇ 批量导出素材</button>
       </div>
     </div>
     <div class="task-table-wrap">
@@ -697,13 +697,15 @@ function switchView(name) {
 
 // ===== 任务列表渲染 =====
 function renderTaskList() {
-  var kw = (document.getElementById("taskSearch").value || "").trim().toLowerCase();
+  var searchEl = document.getElementById("taskSearch");
+  var kw = (searchEl ? (searchEl.value || "") : "").trim().toLowerCase();
   var filtered = [];
   for (var i = 0; i < gTasks.length; i++) {
     if (kw && gTasks[i].name.toLowerCase().indexOf(kw) === -1) continue;
     filtered.push(gTasks[i]);
   }
   var tbody = document.getElementById("taskTableBody");
+  if (!tbody) return;
   if (filtered.length === 0) {
     tbody.innerHTML = "<tr><td colspan=\"7\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw ? "试试其他关键词" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
     updateBatchBar();
@@ -743,6 +745,7 @@ function updateBatchBar() {
   var bar = document.getElementById("batchBar");
   var info = document.getElementById("batchInfo");
   var btn = document.getElementById("batchExportBtn");
+  if (!bar || !info || !btn) return;
   if (gBatchSelected.length > 0) {
     bar.classList.add("show");
     info.textContent = "已选择 " + gBatchSelected.length + " 个任务";
