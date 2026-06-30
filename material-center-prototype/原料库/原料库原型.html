@@ -49,6 +49,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .type-qiantie{background:#e6f7ff;color:#1890ff}
 .type-zhongduan{background:#f6ffed;color:#52c41a}
 .type-weiqiang{background:#fff7e6;color:#fa8c16}
+.type-zhonghouduan{background:#f0e6ff;color:#7b61ff}
 .ms-card .name{font-size:11px;font-weight:500;color:var(--text-1);margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ms-card .meta{font-size:9px;color:var(--text-3)}
 .ms-card .meta-row{display:flex;justify-content:space-between;font-size:9px;color:var(--text-3);margin-top:2px}
@@ -91,6 +92,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           <option>前贴</option>
           <option>中段</option>
           <option>尾帧</option>
+          <option>中后段</option>
         </select>
       </div>
       <div class="ms-filter-item">
@@ -111,10 +113,21 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
       <div class="ms-filter-item">
         <label>优化师</label>
-        <select>
+        <select id="filterOptimizer">
           <option value="">全部</option>
-          <option>张三</option>
-          <option>李四</option>
+          <option>崔志恒</option>
+          <option>黄佩贤</option>
+          <option>黎舒晴</option>
+          <option>李雨航</option>
+          <option>谭嘉颖</option>
+          <option>林金维</option>
+          <option>陈羽思</option>
+          <option>叶首龙</option>
+          <option>赖嘉俊</option>
+          <option>戚嘉豪</option>
+          <option>黄雄伟</option>
+          <option>姚丰育</option>
+          <option>卢俭聪</option>
         </select>
       </div>
       <div class="ms-filter-item">
@@ -167,6 +180,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           <option>前贴</option>
           <option>中段</option>
           <option>尾帧</option>
+          <option>中后段</option>
         </select>
       </div>
       <div class="ms-fm-group">
@@ -185,7 +199,22 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
       <div class="ms-fm-group">
         <label>优化师</label>
-        <input type="text" id="msUploadOptimizer" placeholder="请输入优化师姓名">
+        <select id="msUploadOptimizer">
+          <option value="">请选择</option>
+          <option>崔志恒</option>
+          <option>黄佩贤</option>
+          <option>黎舒晴</option>
+          <option>李雨航</option>
+          <option>谭嘉颖</option>
+          <option>林金维</option>
+          <option>陈羽思</option>
+          <option>叶首龙</option>
+          <option>赖嘉俊</option>
+          <option>戚嘉豪</option>
+          <option>黄雄伟</option>
+          <option>姚丰育</option>
+          <option>卢俭聪</option>
+        </select>
       </div>
     </div>
     <div class="ms-modal-ft">
@@ -211,6 +240,8 @@ var msMaterials = [
   {id:10, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"张三", date:"2026-06-11", size:"2.7MB"},
   {id:11, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"李四", date:"2026-06-10", size:"6.3MB"},
   {id:12, name:"尾帧-关注引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"张三", date:"2026-06-09", size:"1.1MB"},
+  {id:13, name:"中后段-合成A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", size:"4.5MB"},
+  {id:14, name:"中后段-合成B", type:"中后段", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-28", size:"3.2MB"},
 ];
 var msSelectedFiles = [];
 
