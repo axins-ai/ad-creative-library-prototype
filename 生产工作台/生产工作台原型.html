@@ -177,6 +177,15 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .tag .rm{font-size:13px;cursor:pointer;opacity:.5;transition:opacity .15s;margin-left:2px}
 .tag .rm:hover{opacity:1;color:var(--danger)}
 
+  .slot-row{margin-top:8px;padding:8px;background:var(--bg-page);border-radius:var(--radius-s);}
+  .add-slot-btn{
+    display:block;width:100%;padding:6px 0;text-align:center;
+    font-size:12px;color:var(--primary);background:transparent;
+    border:1.5px dashed var(--primary);border-radius:var(--radius-s);
+    cursor:pointer;margin-top:8px;transition:all .2s;
+  }
+  .add-slot-btn:hover{background:var(--primary-light)}
+
 .basic-attrs-cards{
   display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:12px;
 }
@@ -246,30 +255,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .start-btn:hover{box-shadow:0 4px 16px rgba(22,100,255,.35);transform:translateY(-1px)}
 .start-btn:active{transform:translateY(0)}
 .start-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
-
-.output-card{
-  background:var(--bg-card);border-radius:var(--radius-l);
-  box-shadow:var(--shadow-s);display:flex;flex-direction:column;flex:1;min-height:180px;overflow:hidden;
-}
-.output-card .card-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;border-bottom:1px solid var(--border-light);flex-shrink:0;
-}
-.output-card .card-hd .title{font-size:13px;font-weight:600;color:var(--text-1)}
-.output-list{flex:1;overflow-y:auto;padding:10px 12px}
-.output-item{
-  padding:10px 12px;border:1px solid var(--border-light);border-radius:var(--radius-s);
-  margin-bottom:8px;transition:all .15s;
-}
-.output-item:hover{background:var(--bg-hover);border-color:var(--primary-light)}
-.output-item .name{font-size:12px;font-weight:500;color:var(--text-1);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.output-item .detail{font-size:11px;color:var(--text-3);margin-bottom:2px}
-.output-item .status{font-size:11px;color:var(--success);font-weight:500}
-.save-mat-btn{
-  margin-top:6px;padding:3px 10px;border:1px solid var(--primary);border-radius:var(--radius-s);
-  background:#fff;color:var(--primary);font-size:11px;cursor:pointer;transition:all .15s;
-}
-.save-mat-btn:hover{background:var(--primary);color:#fff}
 
 /* ===== 弹窗 ===== */
 .overlay{
@@ -478,6 +463,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <div>
       <div class="section-head"><span class="step-num">2</span> 选择原料（前贴 ＋ 中段 ＋ 尾帧）</div>
       <div class="mat-cards" id="matCards"></div>
+      <div id="midSlotsContainer" style="margin-top:12px"></div>
     </div>
 
     <div class="config-card" style="margin-top:16px">
@@ -537,13 +523,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <button class="start-btn" id="startBtn" onclick="startProduction()">⚙ 开始生产</button>
     </div>
 
-    <div class="output-card" id="outputCard" style="display:none;margin-top:16px">
-      <div class="card-hd">
-        <span class="title">📋 输出列表</span>
-        <span style="font-size:12px;color:var(--text-3)" id="outputCount"></span>
-      </div>
-      <div class="output-list" id="outputList"></div>
-    </div>
+    
   </div>
 
 </main>
@@ -610,7 +590,7 @@ var gModal = {
 };
 
 // ===== 配置页状态 =====
-var gSelected = { "前贴":[], "中段":[], "尾帧":[] };
+var gSelected = { "前贴":[], "中段":[[]], "尾帧":[] };
 var gBasicAttrs = { biz:"", channel:"", optimizer:"" };
 var gActiveParams = ["原料名称","日期","优化师","设计师","序号"];
 
@@ -619,7 +599,7 @@ var gTasks = [
   {
     id: 1, name: "618促销素材生产",
     createTime: "2026-06-20 14:30", status: "done",
-    materials: { "前贴":[], "中段":[], "尾帧":[] },
+    materials: { "前贴":[], "中段":[[]], "尾帧":[] },
     params: { resolution:"1080p", framerate:"25fps", bitrate:"5 Mbps", format:"MP4" },
     namingParams: ["原料名称","日期","优化师","设计师","序号"],
     outputs: [
@@ -630,7 +610,7 @@ var gTasks = [
   {
     id: 2, name: "暑期活动素材包",
     createTime: "2026-06-22 09:15", status: "draft",
-    materials: { "前贴":[], "中段":[], "尾帧":[] },
+    materials: { "前贴":[], "中段":[[]], "尾帧":[] },
     params: { resolution:"1080p", framerate:"25fps", bitrate:"5 Mbps", format:"MP4" },
     namingParams: ["原料名称","日期","序号"],
     outputs: []
@@ -638,7 +618,7 @@ var gTasks = [
   {
     id: 3, name: "品牌宣传视频素材",
     createTime: "2026-06-23 16:00", status: "processing",
-    materials: { "前贴":[], "中段":[], "尾帧":[] },
+    materials: { "前贴":[], "中段":[[]], "尾帧":[] },
     params: { resolution:"1080p", framerate:"25fps", bitrate:"8 Mbps", format:"MP4" },
     namingParams: ["原料名称","日期","优化师","序号"],
     outputs: []
@@ -660,7 +640,6 @@ initTaskMaterials();
 var gNextTaskId = 4;
 var gEditingTaskId = null;
 var gBatchSelected = [];
-var gOutputs = [];  // 存储最近一次生产的输出列表（供保存到原料库使用）
 
 // 基础属性筛选键
 var BASIC_ATTRS_KEYS = ["biz","channel","optimizer"];
@@ -797,7 +776,7 @@ function toggleSelectAll(cb) {
 function newTask() {
   gEditingTaskId = null;
   document.getElementById("taskNameInput").value = "";
-  gSelected = { "前贴":[], "中段":[], "尾帧":[] };
+  gSelected = { "前贴":[], "中段":[[]], "尾帧":[] };
   gBasicAttrs = { biz:"", channel:"", optimizer:"" };
   gActiveParams = ["原料名称","日期","优化师","设计师","序号"];
   document.getElementById("pBiz").value = "";
@@ -820,7 +799,7 @@ function openTask(id) {
   if (!task) return;
   gEditingTaskId = id;
   document.getElementById("taskNameInput").value = task.name;
-  gSelected = { "前贴":[], "中段":[], "尾帧":[] };
+  gSelected = { "前贴":[], "中段":[[]], "尾帧":[] };
   var keys = ["前贴","中段","尾帧"];
   for (var t = 0; t < keys.length; t++) {
     var tk = keys[t];
@@ -846,19 +825,7 @@ function openTask(id) {
   gActiveParams = [];
   for (var k = 0; k < task.namingParams.length; k++) gActiveParams.push(task.namingParams[k]);
   if (task.outputs && task.outputs.length > 0) {
-    document.getElementById("outputCard").style.display = "flex";
-    document.getElementById("outputCount").textContent = "共 " + task.outputs.length + " 个成品";
-    var lh = "";
-    for (var o = 0; o < task.outputs.length; o++) {
-      lh += "<div class=\"output-item\">" +
-        "<div class=\"name\">" + esc(task.outputs[o].name) + "</div>" +
-        "<div class=\"detail\">组合：" + esc(task.outputs[o].combo) + "　参数：" + task.outputs[o].params + "</div>" +
-        "<div class=\"status\">● 已完成</div>" +
-        "</div>";
-    }
-    document.getElementById("outputList").innerHTML = lh;
-  } else {
-    document.getElementById("outputCard").style.display = "none";
+    document.getElementById("outputCount").textContent = "共 " + task.outputs.length + " 个成品";  } else {
   }
   renderCards();
   renderNamingTags();
@@ -1036,14 +1003,13 @@ function downloadFiles(fileName, data, hasTaskName) {
 // ===== 原料卡片 =====
 function renderCards() {
   var c = document.getElementById("matCards");
-  var types = ["前贴", "中段", "尾帧"];
+  var types = ["前贴", "尾帧"];
   var html = "";
   for (var t = 0; t < types.length; t++) {
     var type = types[t];
     var list = gSelected[type];
     var cls = "", tagCls = "";
     if (type === "前贴") { cls = "qt"; tagCls = "tag-qt"; }
-    else if (type === "中段") { cls = "zd"; tagCls = "tag-zd"; }
     else { cls = "wq"; tagCls = "tag-wq"; }
     var tags = "";
     for (var i = 0; i < list.length; i++) {
@@ -1052,7 +1018,6 @@ function renderCards() {
         " <span class=\"rm\" onclick=\"event.stopPropagation();rmMat(" + m.id + ", '" + type + "')\">×</span></span>";
     }
     var cc = "mat-card " + cls + (list.length > 0 ? " selected" : "");
-    // 卡片点击时调用 openModal，传入类型
     html += "<div class=\"" + cc + "\" onclick=\"openModal('" + type + "')\">" +
       "<div class=\"card-top\"><span class=\"type-label\">" + type + "</span>" +
       "<span class=\"count-badge\">" + list.length + " 个</span></div>" +
@@ -1062,28 +1027,49 @@ function renderCards() {
   }
   c.innerHTML = html;
   updateCount();
+  // 渲染中段工作槽
+  if (typeof renderMidSlots === "function") renderMidSlots();
 }
 
-function rmMat(id, type) {
-  var arr = gSelected[type];
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i].id === id) { arr.splice(i, 1); break; }
+function rmMat(id, type, slotIdx) {
+  if (type === "中段" && slotIdx !== undefined) {
+    var arr = gSelected["中段"][slotIdx];
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) { arr.splice(i, 1); break; }
+    }
+  } else {
+    var arr = gSelected[type];
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) { arr.splice(i, 1); break; }
+    }
   }
   renderCards();
+  if (typeof renderMidSlots === "function") renderMidSlots();
 }
 
 // ===== 弹窗：类型锁定 =====
-function openModal(lockType) {
+function openModal(lockType, slotIdx) {
   // lockType: "前贴"|"中段"|"尾帧"|""(未锁定)
+  // slotIdx: 中段工作槽索引，-1 表示非槽位选择
   gModal.lockedType = lockType || "";
+  gModal.slotIdx = (slotIdx >= 0) ? slotIdx : -1;
   gModal.activeTab = gModal.lockedType;
   gModal.tempSel = [];
 
   // 把当前已选中的原料ID填入tempSel
-  var keys = ["前贴","中段","尾帧"];
-  for (var t = 0; t < keys.length; t++) {
-    var list = gSelected[keys[t]];
-    for (var i = 0; i < list.length; i++) gModal.tempSel.push(list[i].id);
+  if (gModal.slotIdx >= 0 && gModal.lockedType === "中段") {
+    // 中段槽位选择：只预填该槽位的原料
+    var slotList = gSelected["中段"][gModal.slotIdx];
+    if (slotList) {
+      for (var i = 0; i < slotList.length; i++) gModal.tempSel.push(slotList[i].id);
+    }
+  } else {
+    // 前贴/尾帧/全部：预填所有已选原料
+    var keys = ["前贴","中段","尾帧"];
+    for (var t = 0; t < keys.length; t++) {
+      var list = gSelected[keys[t]];
+      for (var i = 0; i < list.length; i++) gModal.tempSel.push(list[i].id);
+    }
   }
 
   if (gModal.lockedType) {
@@ -1201,14 +1187,27 @@ function clearSel() {
 }
 
 function confirmSel() {
-  gSelected = { "前贴":[], "中段":[], "尾帧":[] };
-  for (var i = 0; i < gModal.tempSel.length; i++) {
-    var id = gModal.tempSel[i];
-    var mat = getMatById(id);
-    if (mat) gSelected[mat.type].push(mat);
+  if (gModal.slotIdx >= 0 && gModal.lockedType === "中段") {
+    // 中段槽位选择：只更新该槽位
+    gSelected["中段"][gModal.slotIdx] = [];
+    for (var i = 0; i < gModal.tempSel.length; i++) {
+      var id = gModal.tempSel[i];
+      var mat = getMatById(id);
+      if (mat && mat.type === "中段") gSelected["中段"][gModal.slotIdx].push(mat);
+    }
+  } else {
+    // 前贴/尾帧：重建（保留中段槽位）
+    var midBackup = gSelected["中段"];
+    gSelected = { "前贴":[], "中段":midBackup, "尾帧":[] };
+    for (var i = 0; i < gModal.tempSel.length; i++) {
+      var id = gModal.tempSel[i];
+      var mat = getMatById(id);
+      if (mat && mat.type !== "中段") gSelected[mat.type].push(mat);
+    }
   }
   closeModal();
   renderCards();
+  if (typeof renderMidSlots === "function") renderMidSlots();
 }
 
 function updateSelInfo() {
@@ -1218,11 +1217,30 @@ function updateSelInfo() {
 // ===== 成品数量计算 =====
 function updateCount() {
   var q = gSelected["前贴"].length;
-  var z = gSelected["中段"].length;
+  // 中段是多工作槽
+  var zSlots = gSelected["中段"];
+  var zTotalSlots = zSlots.length;
+  var zTotalCount = 0;
+  for (var zi = 0; zi < zSlots.length; zi++) {
+    zTotalCount += zSlots[zi].length;
+  }
   var w = gSelected["尾帧"].length;
-  document.getElementById("countFormula").textContent =
-    "成品数量公式：前贴 " + q + " × 中段 " + z + " × 尾帧 " + w;
-  document.getElementById("countResult").innerHTML = (q * z * w) + " <span>个成品素材</span>";
+  // 成品数 = 前贴数 × (各槽原料数的笛卡尔积) × 尾帧数
+  var midCombos = 1;
+  for (var zi = 0; zi < zSlots.length; zi++) {
+    if (zSlots[zi].length > 0) midCombos *= zSlots[zi].length;
+  }
+  var total = (q > 0 ? q : 1) * midCombos * (w > 0 ? w : 1);
+  // 显示公式
+  var formula = "成品数量公式：前贴 " + q;
+  formula += " × 中段(";
+  for (var zi = 0; zi < zSlots.length; zi++) {
+    if (zi > 0) formula += "+";
+    formula += "槽" + (zi+1) + ":" + zSlots[zi].length;
+  }
+  formula += ") × 尾帧 " + w;
+  document.getElementById("countFormula").textContent = formula;
+  document.getElementById("countResult").innerHTML = total + " <span>个成品素材</span>";
 }
 
 // ===== 命名参数 =====
@@ -1282,21 +1300,73 @@ function updateNamingPreview() {
     '<span style="color:var(--text-3);font-size:11px;margin-left:4px">（示例）</span>';
 }
 
+// ===== 中段多工作槽管理 =====
+function addMidSlot() {
+  var slots = gSelected["中段"];
+  if (slots.length >= 10) { showToast("最多支持10个工作槽", "w"); return; }
+  slots.push([]);
+  renderMidSlots();
+  var b = document.getElementById("btnAddMidSlot");
+  if (b) b.style.display = (slots.length >= 10) ? "none" : "inline-block";
+}
+function removeMidSlot(idx) {
+  var slots = gSelected["中段"];
+  if (slots.length <= 1) return;
+  slots.splice(idx, 1);
+  renderMidSlots();
+  var b = document.getElementById("btnAddMidSlot");
+  if (b) b.style.display = "inline-block";
+}
+function renderMidSlots() {
+  var c = document.getElementById("midSlotsContainer");
+  if (!c) return;
+  var slots = gSelected["中段"];
+  var h = "";
+  for (var i = 0; i < slots.length; i++) {
+    h += "<div style='border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin:6px 0;background:#f9fafb'>";
+    h += "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px'>";
+    h += "<b style='font-size:13px'>工作槽 " + (i+1) + "</b>";
+    if (i > 0) h += "<button onclick='removeMidSlot(" + i + ")' style='color:#ef4444;background:none;border:1px solid #ef4444;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px'>删除</button>";
+    h += "</div>";
+    h += "<div style='min-height:28px;font-size:12px;color:#6b7280;margin-bottom:6px'>";
+    if (slots[i].length === 0) {
+      h += "<span style='color:#9ca3af'>未选择原料</span>";
+    } else {
+      for (var j = 0; j < slots[i].length; j++) {
+        var m = slots[i][j];
+        if (m) h += "<span style='display:inline-block;background:#dbeafe;padding:2px 6px;border-radius:4px;margin:2px;font-size:12px'>" + (m["名称"] || "未知") + "</span>";
+      }
+    }
+    h += "</div>";
+    h += "<button type='button' class='btn btn-sm' onclick='openModal(\"中段\", " + i + ")'>选择原料</button>";
+    h += "</div>";
+  }
+  c.innerHTML = h;
+}
+
 // ===== 开始生产（含表单校验）=====
 function startProduction() {
   var btn = document.getElementById("startBtn");
   btn.disabled = true;
   btn.textContent = "⚙ 生产中…";
 
+  // 中段是多工作槽
   var q = gSelected["前贴"].length;
-  var z = gSelected["中段"].length;
+  var zSlots = gSelected["中段"];
+  var zTotalCount = 0;
+  for (var zi = 0; zi < zSlots.length; zi++) zTotalCount += zSlots[zi].length;
   var w = gSelected["尾帧"].length;
-  if (q === 0 || z === 0 || w === 0) {
+  // 至少选两类原料
+  var hasQ = q > 0;
+  var hasZ = zTotalCount > 0;
+  var hasW = w > 0;
+  var typeCount = (hasQ?1:0) + (hasZ?1:0) + (hasW?1:0);
+  if (typeCount < 2) {
     var miss = [];
-    if (q === 0) miss.push("前贴");
-    if (z === 0) miss.push("中段");
-    if (w === 0) miss.push("尾帧");
-    showToast("请先选择原料：" + miss.join("、"), "w");
+    if (!hasQ) miss.push("前贴");
+    if (!hasZ) miss.push("中段");
+    if (!hasW) miss.push("尾帧");
+    showToast("请至少选择两类原料，缺少：" + miss.join("、"), "w");
     btn.disabled = false;
     btn.textContent = "⚙ 开始生产";
     var cards = document.getElementById("matCards").children;
@@ -1315,13 +1385,37 @@ function startProduction() {
   var fmt  = document.getElementById("pFormat").value;
 
   var out = [];
-  for (var qi = 0; qi < gSelected["前贴"].length; qi++) {
-    for (var zi = 0; zi < gSelected["中段"].length; zi++) {
-      for (var wi = 0; wi < gSelected["尾帧"].length; wi++) {
-        var qt = gSelected["前贴"][qi];
-        var zd = gSelected["中段"][zi];
-        var wq = gSelected["尾帧"][wi];
-        var cname = qt.name + "+" + zd.name + "+" + wq.name;
+  var qList = gSelected["前贴"];
+  var zSlots = gSelected["中段"];  // 数组的数组
+  var wList = gSelected["尾帧"];
+  // 生成中段的所有组合（各槽的笛卡尔积）
+  function genCombos(slots, idx, cur) {
+    if (idx >= slots.length) {
+      out2.push(cur.slice());
+      return;
+    }
+    if (slots[idx].length === 0) {
+      genCombos(slots, idx+1, cur);
+      return;
+    }
+    for (var si = 0; si < slots[idx].length; si++) {
+      cur.push(slots[idx][si]);
+      genCombos(slots, idx+1, cur);
+      cur.pop();
+    }
+  }
+  var midCombos = [];
+  genCombos(zSlots, 0, []);
+  // 生成最终成品
+  for (var qi = 0; qi < qList.length; qi++) {
+    for (var mi = 0; mi < midCombos.length; mi++) {
+      for (var wi = 0; wi < wList.length; wi++) {
+        var qt = qList[qi];
+        var zdNames = [];
+        for (var si = 0; si < midCombos[mi].length; si++) zdNames.push(midCombos[mi][si].name);
+        var zdName = zdNames.join("+");
+        var wq = wList[wi];
+        var cname = qt.name + "+" + zdName + "+" + wq.name;
         var samp = {
           "原料名称": cname,
           "日期": "20260629",
@@ -1343,8 +1437,6 @@ function startProduction() {
     }
   }
 
-  // 保存输出列表到全局变量，供"保存到原料库"使用
-  gOutputs = out;
 
   if (gEditingTaskId) {
     for (var k = 0; k < gTasks.length; k++) {
@@ -1356,53 +1448,12 @@ function startProduction() {
     }
   }
 
-  document.getElementById("outputCard").style.display = "flex";
-  document.getElementById("outputCount").textContent = "共 " + out.length + " 个成品";
-  var lh = "";
-  for (var i = 0; i < out.length; i++) {
-    lh += "<div class=\"output-item\">" +
-      "<div class=\"name\">" + esc(out[i].name) + "</div>" +
-      "<div class=\"detail\">组合：" + esc(out[i].combo) + "　参数：" + out[i].params + "</div>" +
-      "<div class=\"status\">● 已完成</div>" +
-      "<button class=\"save-mat-btn\" onclick=\"saveToMaterialLib(" + i + ")\">💾 保存到原料库</button>" +
-      "</div>";
-  }
-  document.getElementById("outputList").innerHTML = lh;
-  showToast("生产完成！共生成 " + out.length + " 个成品素材", "s");
+  document.getElementById("outputCard").style.display = "flex";  showToast("生产完成！共生成 " + out.length + " 个成品素材", "s");
 
   btn.disabled = false;
   btn.textContent = "⚙ 开始生产";
 }
 
-// ===== 保存到原料库 =====
-function saveToMaterialLib(index) {
-  if (!gOutputs || !gOutputs[index]) {
-    showToast("保存失败：找不到输出素材", "e");
-    return;
-  }
-  var item = gOutputs[index];
-  var type = prompt("请选择原料类型（输入：前贴 / 中段 / 尾帧）", "前贴");
-  if (!type || (type !== "前贴" && type !== "中段" && type !== "尾帧")) {
-    showToast("已取消保存（类型无效）", "i");
-    return;
-  }
-  var saved = [];
-  try { saved = JSON.parse(localStorage.getItem("savedMaterials") || "[]"); } catch(e) { saved = []; }
-  var material = {
-    id: "saved_" + Date.now(),
-    name: item.name.replace(/\.[^.]+$/, ""),
-    type: type,
-    biz: gBasicAttrs.biz || "",
-    channel: gBasicAttrs.channel || "",
-    optimizer: gBasicAttrs.optimizer || "",
-    date: new Date().toISOString().slice(0, 10).replace(/-/g, ""),
-    duration: "",
-    size: ""
-  };
-  saved.push(material);
-  localStorage.setItem("savedMaterials", JSON.stringify(saved));
-  showToast("已保存到原料库：" + material.name + "（" + type + "）", "s");
-}
 
 // ===== 基础属性更新 =====
 function updateBasicAttrs() {
@@ -1420,7 +1471,7 @@ function updateBasicAttrs() {
   if (gBasicAttrs.optimizer) hint += "优化师:" + gBasicAttrs.optimizer;
   document.getElementById("basicAttrsHint").textContent = hint ? "🔒 已锁定：" + hint.trim() : "📌 选择基础属性后，原料选择弹窗将只展示匹配的原料";
   // 清空已选原料（属性变更后需要重新选择）
-  gSelected = { "前贴":[], "中段":[], "尾帧":[] };
+  gSelected = { "前贴":[], "中段":[[]], "尾帧":[] };
   renderCards();
 }
 
