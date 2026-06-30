@@ -41,22 +41,21 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .ms-list-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
 .ms-list-header .title{font-size:13px;font-weight:600;color:var(--text-1)}
 .ms-list-header .count{font-size:12px;color:var(--text-3)}
-.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:6px;padding:8px;overflow-y:auto;flex:1;}
-.ms-card{background:var(--bg-page);border-radius:var(--radius-s);padding:4px;border:1px solid var(--border-light);transition:all .2s;cursor:pointer;}
-.ms-card:hover{border-color:var(--primary);box-shadow:var(--shadow-m);transform:translateY(-1px)}
-.ms-card .thumb{width:100%;height:56px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-s);margin-bottom:4px;font-size:22px;position:relative;overflow:hidden;}
-.thumb-前贴{background:linear-gradient(135deg,#e6f7ff,#bae7ff)}
-.thumb-中段{background:linear-gradient(135deg,#f6ffed,#d9f7be)}
-.thumb-尾帧{background:linear-gradient(135deg,#fff7e6,#ffe58f)}
-.thumb-中后段{background:linear-gradient(135deg,#f0e6ff,#d3adf7)}
-.ms-card .type-tag{display:inline-block;padding:1px 4px;border-radius:6px;font-size:9px;font-weight:500;margin-bottom:2px;}
+.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;padding:12px;overflow-y:auto;flex:1;}
+.ms-card{background:var(--bg-card);border-radius:var(--radius-l);overflow:hidden;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:transform .2s,box-shadow .2s;cursor:pointer;position:relative;}
+.ms-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-m)}
+.ms-card .thumb{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden;}
+.ms-card .thumb .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.ms-card:hover .thumb .play-overlay{opacity:1}
+.ms-card .thumb .play-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.ms-card .info{padding:10px 12px}
+.ms-card .info .name{font-size:13px;font-weight:500;color:var(--text-1);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-card .info .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ms-card .info .meta-detail{font-size:11px;color:var(--text-3);margin-top:3px}
 .type-qiantie{background:#e6f7ff;color:#1890ff}
 .type-zhongduan{background:#f6ffed;color:#52c41a}
 .type-weiqiang{background:#fff7e6;color:#fa8c16}
 .type-zhonghouduan{background:#f0e6ff;color:#7b61ff}
-.ms-card .name{font-size:11px;font-weight:500;color:var(--text-1);margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ms-card .meta{font-size:9px;color:var(--text-3)}
-.ms-card .meta-row{display:flex;justify-content:space-between;font-size:9px;color:var(--text-3);margin-top:2px}
 .ms-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-3)}
 .ms-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
 .ms-modal-overlay.show{opacity:1;pointer-events:auto}
@@ -228,6 +227,29 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   </div>
 </div>
 
+<div class="ms-modal-overlay" id="msPreviewOverlay" onclick="closeMsPreview(event)">
+  <div class="ms-modal" onclick="event.stopPropagation()">
+    <div class="ms-modal-hd">
+      <h3 id="msPreviewName">原料预览</h3>
+      <button class="close-btn" onclick="closeMsPreview()">×</button>
+    </div>
+    <div class="ms-modal-bd">
+      <div style="background:#1a1a1a;border-radius:var(--radius);padding:40px;text-align:center;margin-bottom:16px">
+        <span id="msPreviewIcon" style="font-size:80px">🎬</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><span style="font-size:11px;color:var(--text-3)">原料名称</span><div id="msPVName" style="font-size:13px;font-weight:500;color:var(--text-1)"></div></div>
+        <div><span style="font-size:11px;color:var(--text-3)">原料类型</span><div id="msPVType" style="font-size:13px;font-weight:500;color:var(--text-1)"></div></div>
+        <div><span style="font-size:11px;color:var(--text-3)">业务归属</span><div id="msPVBiz" style="font-size:13px;color:var(--text-2)"></div></div>
+        <div><span style="font-size:11px;color:var(--text-3)">渠道</span><div id="msPVChannel" style="font-size:13px;color:var(--text-2)"></div></div>
+        <div><span style="font-size:11px;color:var(--text-3)">优化师</span><div id="msPVOptimizer" style="font-size:13px;color:var(--text-2)"></div></div>
+        <div><span style="font-size:11px;color:var(--text-3)">上传日期</span><div id="msPVDate" style="font-size:13px;color:var(--text-2)"></div></div>
+        <div><span style="font-size:11px;color:var(--text-3)">文件大小</span><div id="msPVSize" style="font-size:13px;color:var(--text-2)"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
@@ -257,18 +279,25 @@ function renderMsGrid() {
     return;
   }
   var html = "";
+  var typeLabels = { "前贴":"前贴", "中段":"中段", "尾帧":"尾帧", "中后段":"中后段" };
+  var thumbColors = { "前贴":"linear-gradient(135deg,#e6f7ff,#bae7ff)", "中段":"linear-gradient(135deg,#f6ffed,#d9f7be)", "尾帧":"linear-gradient(135deg,#fff7e6,#ffe58f)", "中后段":"linear-gradient(135deg,#f0e6ff,#d3adf7)" };
+  var thumbIcons = { "前贴":"🎬", "中段":"🎥", "尾帧":"📺", "中后段":"🎞️" };
   for (var i = 0; i < msMaterials.length; i++) {
     var m = msMaterials[i];
     var tagClass = "type-" + m.type;
-    var thumbIcons = { "前贴":"🎬", "中段":"🎥", "尾帧":"📺", "中后段":"🎞️" };
     var icon = thumbIcons[m.type] || "🎬";
-    html += '<div class="ms-card" onclick="showToast(\'' + m.name + '\', \'info\')">' +
-      '<div class="thumb thumb-' + m.type + '">' + icon + '</div>' +
-      '<div class="type-tag ' + tagClass + '">' + m.type + '</div>' +
-      '<div class="name">' + m.name + '</div>' +
-      '<div class="meta-row"><span>' + m.biz + '</span><span>' + m.channel + '</span></div>' +
-      '<div class="meta">' + m.optimizer + ' · ' + m.date + '</div>' +
-      '</div>';
+    var bg = thumbColors[m.type] || "#f5f5f5";
+    html += '<div class="ms-card" onclick="openMsPreview(' + m.id + ')">' +
+      '<div class="thumb" style="background:' + bg + '">' +
+        '<span style="font-size:40px">' + icon + '</span>' +
+        '<div class="play-overlay"><div class="play-btn">▶</div></div>' +
+      '</div>' +
+      '<div class="info">' +
+        '<div class="name">' + m.name + '</div>' +
+        '<div class="meta"><span class="type-tag ' + tagClass + '" style="font-size:10px;padding:1px 6px;border-radius:4px;font-weight:500">' + m.type + '</span></div>' +
+        '<div class="meta-detail">' + m.biz + ' · ' + m.channel + ' · ' + m.optimizer + '</div>' +
+        '<div class="meta-detail" style="font-size:10px">' + m.date + ' · ' + m.size + '</div>' +
+      '</div></div>';
   }
   grid.innerHTML = html;
   document.getElementById("msCount").textContent = "共 " + msMaterials.length + " 个原料";
@@ -325,6 +354,30 @@ function submitUpload() {
   closeUploadModal();
   showToast("成功上传 " + msSelectedFiles.length + " 个原料", "success");
   msSelectedFiles = [];
+}
+
+function openMsPreview(id) {
+  for (var i = 0; i < msMaterials.length; i++) {
+    if (msMaterials[i].id === id) {
+      var m = msMaterials[i];
+      document.getElementById("msPreviewName").textContent = m.name;
+      document.getElementById("msPVName").textContent = m.name;
+      document.getElementById("msPVType").textContent = m.type;
+      document.getElementById("msPVBiz").textContent = m.biz;
+      document.getElementById("msPVChannel").textContent = m.channel;
+      document.getElementById("msPVOptimizer").textContent = m.optimizer;
+      document.getElementById("msPVDate").textContent = m.date;
+      document.getElementById("msPVSize").textContent = m.size;
+      var icons = {"前贴":"🎬","中段":"🎥","尾帧":"📺","中后段":"🎞️"};
+      document.getElementById("msPreviewIcon").textContent = icons[m.type] || "🎬";
+      break;
+    }
+  }
+  document.getElementById("msPreviewOverlay").classList.add("show");
+}
+function closeMsPreview(e) {
+  if (e && e.target !== document.getElementById("msPreviewOverlay")) return;
+  document.getElementById("msPreviewOverlay").classList.remove("show");
 }
 
 function showToast(msg, type) {
