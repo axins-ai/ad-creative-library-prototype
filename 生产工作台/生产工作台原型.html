@@ -787,7 +787,6 @@ function newTask() {
   document.getElementById("pFramerate").value = "25fps";
   document.getElementById("pBitrate").value = "5 Mbps";
   document.getElementById("pFormat").value = "MP4";
-  document.getElementById("outputCard").style.display = "none";
   renderCards();
   renderNamingTags();
   switchView("config");
@@ -1448,7 +1447,7 @@ function startProduction() {
     }
   }
 
-  document.getElementById("outputCard").style.display = "flex";  showToast("生产完成！共生成 " + out.length + " 个成品素材", "s");
+  showToast("生产完成！共生成 " + out.length + " 个成品素材", "s");
 
   btn.disabled = false;
   btn.textContent = "⚙ 开始生产";
