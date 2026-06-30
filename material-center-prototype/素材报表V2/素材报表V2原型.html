@@ -349,7 +349,6 @@ tbody tr.selected{background:var(--primary-light)}
     <div class="table-toolbar">
       <div class="table-title">📊 素材报表 V2（完整版）</div>
       <div class="table-actions">
-        <button class="btn btn-outline" onclick="openUploadModal()">📷 上传素材</button>
         <button class="btn btn-outline" onclick="openColConfig()">⚙ 自定义列</button>
         <button class="btn btn-success" onclick="openExport()">📥 导出报表</button>
       </div>
@@ -366,76 +365,6 @@ tbody tr.selected{background:var(--primary-light)}
     </div>
   </div>
 </main>
-
-<!-- Upload Modal -->
-<div class="modal-mask" id="uploadMask">
-  <div class="modal">
-    <div class="modal-hd">
-      <h3>📷 上传素材</h3>
-      <button class="modal-close" onclick="closeModal('uploadMask')">×</button>
-    </div>
-    <div class="modal-bd">
-      <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-        <div class="uz-icon">📁</div>
-        <p>点击选择文件，或拖拽文件到此处</p>
-        <p style="font-size:11px;color:var(--text-3);margin-top:4px">支持 jpg/png/mp4 格式</p>
-      </div>
-      <input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(event)">
-      <div class="fm-row">
-        <div class="fm-group">
-          <label>素材名称 <span class="req">*</span></label>
-          <input type="text" id="f_name" placeholder="输入素材名称">
-        </div>
-        <div class="fm-group">
-          <label>素材类型 <span class="req">*</span></label>
-          <select id="f_type">
-            <option>图片</option>
-            <option>视频</option>
-          </select>
-        </div>
-      </div>
-      <div class="fm-row">
-        <div class="fm-group">
-          <label>业务归属 <span class="req">*</span></label>
-          <select id="f_biz">
-            <option>存量</option>
-            <option>权益</option>
-          </select>
-        </div>
-        <div class="fm-group">
-        <label>渠道 <span class="req">*</span></label>
-        <select id="f_channel">
-          <option>头条</option>
-          <option>广点通</option>
-        </select>
-        </div>
-      </div>
-      <div class="fm-row">
-        <div class="fm-group">
-          <label>优化师 <span class="req">*</span></label>
-          <select id="f_optimizer">
-            <option>张伟</option>
-            <option>王芳</option>
-            <option>刘强</option>
-            <option>赵明</option>
-          </select>
-        </div>
-        <div class="fm-group">
-          <label>设计师 <span class="req">*</span></label>
-          <select id="f_designer">
-            <option>李明</option>
-            <option>陈晓</option>
-            <option>赵丽</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-ft">
-      <button class="btn btn-outline" onclick="closeModal('uploadMask')">取消</button>
-      <button class="btn btn-primary" onclick="submitUpload()">确认上传</button>
-    </div>
-  </div>
-</div>
 
 <!-- Column Config Modal -->
 <div class="modal-mask" id="colMask">
@@ -1170,74 +1099,9 @@ function batchDelete(){
   showToast('成功删除 ' + selected.size + ' 条素材');
 }
 
-function openUploadModal(){
-  document.getElementById('uploadMask').classList.add('show');
-  document.body.style.overflow='hidden';
-}
 function closeModal(id){
   document.getElementById(id).classList.remove('show');
   document.body.style.overflow='';
-  if(id==='uploadMask') editingId=null;
-}
-function handleFileSelect(e){
-  var file = e.target.files[0];
-  if(file) showToast('已选择文件：' + file.name);
-}
-function submitUpload(){
-  var name = document.getElementById('f_name').value.trim();
-  if(!name){ showToast('请输入素材名称'); return; }
-  var type = document.getElementById('f_type').value;
-  var biz = document.getElementById('f_biz').value;
-  var channel = document.getElementById('f_channel').value;
-  var optimizer = document.getElementById('f_optimizer').value;
-  var designer = document.getElementById('f_designer').value;
-  var m = randomMetrics(type==='视频');
-  var newId = data.length+1;
-  var today = new Date().toISOString().slice(0,10);
-  var newItem = {
-    id:newId,
-    name:name,
-    creativeId:'CR' + newId.toString().padStart(8,'0'),
-    adId:'AD' + (100000+newId),
-    projectId:'PJ' + (5000+newId),
-    accountId:'AC' + (20000+newId),
-    type:type,
-    biz:biz,
-    optimizer:optimizer,
-    designer:designer,
-    channel:channel,
-    url:'https://landing.example.com/p/'+newId,
-    createTime:today,
-    dataDate:today,
-    thumb:type==='视频' ? 'https://picsum.photos/seed/vidnew/160/120' : 'https://picsum.photos/seed/imgnew/160/120',
-    cost:parseFloat(m.cost),
-    impressions:m.impressions,
-    cpm:parseFloat(m.cpm),
-    clicks:m.clicks,
-    ctr:m.ctr,
-    conversions:m.conversions,
-    cvr:m.cvr,
-    effectivePlays:m.effectivePlays || 0,
-    effectivePlayRate:m.effectivePlayRate || '0.00',
-    v3Count:m.v3Count || 0,
-    v3Rate:m.v3Rate || '0.00',
-    v5Count:m.v5Count || 0,
-    v5Rate:m.v5Rate || '0.00',
-    v7Count:m.v7Count || 0,
-    v7Rate:m.v7Rate || '0.00',
-    p10Count:m.p10Count || 0,
-    p25Count:m.p25Count || 0,
-    p50Count:m.p50Count || 0,
-    p75Count:m.p75Count || 0,
-    p90Count:m.p90Count || 0,
-    p95Count:m.p95Count || 0,
-    p100Count:m.p100Count || 0
-  };
-  data.unshift(newItem);
-  closeModal('uploadMask');
-  applyFilter();
-  showToast('素材「' + name + '」上传成功！');
-  document.getElementById('f_name').value='';
 }
 
 function openPreview(id){
