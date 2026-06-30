@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v20260630-1017: fix dual-menu + viewConfig leak + 中后段合成 + saveToLib -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -28,11 +27,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 .page-body{display:flex;flex-direction:column;padding:20px 24px;gap:16px;min-height:calc(100vh - 52px);overflow-y:auto}
 
-/* 视图显隐：双重保险（CSS + 内联 style） */
 .view{display:none !important}
 .view.active{display:flex !important;flex-direction:column;gap:16px}
-
-/* 本页面在 iframe 中加载，隐藏任何顶部栏（防止双菜单） */
+/* 在 iframe 中隐藏子页面的顶部栏，避免双菜单 */
 .top-bar{display:none !important}
 
 .list-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
@@ -267,6 +264,12 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .output-item .name{font-size:12px;font-weight:500;color:var(--text-1);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .output-item .detail{font-size:11px;color:var(--text-3);margin-bottom:2px}
 .output-item .status{font-size:11px;color:var(--success);font-weight:500}
+.save-mat-btn{
+  margin-top:8px;padding:4px 12px;border:1px solid var(--primary);border-radius:var(--radius-s);
+  background:#fff;color:var(--primary);font-size:12px;cursor:pointer;transition:all .15s;
+  align-self:flex-start;
+}
+.save-mat-btn:hover{background:var(--primary);color:#fff}
 
 /* ===== 弹窗 ===== */
 .overlay{
@@ -387,8 +390,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 <main class="page-body">
 
-  <!-- 视图1：任务列表（默认显示） -->
-  <div class="view active" id="viewList" style="display:flex;flex-direction:column;gap:16px">
+  <!-- 视图1：任务列表 -->
+  <div class="view" id="viewList">
     <div class="list-header">
       <div class="left"></div>
       <div class="right">
@@ -421,8 +424,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     </div>
   </div>
 
-  <!-- 视图2：任务配置（默认隐藏） -->
-  <div class="view" id="viewConfig" style="display:none">
+  <!-- 视图2：任务配置 -->
+  <div class="view" id="viewConfig">
     <div class="config-back" onclick="goBackToList()">
       <span class="arrow">←</span> 返回任务列表
     </div>
@@ -598,7 +601,6 @@ var MATERIALS_DB = [
   {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB"},
   {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB"},
 ];
-var NEXT_MATERIAL_ID = 9;  // 新原料ID自增
 
 // ===== 弹窗状态 =====
 var gModal = {
@@ -658,6 +660,7 @@ initTaskMaterials();
 var gNextTaskId = 4;
 var gEditingTaskId = null;
 var gBatchSelected = [];
+var gOutputs = [];  // 存储最近一次生产的输出列表
 
 // 基础属性筛选键
 var BASIC_ATTRS_KEYS = ["biz","channel","optimizer"];
@@ -678,23 +681,17 @@ function getMatById(id) {
 function switchView(name) {
   var vl = document.getElementById("viewList");
   var vc = document.getElementById("viewConfig");
-  // 隐藏所有视图（双重保险：class + 内联 style）
   vl.classList.remove("active");
   vc.classList.remove("active");
   vl.style.display = "none";
   vc.style.display = "none";
-  // 显示目标视图
   if (name === "list") {
     vl.classList.add("active");
     vl.style.display = "flex";
-    vl.style.flexDirection = "column";
-    vl.style.gap = "16px";
     renderTaskList();
   } else {
     vc.classList.add("active");
     vc.style.display = "flex";
-    vc.style.flexDirection = "column";
-    vc.style.gap = "16px";
   }
 }
 
@@ -850,11 +847,10 @@ function openTask(id) {
     document.getElementById("outputCount").textContent = "共 " + task.outputs.length + " 个成品";
     var lh = "";
     for (var o = 0; o < task.outputs.length; o++) {
-      lh += "<div class=\"output-item\" data-idx=\"" + o + "\">" +
+      lh += "<div class=\"output-item\">" +
         "<div class=\"name\">" + esc(task.outputs[o].name) + "</div>" +
         "<div class=\"detail\">组合：" + esc(task.outputs[o].combo) + "　参数：" + task.outputs[o].params + "</div>" +
         "<div class=\"status\">● 已完成</div>" +
-        "<button style=\"margin-top:6px;padding:3px 10px;font-size:11px;border:1px solid var(--primary);background:var(--primary-light);color:var(--primary);border-radius:4px;cursor:pointer\" onclick=\"saveOutputToLib(" + o + ")\">⬇ 保存到原料库</button>" +
         "</div>";
     }
     document.getElementById("outputList").innerHTML = lh;
@@ -1218,28 +1214,12 @@ function updateSelInfo() {
 
 // ===== 成品数量计算 =====
 function updateCount() {
-  var counts = {};
-  var labels = {};
-  var types = ["前贴","中段","尾帧"];
-  var selTypes = [];
-  for (var t = 0; t < types.length; t++) {
-    var c = gSelected[types[t]].length;
-    counts[types[t]] = c;
-    if (c > 0) {
-      selTypes.push(types[t]);
-      labels[types[t]] = types[t] + " " + c;
-    }
-  }
-  if (selTypes.length === 0) {
-    document.getElementById("countFormula").textContent = "成品数量公式：（未选择原料）";
-    document.getElementById("countResult").innerHTML = "0 <span>个成品素材</span>";
-    return;
-  }
-  var formula = selTypes.map(function(k) { return labels[k]; }).join(" × ");
-  document.getElementById("countFormula").textContent = "成品数量公式：" + formula;
-  var total = 1;
-  for (var i = 0; i < selTypes.length; i++) total *= counts[selTypes[i]];
-  document.getElementById("countResult").innerHTML = total + " <span>个成品素材</span>";
+  var q = gSelected["前贴"].length;
+  var z = gSelected["中段"].length;
+  var w = gSelected["尾帧"].length;
+  document.getElementById("countFormula").textContent =
+    "成品数量公式：前贴 " + q + " × 中段 " + z + " × 尾帧 " + w;
+  document.getElementById("countResult").innerHTML = (q * z * w) + " <span>个成品素材</span>";
 }
 
 // ===== 命名参数 =====
@@ -1308,67 +1288,60 @@ function startProduction() {
   var q = gSelected["前贴"].length;
   var z = gSelected["中段"].length;
   var w = gSelected["尾帧"].length;
-  var totalSelected = q + z + w;
-  if (totalSelected === 0) {
-    showToast("请先选择至少一种原料", "w");
+  if (q === 0 || z === 0 || w === 0) {
+    var miss = [];
+    if (q === 0) miss.push("前贴");
+    if (z === 0) miss.push("中段");
+    if (w === 0) miss.push("尾帧");
+    showToast("请先选择原料：" + miss.join("、"), "w");
     btn.disabled = false;
     btn.textContent = "⚙ 开始生产";
+    var cards = document.getElementById("matCards").children;
+    for (var i = 0; i < cards.length; i++) {
+      var ct = cards[i].querySelector(".type-label").textContent;
+      if (miss.indexOf(ct) !== -1) {
+        cards[i].style.borderColor = "#ff4d4f";
+        (function(card) { setTimeout(function() { card.style.borderColor = ""; }, 2000); })(cards[i]);
+      }
+    }
     return;
-  }
-
-  // 高亮未选中的卡片
-  var miss = [];
-  if (q === 0) miss.push("前贴");
-  if (z === 0) miss.push("中段");
-  if (w === 0) miss.push("尾帧");
-  if (miss.length > 0 && miss.length < 3) {
-    var hint = "未选择：" + miss.join("、") + "（将跳过该类型）";
-    showToast(hint, "i");
   }
 
   var res  = document.getElementById("pResolution").value;
   var fr   = document.getElementById("pFramerate").value;
   var fmt  = document.getElementById("pFormat").value;
 
-  // 动态拼接选中类型的嵌套循环
-  var typeOrder = [];
-  if (q > 0) typeOrder.push("前贴");
-  if (z > 0) typeOrder.push("中段");
-  if (w > 0) typeOrder.push("尾帧");
-
   var out = [];
-  // 使用递归生成所有组合
-  function genCombo(idx, currentCombo, comboName) {
-    if (idx >= typeOrder.length) {
-      // 生成文件名
-      var samp = {
-        "原料名称": comboName,
-        "日期": "20260629",
-        "优化师": "张伟",
-        "设计师": "李明",
-        "序号": String(out.length + 1),
-        "分辨率": res,
-        "帧率": fr,
-        "业务": (currentCombo[0] ? currentCombo[0].biz : "") || "",
-        "渠道": (currentCombo[0] ? currentCombo[0].channel : "") || "",
-      };
-      var fn = "";
-      for (var pi = 0; pi < gActiveParams.length; pi++) {
-        if (pi > 0) fn += "_";
-        fn += (samp[gActiveParams[pi]] || gActiveParams[pi]);
+  for (var qi = 0; qi < gSelected["前贴"].length; qi++) {
+    for (var zi = 0; zi < gSelected["中段"].length; zi++) {
+      for (var wi = 0; wi < gSelected["尾帧"].length; wi++) {
+        var qt = gSelected["前贴"][qi];
+        var zd = gSelected["中段"][zi];
+        var wq = gSelected["尾帧"][wi];
+        var cname = qt.name + "+" + zd.name + "+" + wq.name;
+        var samp = {
+          "原料名称": cname,
+          "日期": "20260629",
+          "优化师": "张伟",
+          "设计师": "李明",
+          "序号": String(out.length + 1),
+          "分辨率": res,
+          "帧率": fr,
+          "业务": qt.biz || "",
+          "渠道": qt.channel || "",
+        };
+        var fn = "";
+        for (var pi = 0; pi < gActiveParams.length; pi++) {
+          if (pi > 0) fn += "_";
+          fn += (samp[gActiveParams[pi]] || gActiveParams[pi]);
+        }
+        out.push({ name: fn + "." + fmt.toLowerCase(), combo: cname, params: res + " · " + fr });
       }
-      out.push({ name: fn + "." + fmt.toLowerCase(), combo: comboName, params: res + " · " + fr });
-      return;
-    }
-    var t = typeOrder[idx];
-    for (var i = 0; i < gSelected[t].length; i++) {
-      var newCombo = currentCombo.slice();
-      newCombo.push(gSelected[t][i]);
-      var newName = comboName ? comboName + "+" + gSelected[t][i].name : gSelected[t][i].name;
-      genCombo(idx + 1, newCombo, newName);
     }
   }
-  genCombo(0, [], "");
+
+  // 保存输出列表到全局变量，供"保存到原料库"使用
+  gOutputs = out;
 
   if (gEditingTaskId) {
     for (var k = 0; k < gTasks.length; k++) {
@@ -1384,19 +1357,11 @@ function startProduction() {
   document.getElementById("outputCount").textContent = "共 " + out.length + " 个成品";
   var lh = "";
   for (var i = 0; i < out.length; i++) {
-    var typeLabel = "";
-    if (q > 0 && z > 0 && w > 0) typeLabel = "（前＋中＋尾）";
-    else if (q > 0 && z > 0) typeLabel = "（前＋中）";
-    else if (q > 0 && w > 0) typeLabel = "（前＋尾）";
-    else if (z > 0 && w > 0) typeLabel = "（中后段）";
-    else if (q > 0) typeLabel = "（前贴）";
-    else if (z > 0) typeLabel = "（中段）";
-    else if (w > 0) typeLabel = "（尾帧）";
-    lh += "<div class=\"output-item\" data-idx=\"" + i + "\">" +
+    lh += "<div class=\"output-item\">" +
       "<div class=\"name\">" + esc(out[i].name) + "</div>" +
-      "<div class=\"detail\">组合：" + esc(out[i].combo) + "　" + typeLabel + "　参数：" + out[i].params + "</div>" +
+      "<div class=\"detail\">组合：" + esc(out[i].combo) + "　参数：" + out[i].params + "</div>" +
       "<div class=\"status\">● 已完成</div>" +
-      "<button style=\"margin-top:6px;padding:3px 10px;font-size:11px;border:1px solid var(--primary);background:var(--primary-light);color:var(--primary);border-radius:4px;cursor:pointer\" onclick=\"saveOutputToLib(" + i + ")\">⬇ 保存到原料库</button>" +
+      "<button class=\"save-mat-btn\" onclick=\"saveToMaterialLib(" + i + ")\">💾 保存到原料库</button>" +
       "</div>";
   }
   document.getElementById("outputList").innerHTML = lh;
@@ -1406,40 +1371,35 @@ function startProduction() {
   btn.textContent = "⚙ 开始生产";
 }
 
-// ===== 保存成品到原料库 =====
-function saveOutputToLib(idx) {
-  if (!gEditingTaskId) { showToast("请先保存任务", "w"); return; }
-  var task = null;
-  for (var i = 0; i < gTasks.length; i++) { if (gTasks[i].id === gEditingTaskId) { task = gTasks[i]; break; } }
-  if (!task || !task.outputs || !task.outputs[idx]) return;
-
-  var out = task.outputs[idx];
-  // 判断组合类型
-  var q = gSelected["前贴"].length > 0 ? 1 : 0;
-  var z = gSelected["中段"].length > 0 ? 1 : 0;
-  var w = gSelected["尾帧"].length > 0 ? 1 : 0;
-  var matType = "";
-  if (q && z && w) matType = "前中后段";
-  else if (z && w) matType = "中后段";
-  else if (q && z) matType = "前中段";
-  else if (q && w) matType = "前后段";
-  else if (q) matType = "前贴";
-  else if (z) matType = "中段";
-  else if (w) matType = "尾帧";
-
-  var newMat = {
-    id:       NEXT_MATERIAL_ID++,
-    name:     out.name.replace(/\.[^.]+$/, ""),
-    type:     matType,
-    biz:      gBasicAttrs.biz || "存量",
-    channel:  gBasicAttrs.channel || "广点通",
-    optimizer: gBasicAttrs.optimizer || "未分配",
-    date:     new Date().toISOString().slice(0,10),
-    duration: "00:30",
-    size:     "20.0 MB",
+// ===== 保存到原料库 =====
+function saveToMaterialLib(index) {
+  if (!gOutputs || !gOutputs[index]) {
+    showToast("保存失败：找不到输出素材", "e");
+    return;
+  }
+  var item = gOutputs[index];
+  // 让用户输入原料类型
+  var type = prompt("请选择原料类型（输入：前贴 / 中段 / 尾帧）", "前贴");
+  if (!type || (type !== "前贴" && type !== "中段" && type !== "尾帧")) {
+    showToast("已取消保存（类型无效）", "i");
+    return;
+  }
+  var saved = [];
+  try { saved = JSON.parse(localStorage.getItem("savedMaterials") || "[]"); } catch(e) { saved = []; }
+  var material = {
+    id: "saved_" + Date.now(),
+    name: item.name.replace(/\.[^.]+$/, ""),
+    type: type,
+    biz: gBasicAttrs.biz || "",
+    channel: gBasicAttrs.channel || "",
+    optimizer: gBasicAttrs.optimizer || "",
+    date: new Date().toISOString().slice(0, 10).replace(/-/g, ""),
+    duration: "",
+    size: ""
   };
-  MATERIALS_DB.push(newMat);
-  showToast("已保存到原料库：「" + newMat.name + "」(" + matType + ")", "s");
+  saved.push(material);
+  localStorage.setItem("savedMaterials", JSON.stringify(saved));
+  showToast("已保存到原料库：" + material.name + "（" + type + "）", "s");
 }
 
 // ===== 基础属性更新 =====
@@ -1474,7 +1434,7 @@ function showToast(msg, type) {
 }
 
 // ===== 初始化 =====
-switchView("list");
+renderTaskList();
 </script>
 </body>
 </html>
