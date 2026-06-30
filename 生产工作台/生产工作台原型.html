@@ -27,8 +27,12 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 .page-body{display:flex;flex-direction:column;padding:20px 24px;gap:16px;min-height:calc(100vh - 52px);overflow-y:auto}
 
-.view{display:none}
-.view.active{display:flex;flex-direction:column;gap:16px}
+/* 视图显隐：双重保险（CSS + 内联 style） */
+.view{display:none !important}
+.view.active{display:flex !important;flex-direction:column;gap:16px}
+
+/* 本页面在 iframe 中加载，隐藏任何顶部栏（防止双菜单） */
+.top-bar{display:none !important}
 
 .list-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .list-header .left{display:flex;align-items:center;gap:12px}
@@ -382,8 +386,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 <main class="page-body">
 
-  <!-- 视图1：任务列表 -->
-  <div class="view" id="viewList">
+  <!-- 视图1：任务列表（默认显示） -->
+  <div class="view active" id="viewList" style="display:flex;flex-direction:column;gap:16px">
     <div class="list-header">
       <div class="left"></div>
       <div class="right">
@@ -416,8 +420,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     </div>
   </div>
 
-  <!-- 视图2：任务配置 -->
-  <div class="view" id="viewConfig">
+  <!-- 视图2：任务配置（默认隐藏） -->
+  <div class="view" id="viewConfig" style="display:none">
     <div class="config-back" onclick="goBackToList()">
       <span class="arrow">←</span> 返回任务列表
     </div>
@@ -673,17 +677,23 @@ function getMatById(id) {
 function switchView(name) {
   var vl = document.getElementById("viewList");
   var vc = document.getElementById("viewConfig");
+  // 隐藏所有视图（双重保险：class + 内联 style）
   vl.classList.remove("active");
   vc.classList.remove("active");
   vl.style.display = "none";
   vc.style.display = "none";
+  // 显示目标视图
   if (name === "list") {
     vl.classList.add("active");
     vl.style.display = "flex";
+    vl.style.flexDirection = "column";
+    vl.style.gap = "16px";
     renderTaskList();
   } else {
     vc.classList.add("active");
     vc.style.display = "flex";
+    vc.style.flexDirection = "column";
+    vc.style.gap = "16px";
   }
 }
 
