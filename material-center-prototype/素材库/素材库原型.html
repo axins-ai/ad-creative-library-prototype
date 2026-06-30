@@ -105,14 +105,17 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 </head>
 <body>
 
-<div class="top-bar">
+<div class="top-bar" style="display:none!important">
   <h1>📂 素材库</h1>
   <div class="actions">
-    <button class="btn btn-primary" onclick="openUploadModal()">↑ 上传素材</button>
   </div>
 </div>
 
 <div class="content">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h1 style="font-size:17px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:8px">📂 素材库 <span style="font-size:11px;color:var(--text-3);font-weight:400" id="scCount">共 0 个素材</span></h1>
+    <button class="btn btn-primary" onclick="openUploadModal()">↑ 上传素材</button>
+  </div>
   <div class="filter-bar">
     <div class="filter-group">
       <label>名称搜索</label>
@@ -461,6 +464,8 @@ function renderGrid() {
       '</div></div>';
   }
   el.innerHTML = html;
+  var countEl = document.getElementById("scCount");
+  if (countEl) countEl.textContent = "共 " + data.length + " 个素材";
   } catch(e) {
     console.error("renderGrid error:", e);
     var el2 = document.getElementById("gridView");
