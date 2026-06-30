@@ -27,9 +27,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 .page-body{display:flex;flex-direction:column;padding:20px 24px;gap:16px;min-height:calc(100vh - 52px);overflow-y:auto}
 
+/* 修复：默认隐藏所有视图，active 才显示（!important 防止泄漏） */
 .view{display:none !important}
 .view.active{display:flex !important;flex-direction:column;gap:16px}
-/* 在 iframe 中隐藏子页面的顶部栏，避免双菜单 */
+/* 修复：iframe 内隐藏子页面顶部栏，避免与 index.html 双菜单 */
 .top-bar{display:none !important}
 
 .list-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
@@ -265,9 +266,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .output-item .detail{font-size:11px;color:var(--text-3);margin-bottom:2px}
 .output-item .status{font-size:11px;color:var(--success);font-weight:500}
 .save-mat-btn{
-  margin-top:8px;padding:4px 12px;border:1px solid var(--primary);border-radius:var(--radius-s);
-  background:#fff;color:var(--primary);font-size:12px;cursor:pointer;transition:all .15s;
-  align-self:flex-start;
+  margin-top:6px;padding:3px 10px;border:1px solid var(--primary);border-radius:var(--radius-s);
+  background:#fff;color:var(--primary);font-size:11px;cursor:pointer;transition:all .15s;
 }
 .save-mat-btn:hover{background:var(--primary);color:#fff}
 
@@ -660,7 +660,7 @@ initTaskMaterials();
 var gNextTaskId = 4;
 var gEditingTaskId = null;
 var gBatchSelected = [];
-var gOutputs = [];  // 存储最近一次生产的输出列表
+var gOutputs = [];  // 存储最近一次生产的输出列表（供保存到原料库使用）
 
 // 基础属性筛选键
 var BASIC_ATTRS_KEYS = ["biz","channel","optimizer"];
@@ -1378,7 +1378,6 @@ function saveToMaterialLib(index) {
     return;
   }
   var item = gOutputs[index];
-  // 让用户输入原料类型
   var type = prompt("请选择原料类型（输入：前贴 / 中段 / 尾帧）", "前贴");
   if (!type || (type !== "前贴" && type !== "中段" && type !== "尾帧")) {
     showToast("已取消保存（类型无效）", "i");
@@ -1435,6 +1434,7 @@ function showToast(msg, type) {
 
 // ===== 初始化 =====
 renderTaskList();
+switchView('list');
 </script>
 </body>
 </html>
