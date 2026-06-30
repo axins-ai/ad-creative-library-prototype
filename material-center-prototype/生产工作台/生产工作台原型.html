@@ -470,7 +470,23 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
     <div class="config-card" style="margin-top:16px">
       <div class="section-head"><span class="step-num">3</span> 配置输出参数</div>
-      <div class="params-grid">
+      <div class="params-grid" id="paramsGrid">
+        <div class="param-item">
+          <label>视频分辨率</label>
+          <select id="pResolution">
+            <option>720p</option>
+            <option selected>1080p</option>
+            <option>4K</option>
+          </select>
+        </div>
+        <div class="param-item">
+          <label>视频帧率</label>
+          <select id="pFramerate">
+            <option>24fps</option>
+            <option selected>25fps</option>
+            <option>30fps</option>
+          </select>
+        </div>
         <div class="param-item">
           <label>视频码率</label>
           <select id="pBitrate">
@@ -489,13 +505,21 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </div>
       </div>
 
+      <div class="mid-order-wrap" id="midOrderWrap" style="display:none;margin-bottom:12px;padding:10px 14px;background:var(--bg-page);border-radius:var(--radius);align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--text-2);font-weight:500">中段拼接顺序：</span>
+        <select id="midOrder" style="height:32px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:#fff;outline:none;cursor:pointer">
+          <option value="sequential">顺序拼接</option>
+          <option value="random">随机拼接</option>
+        </select>
+      </div>
+
       <div class="count-review">
         <div class="count-formula" id="countFormula">成品数量公式：前贴 0 × 中段 0 × 尾帧 0</div>
         <div class="count-result" id="countResult">0 <span>个成品素材</span></div>
       </div>
 
       <div class="naming-area" style="margin-top:14px">
-        <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:8px">
           文件命名格式
         </div>
         <div class="naming-preview" id="namingPreview">
@@ -605,18 +629,18 @@ var gTasks = [
     id: 1, name: "618促销素材生产",
     createTime: "2026-06-20 14:30", status: "done",
     materials: { "前贴":[], "中段":[], "尾帧":[] },
-    params: { bitrate:"5 Mbps", format:"MP4" },
+    params: { resolution:"1080p", framerate:"25fps", bitrate:"5 Mbps", format:"MP4" },
     namingParams: ["原料名称","日期","优化师","设计师","序号"],
     outputs: [
-      { name:"开场动画A+产品介绍B+行动号召C_20260620_张伟_李明_01.mp4", combo:"开场动画A+产品介绍B+行动号召C", params:"1080p · 25fps" },
-      { name:"开场动画A+产品介绍B+尾帧-下载引导_20260620_张伟_李明_02.mp4", combo:"开场动画A+产品介绍B+尾帧-下载引导", params:"1080p · 25fps" },
+      { name:"开场动画A+产品介绍B+行动号召C_20260620_张伟_李明_01.mp4", combo:"开场动画A+产品介绍B+行动号召C", params:"1080p · 25fps · MP4" },
+      { name:"开场动画A+产品介绍B+尾帧-下载引导_20260620_张伟_李明_02.mp4", combo:"开场动画A+产品介绍B+尾帧-下载引导", params:"1080p · 25fps · MP4" },
     ]
   },
   {
     id: 2, name: "暑期活动素材包",
     createTime: "2026-06-22 09:15", status: "draft",
     materials: { "前贴":[], "中段":[], "尾帧":[] },
-    params: { bitrate:"5 Mbps", format:"MP4" },
+    params: { resolution:"1080p", framerate:"25fps", bitrate:"5 Mbps", format:"MP4" },
     namingParams: ["原料名称","日期","序号"],
     outputs: []
   },
@@ -789,6 +813,8 @@ function newTask() {
   document.getElementById("pChannel").value = "";
   document.getElementById("pOptimizer").value = "";
   document.getElementById("basicAttrsHint").textContent = "📌 选择基础属性后，原料选择弹窗将只展示匹配的原料";
+  document.getElementById("pResolution").value = "1080p";
+  document.getElementById("pFramerate").value = "25fps";
   document.getElementById("pBitrate").value = "5 Mbps";
   document.getElementById("pFormat").value = "MP4";
   renderCards();
@@ -830,8 +856,10 @@ function openTask(id) {
   document.getElementById("pChannel").value = gBasicAttrs.channel;
   document.getElementById("pOptimizer").value = gBasicAttrs.optimizer;
   updateBasicAttrs();
-  document.getElementById("pBitrate").value = task.params.bitrate;
-  document.getElementById("pFormat").value = task.params.format;
+  document.getElementById("pResolution").value = task.params.resolution || "1080p";
+  document.getElementById("pFramerate").value = task.params.framerate || "25fps";
+  document.getElementById("pBitrate").value = task.params.bitrate || "5 Mbps";
+  document.getElementById("pFormat").value = task.params.format || "MP4";
   gActiveParams = [];
   for (var k = 0; k < task.namingParams.length; k++) gActiveParams.push(task.namingParams[k]);
   if (task.outputs && task.outputs.length > 0) {
@@ -1029,6 +1057,9 @@ function renderCards() {
   }
   h += renderOneCard("尾帧","wq","tag-wq");
   c.innerHTML = h;
+  // 中段多槽时显示拼接顺序选项
+  var orderWrap = document.getElementById("midOrderWrap");
+  if (orderWrap) orderWrap.style.display = gMidSlotList.length > 1 ? "flex" : "none";
   updateCount();
 }
 
@@ -1334,150 +1365,96 @@ function updateNamingPreview() {
 }
 
 // ===== 开始生产（含表单校验）=====
+function validateForm() {
+  var name = document.getElementById("taskNameInput").value.trim();
+  if (!name) { showToast("请填写任务名称", "w"); document.getElementById("taskNameInput").focus(); return false; }
+  if (!gBasicAttrs.biz) { showToast("请选择业务类型", "w"); return false; }
+  if (!gBasicAttrs.channel) { showToast("请选择渠道", "w"); return false; }
+  if (!gBasicAttrs.optimizer) { showToast("请选择优化师", "w"); return false; }
+  var q = gSelected["前贴"].length;
+  var zTotalCount = 0;
+  for (var zi = 0; zi < gMidSlotList.length; zi++) zTotalCount += gMidSlotList[zi].length;
+  var w = gSelected["尾帧"].length;
+  var typeCount = (q>0?1:0) + (zTotalCount>0?1:0) + (w>0?1:0);
+  if (typeCount < 2) { showToast("请至少选择两类原料（前贴/中段/尾帧）", "w"); return false; }
+  return true;
+}
+
 function startProduction() {
+  // 表单校验
+  if (!validateForm()) return;
+  
   var btn = document.getElementById("startBtn");
   btn.disabled = true;
   btn.textContent = "⚙ 生产中…";
 
-  // 中段是多工作槽
-  var q = gSelected["前贴"].length;
-  var zSlots = gMidSlotList;
-  var zTotalCount = 0;
-  for (var zi = 0; zi < zSlots.length; zi++) zTotalCount += zSlots[zi].length;
-  var w = gSelected["尾帧"].length;
-  // 至少选两类原料
-  var hasQ = q > 0;
-  var hasZ = zTotalCount > 0;
-  var hasW = w > 0;
-  var typeCount = (hasQ?1:0) + (hasZ?1:0) + (hasW?1:0);
-  if (typeCount < 2) {
-    var miss = [];
-    if (!hasQ) miss.push("前贴");
-    if (!hasZ) miss.push("中段");
-    if (!hasW) miss.push("尾帧");
-    showToast("请至少选择两类原料，缺少：" + miss.join("、"), "w");
-    btn.disabled = false;
-    btn.textContent = "⚙ 开始生产并保存任务";
-    var cards = document.getElementById("matCards").children;
-    for (var i = 0; i < cards.length; i++) {
-      var labelEl = cards[i].querySelector(".type-label");
-      if (!labelEl) continue;
-      var ct = labelEl.textContent;
-      if (miss.indexOf(ct) !== -1) {
-        cards[i].style.borderColor = "#ff4d4f";
-        (function(card) { setTimeout(function() { card.style.borderColor = ""; }, 2000); })(cards[i]);
-      }
-    }
-    return;
-  }
-
-  var fmt  = document.getElementById("pFormat").value;
-
-  var out = [];
-  var qList = gSelected["前贴"];
-  var zSlots = gMidSlotList;  // 数组的数组
-  var wList = gSelected["尾帧"];
-  // 生成中段的所有组合（各槽的笛卡尔积）
-  function genCombos(slots, idx, cur) {
-    if (idx >= slots.length) {
-      midCombos.push(cur.slice());
-      return;
-    }
-    if (slots[idx].length === 0) {
-      genCombos(slots, idx+1, cur);
-      return;
-    }
-    for (var si = 0; si < slots[idx].length; si++) {
-      cur.push(slots[idx][si]);
-      genCombos(slots, idx+1, cur);
-      cur.pop();
+  // 立即保存任务（状态为"生产中"）并跳回列表
+  var name = document.getElementById("taskNameInput").value.trim();
+  if (!name) name = "未命名任务_"+new Date().toISOString().slice(0,10);
+  var fmt = document.getElementById("pFormat").value;
+  var now = new Date();
+  var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
+  var ts = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + ":" + pad(now.getMinutes());
+  
+  // 构建原料数据
+  var midArr = [];
+  for (var si = 0; si < gMidSlotList.length; si++) {
+    for (var mi = 0; mi < gMidSlotList[si].length; mi++) {
+      midArr.push(gMidSlotList[si][mi]);
     }
   }
-  var midCombos = [];
-  genCombos(zSlots, 0, []);
-  // 生成最终成品
-  for (var qi = 0; qi < qList.length; qi++) {
-    for (var mi = 0; mi < midCombos.length; mi++) {
-      for (var wi = 0; wi < wList.length; wi++) {
-        var qt = qList[qi];
-        var zdNames = [];
-        for (var si = 0; si < midCombos[mi].length; si++) zdNames.push(midCombos[mi][si].name);
-        var zdName = zdNames.join("+");
-        var wq = wList[wi];
-        var cname = qt.name + "+" + zdName + "+" + wq.name;
-        var samp = {
-          "原料名称": cname,
-          "日期": "20260629",
-          "优化师": "张伟",
-          "设计师": "李明",
-          "序号": String(out.length + 1),
-          "业务": qt.biz || "",
-          "渠道": qt.channel || "",
-        };
-        var fn = "";
-        for (var pi = 0; pi < gActiveParams.length; pi++) {
-          if (pi > 0) fn += "_";
-          fn += (samp[gActiveParams[pi]] || gActiveParams[pi]);
-        }
-        out.push({ name: fn + "." + fmt.toLowerCase(), combo: cname, params: fmt });
-      }
-    }
-  }
-
-
-  // 保存任务
+  
   if (!gEditingTaskId) {
-    // 如果是新建任务，先创建任务记录
-    var name = document.getElementById("taskNameInput").value.trim();
-    if (!name) name = "未命名任务_"+new Date().toISOString().slice(0,10);
     var nid = gNextTaskId++;
-    var now = new Date();
-    var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
-    var ts = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + ":" + pad(now.getMinutes());
     gTasks.push({
-      id: nid, name: name, createTime: ts, status: "done",
-      materials: {
-        "前贴": gSelected["前贴"].slice(),
-        "中段": (function(){var a=[];for(var si=0;si<gMidSlotList.length;si++){for(var mi=0;mi<gMidSlotList[si].length;mi++)a.push(gMidSlotList[si][mi]);}return a;})(),
-        "尾帧": gSelected["尾帧"].slice()
-      },
-      params: { bitrate: document.getElementById("pBitrate").value, format: fmt },
+      id: nid, name: name, createTime: ts, status: "processing",
+      materials: { "前贴": gSelected["前贴"].slice(), "中段": midArr, "尾帧": gSelected["尾帧"].slice() },
+      params: { resolution: document.getElementById("pResolution").value, framerate: document.getElementById("pFramerate").value, bitrate: document.getElementById("pBitrate").value, format: fmt },
       namingParams: gActiveParams.slice(),
       basicAttrs: { biz:gBasicAttrs.biz, channel:gBasicAttrs.channel, optimizer:gBasicAttrs.optimizer },
-      outputs: out
+      outputs: []
     });
   } else {
     for (var k = 0; k < gTasks.length; k++) {
       if (gTasks[k].id === gEditingTaskId) {
-        gTasks[k].outputs = out;
-        gTasks[k].status = "done";
+        gTasks[k].name = name;
+        gTasks[k].materials = { "前贴": gSelected["前贴"].slice(), "中段": midArr, "尾帧": gSelected["尾帧"].slice() };
+        gTasks[k].params = { resolution: document.getElementById("pResolution").value, framerate: document.getElementById("pFramerate").value, bitrate: document.getElementById("pBitrate").value, format: fmt };
+        gTasks[k].namingParams = gActiveParams.slice();
+        gTasks[k].basicAttrs = { biz:gBasicAttrs.biz, channel:gBasicAttrs.channel, optimizer:gBasicAttrs.optimizer };
+        gTasks[k].status = "processing";
+        gTasks[k].outputs = [];
         break;
       }
     }
   }
-
-  // 保存到原料库
+  
+  // 保存到原料库（如果勾选了）
   var saveLib = document.getElementById("saveAsMaterial").checked;
-  if (saveLib && out.length > 0) {
+  if (saveLib) {
     var saveType = document.getElementById("saveMaterialType").value;
-    for (var oi = 0; oi < out.length; oi++) {
-      MATERIALS_DB.push({
-        id: Date.now() + oi + Math.random(),
-        name: out[oi].name.replace(/\.\w+$/, ""),
-        type: saveType,
-        biz: gBasicAttrs.biz || "存量",
-        channel: gBasicAttrs.channel || "广点通",
-        optimizer: gBasicAttrs.optimizer || "未设置",
-        date: new Date().toISOString().slice(0,10),
-        duration: "00:30",
-        size: (Math.random() * 20 + 5).toFixed(1) + " MB"
-      });
+    // 生成一个占位成品保存到原料库
+    var cnameParts = [];
+    for (var qi = 0; qi < gSelected["前贴"].length; qi++) cnameParts.push(gSelected["前贴"][qi].name);
+    for (var si = 0; si < gMidSlotList.length; si++) {
+      for (var mi = 0; mi < gMidSlotList[si].length; mi++) cnameParts.push(gMidSlotList[si][mi].name);
     }
-    showToast("生产完成！共生成 " + out.length + " 个成品，已保存到原料库", "s");
-  } else {
-    showToast("生产完成！共生成 " + out.length + " 个成品素材", "s");
+    for (var wi = 0; wi < gSelected["尾帧"].length; wi++) cnameParts.push(gSelected["尾帧"][wi].name);
+    var cname = cnameParts.length > 0 ? cnameParts.join("+") : "组合素材";
+    MATERIALS_DB.push({
+      id: Date.now() + Math.random(),
+      name: cname,
+      type: saveType,
+      biz: gBasicAttrs.biz || "存量",
+      channel: gBasicAttrs.channel || "广点通",
+      optimizer: gBasicAttrs.optimizer || "未设置",
+      date: new Date().toISOString().slice(0,10),
+      duration: "00:30",
+      size: (Math.random() * 20 + 5).toFixed(1) + " MB"
+    });
   }
 
+  showToast("任务已创建，生产中…", "s");
   btn.disabled = false;
   btn.textContent = "⚙ 开始生产并保存任务";
   goBackToList();
