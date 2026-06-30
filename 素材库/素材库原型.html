@@ -581,7 +581,7 @@ document.getElementById("uploadOverlay").addEventListener("click", function(e) {
 });
 
 /* 初始渲染 */
-renderGrid();
+try { renderGrid(); } catch(e) { console.error("renderGrid init failed:", e); }
 </script>
 </body>
 </html>
