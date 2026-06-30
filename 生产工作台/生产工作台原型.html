@@ -1433,8 +1433,10 @@ function showToast(msg, type) {
 }
 
 // ===== 初始化 =====
-renderTaskList();
-switchView('list');
+document.addEventListener("DOMContentLoaded", function() {
+  renderTaskList();
+  switchView('list');
+});
 </script>
 </body>
 </html>
