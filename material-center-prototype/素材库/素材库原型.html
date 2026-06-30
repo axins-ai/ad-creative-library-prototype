@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v20260630-1017: fix getFilteredData null safety + hide top-bar -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -17,8 +18,9 @@
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 }
 html{font-size:14px}
-body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
-.top-bar{height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:var(--shadow-s);position:sticky;top:0;z-index:100;flex-shrink:0;}
+body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;margin:0;padding:0}
+/* 本页面在 iframe 中加载，隐藏顶部栏（防止双菜单） */
+.top-bar{display:none !important}
 .top-bar h1{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
 .top-bar .actions{display:flex;gap:8px;align-items:center}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:32px;padding:0 14px;border-radius:var(--radius-s);font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .18s;white-space:nowrap;}
@@ -31,44 +33,42 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .filter-group select,.filter-group input[type="date"],.filter-group input[type="text"]{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;}
 .filter-group select:focus,.filter-group input:focus{border-color:var(--primary)}
 .filter-group .date-sep{font-size:11px;color:#999}
-.view-toggle{display:flex;align-items:center;gap:2px;margin-left:auto}
-.view-toggle button{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:14px;transition:all .15s;}
-.view-toggle button:first-child{border-radius:var(--radius-s) 0 0 var(--radius-s)}
-.view-toggle button:last-child{border-radius:0 var(--radius-s) var(--radius-s) 0;border-left:none}
-.view-toggle button.active{background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+
+/* 搜索下拉框样式 */
+.search-select{position:relative;display:inline-block;min-width:140px;}
+.search-select select{width:100%;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;appearance:none;-webkit-appearance:none;padding-right:24px;}
+.search-select select:focus{border-color:var(--primary)}
+.search-select .select-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-3);font-size:10px;}
+.search-select-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--primary);border-radius:var(--radius-s);box-shadow:0 4px 12px rgba(0,0,0,.15);max-height:200px;overflow-y:auto;z-index:1000;display:none;margin-top:2px;}
+.search-select-dropdown.show{display:block}
+.search-select-dropdown .search-input{width:100%;padding:6px 8px;border:none;border-bottom:1px solid var(--border-light);outline:none;font-size:12px;}
+.search-select-dropdown .option-item{padding:6px 10px;cursor:pointer;font-size:12px;transition:background .15s;}
+.search-select-dropdown .option-item:hover{background:var(--primary-light);color:var(--primary)}
+.search-select-dropdown .option-item.selected{background:var(--primary-light);color:var(--primary);font-weight:500;}
+
 .grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.grid-view.active{display:grid}
 .grid-card{background:var(--bg-card);border-radius:var(--radius-l);overflow:hidden;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:transform .2s,box-shadow .2s;cursor:pointer;position:relative;}
 .grid-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-m)}
 .grid-card .thumb{width:100%;aspect-ratio:16/9;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:48px;color:#ccc;position:relative;overflow:hidden;}
 .grid-card .thumb .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
 .grid-card:hover .thumb .play-overlay{opacity:1}
-.grid-card .thumb .play-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.grid-card .thumb .play-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .grid-card .info{padding:12px 14px}
 .grid-card .info .name{font-size:13px;font-weight:500;color:var(--text-1);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .grid-card .info .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .grid-card .badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
-.bade-video{background:#e3f2fd;color:#1976d2}
-.bade-image{background:#e8f5e9;color:#388e3c}
-.bade-auto{background:#f3e5f5;color:#7b1fa2}
-.bade-manual{background:#fff8e1;color:#f57f17}
-.list-view{display:none;flex-direction:column;gap:8px}
-.list-view.active{display:flex}
-.list-row{background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:background .15s;cursor:pointer;}
-.list-row:hover{background:var(--bg-hover)}
-.list-row .thumb-sm{width:80px;height:45px;background:#f5f5f5;border-radius:var(--radius-s);display:flex;align-items:center;justify-content:center;font-size:20px;color:#ccc;flex-shrink:0;}
-.list-row .info{flex:1;min-width:0}
-.list-row .info .name{font-size:13px;font-weight:500;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.list-row .info .meta{display:flex;gap:6px;margin-top:4px}
-.list-row .date{font-size:12px;color:var(--text-3);white-space:nowrap}
-.list-row .preview-btn{width:32px;height:32px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--primary);border:none;cursor:pointer;transition:all .15s;flex-shrink:0;}
-.list-row .preview-btn:hover{background:var(--primary);color:#fff}
-.empty-state{text-align:center;padding:80px 20px;color:var(--text-3)}
+.badge-video{background:#e3f2fd;color:#1976d2}
+.badge-image{background:#e8f5e9;color:#388e3c}
+.badge-auto{background:#f3e5f5;color:#7b1fa2}
+.badge-manual{background:#fff8e1;color:#f57f17}
+.empty-state{text-align:center;padding:80px 20px;color:var(--text-3);grid-column:1/-1;}
 .empty-state .icon{font-size:64px;margin-bottom:16px;display:block}
+
+/* 预览弹窗样式 */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:40px;animation:fadeIn .2s;}
 .modal-overlay.active{display:flex}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{background:#fff;border-radius:var(--radius-l);width:900px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-l);animation:slideUp .25s;}
+.modal{background:#fff;border-radius:var(--radius-l);width:900px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-m);animation:slideUp .25s;}
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
 .modal-header h3{font-size:15px;font-weight:600}
@@ -82,12 +82,15 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .modal-sidebar .detail-row{margin-bottom:16px}
 .modal-sidebar .detail-label{font-size:11px;color:var(--text-3);font-weight:500;margin-bottom:4px}
 .modal-sidebar .detail-value{font-size:13px;color:var(--text-1)}
+
+/* 上传弹窗样式 */
 .upload-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s;}
 .upload-overlay.active{display:flex}
-.upload-modal{background:#fff;border-radius:var(--radius-l);width:560px;max-width:95vw;max-height:90vh;box-shadow:var(--shadow-l);animation:slideUp .25s;display:flex;flex-direction:column;}
+.upload-modal{background:#fff;border-radius:var(--radius-l);width:560px;max-width:95vw;max-height:90vh;box-shadow:var(--shadow-m);animation:slideUp .25s;display:flex;flex-direction:column;}
 .upload-modal .modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
 .upload-modal .modal-header h3{font-size:15px;font-weight:600}
 .upload-modal .modal-header .close-btn{width:32px;height:32px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-3);transition:background .15s;}
+.upload-modal .modal-header .close-btn:hover{background:var(--bg-page)}
 .upload-body{padding:16px 24px;overflow-y:auto;flex:1}
 .upload-body .file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-3);font-size:13px;margin-bottom:16px;}
 .upload-body .file-drop:hover,.upload-body .file-drop.drag-over{border-color:var(--primary);background:var(--primary-light)}
@@ -102,8 +105,19 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 </head>
 <body>
 
+<div class="top-bar">
+  <h1>📂 素材库</h1>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="openUploadModal()">↑ 上传素材</button>
+  </div>
+</div>
+
 <div class="content">
   <div class="filter-bar">
+    <div class="filter-group">
+      <label>名称搜索</label>
+      <input type="text" id="nameFilter" placeholder="搜索素材名称..." oninput="applyFilter()">
+    </div>
     <div class="filter-group">
       <label>类型</label>
       <select id="typeFilter" onchange="applyFilter()">
@@ -121,20 +135,44 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </select>
     </div>
     <div class="filter-group">
-      <label>上传日期</label>
-      <input type="date" id="dateStart" value="2026-06-01">
-      <span class="date-sep">~</span>
-      <input type="date" id="dateEnd" value="2026-06-24">
+      <label>优化师</label>
+      <div class="search-select" id="optimizerFilterWrap">
+        <select id="optimizerFilter" onchange="applyFilter()">
+          <option value="">全部</option>
+          <option>崔志恒</option>
+          <option>黄佩贤</option>
+          <option>黎舒晴</option>
+          <option>李雨航</option>
+          <option>谭嘉颖</option>
+          <option>林金维</option>
+          <option>陈羽思</option>
+          <option>叶首龙</option>
+          <option>赖嘉俊</option>
+          <option>戚嘉豪</option>
+          <option>黄雄伟</option>
+          <option>姚丰育</option>
+          <option>卢俭聪</option>
+        </select>
+        <div class="select-arrow">▼</div>
+        <div class="search-select-dropdown" id="optimizerFilterDropdown">
+          <input type="text" class="search-input" placeholder="搜索优化师..." oninput="filterOptimizerOptions(this.value, 'optimizerFilter', 'optimizerFilterDropdown')">
+        </div>
+      </div>
     </div>
-    <div class="view-toggle">
-      <button class="active" onclick="switchView('grid',this)" title="网格视图">▦</button>
-      <button onclick="switchView('list',this)" title="列表视图">☰</button>
+    <div class="filter-group">
+      <label>上传日期</label>
+      <input type="date" id="dateStart" value="2026-06-01" onchange="applyFilter()">
+      <span class="date-sep">~</span>
+      <input type="date" id="dateEnd" value="2026-06-24" onchange="applyFilter()">
+    </div>
+    <div class="filter-group" style="margin-left:auto">
+      <button class="btn btn-primary" onclick="openUploadMaterialModal()">📷 上传素材</button>
     </div>
   </div>
-  <div class="grid-view active" id="gridView"></div>
-  <div class="list-view" id="listView"></div>
+  <div class="grid-view" id="gridView"></div>
 </div>
 
+<!-- 预览弹窗 -->
 <div class="modal-overlay" id="previewModal">
   <div class="modal">
     <div class="modal-header">
@@ -143,6 +181,32 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     </div>
     <div class="modal-body">
       <div class="modal-preview" id="previewArea">
+        <div class="preview-video-wrap" id="previewVideoWrap" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;position:relative;">
+          <div class="fake-player" style="width:85%;max-width:680px;aspect-ratio:16/9;background:#111;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.5)">
+            <div class="fake-progress" style="position:absolute;bottom:0;left:0;right:0;height:4px;background:#333">
+              <div style="width:35%;height:100%;background:var(--primary);border-radius:0 2px 2px 0"></div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:16px;right:16px;display:flex;align-items:center;gap:12px">
+              <span style="color:#fff;font-size:12px">▶</span>
+              <div style="flex:1;height:3px;background:#555;border-radius:2px">
+                <div style="width:35%;height:100%;background:var(--primary);border-radius:2px"></div>
+              </div>
+              <span style="color:#999;font-size:11px">01:23 / 03:45</span>
+              <span style="color:#fff;font-size:12px">⛶</span>
+            </div>
+            <div style="color:rgba(255,255,255,.6);font-size:48px">▶</div>
+            <div style="color:rgba(255,255,255,.35);font-size:13px;margin-top:12px">点击播放 · 原型模拟</div>
+          </div>
+        </div>
+        <div class="preview-image-wrap" id="previewImageWrap" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:#1a1a1a;padding:32px">
+          <div style="max-width:90%;max-height:90%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a2a3e,#1a2a2e);border-radius:12px;padding:48px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+            <div style="text-align:center;color:rgba(255,255,255,.5)">
+              <div style="font-size:64px;margin-bottom:16px">🖼️</div>
+              <div style="font-size:14px;color:rgba(255,255,255,.4)">图片素材预览区域</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.25);margin-top:8px">实际将展示真实图片内容</div>
+            </div>
+          </div>
+        </div>
         <div class="preview-placeholder" id="previewPlaceholder">
           <div class="play-icon" id="previewIcon">▶</div>
           <div class="tip" id="previewTip">此为原型预览，实际将展示真实素材内容</div>
@@ -182,6 +246,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   </div>
 </div>
 
+<!-- 上传弹窗 -->
 <div class="upload-overlay" id="uploadOverlay">
   <div class="upload-modal">
     <div class="modal-header">
@@ -219,11 +284,32 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
       <div class="fm-group">
         <label>优化师</label>
-        <input type="text" id="uploadOptimizer" placeholder="请输入优化师姓名">
+        <div class="search-select" id="uploadOptimizerWrap">
+          <select id="uploadOptimizer">
+            <option value="">请选择</option>
+            <option>崔志恒</option>
+            <option>黄佩贤</option>
+            <option>黎舒晴</option>
+            <option>李雨航</option>
+            <option>谭嘉颖</option>
+            <option>林金维</option>
+            <option>陈羽思</option>
+            <option>叶首龙</option>
+            <option>赖嘉俊</option>
+            <option>戚嘉豪</option>
+            <option>黄雄伟</option>
+            <option>姚丰育</option>
+            <option>卢俭聪</option>
+          </select>
+          <div class="select-arrow">▼</div>
+          <div class="search-select-dropdown" id="uploadOptimizerDropdown">
+            <input type="text" class="search-input" placeholder="搜索优化师..." oninput="filterOptimizerOptions(this.value, 'uploadOptimizer', 'uploadOptimizerDropdown')">
+          </div>
+        </div>
       </div>
     </div>
     <div class="upload-actions">
-      <button class="btn btn-outline" onclick="closeUploadModal()">取消</button>
+      <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="closeUploadModal()">取消</button>
       <button class="btn btn-primary" onclick="submitUpload()">确认上传</button>
     </div>
   </div>
@@ -231,37 +317,129 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 <script>
 var materialData = [
-  {id:1, name:"夏日促销A版_前贴01_中段03_尾帧02.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-23", source:"自动入库", size:"15.2MB"},
-  {id:2, name:"品牌宣传主视觉_v2.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-22", source:"手动上传", size:"22.8MB"},
-  {id:3, name:"产品展示图_横版_1080p.png", type:"图片", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-22", source:"自动入库", size:"1.4MB"},
-  {id:4, name:"节日活动_快剪版_30s.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"王五", date:"2026-06-21", source:"自动入库", size:"8.6MB"},
-  {id:5, name:"Banner_首页轮播_750x300.jpg", type:"图片", biz:"存量", channel:"广点通", optimizer:"李四", date:"2026-06-21", source:"手动上传", size:"320KB"},
-  {id:6, name:"新品上市_15s短版_尾帧变体02.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"张三", date:"2026-06-20", source:"自动入库", size:"5.1MB"},
+  {id:1, name:"夏日促销A版_前贴01_中段03_尾帧02.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"崔志恒", date:"2026-06-23", source:"自动入库", size:"15.2MB"},
+  {id:2, name:"品牌宣传主视觉_v2.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"黄佩贤", date:"2026-06-22", source:"手动上传", size:"22.8MB"},
+  {id:3, name:"产品展示图_横版_1080p.png", type:"图片", biz:"存量", channel:"广点通", optimizer:"黎舒晴", date:"2026-06-22", source:"自动入库", size:"1.4MB"},
+  {id:4, name:"节日活动_快剪版_30s.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"李雨航", date:"2026-06-21", source:"自动入库", size:"8.6MB"},
+  {id:5, name:"Banner_首页轮播_750x300.jpg", type:"图片", biz:"存量", channel:"广点通", optimizer:"谭嘉颖", date:"2026-06-21", source:"手动上传", size:"320KB"},
+  {id:6, name:"新品上市_15s短版_尾帧变体02.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"林金维", date:"2026-06-20", source:"自动入库", size:"5.1MB"},
+  {id:7, name:"开场动画_科技感_前贴01.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"陈羽思", date:"2026-06-20", source:"自动入库", size:"12.8MB"},
+  {id:8, name:"产品特写_中段素材_正脸版.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"叶首龙", date:"2026-06-19", source:"自动入库", size:"18.3MB"},
+  {id:9, name:"行动号召_尾帧01_立即咨询.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"赖嘉俊", date:"2026-06-19", source:"手动上传", size:"3.2MB"},
+  {id:10, name:"竖版海报_9:16_权益介绍.png", type:"图片", biz:"权益", channel:"头条", optimizer:"戚嘉豪", date:"2026-06-18", source:"手动上传", size:"850KB"},
+  {id:11, name:"信息流大图_1200x628_夏日促销.jpg", type:"图片", biz:"存量", channel:"广点通", optimizer:"黄雄伟", date:"2026-06-18", source:"自动入库", size:"420KB"},
+  {id:12, name:"完整成片_存量套餐_前中尾_1080p.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"姚丰育", date:"2026-06-17", source:"自动入库", size:"28.5MB"},
+  {id:13, name:"Logo动画_尾帧03_品牌曝光.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"卢俭聪", date:"2026-06-17", source:"自动入库", size:"4.7MB"},
+  {id:14, name:"方图_1:1_产品主视觉.png", type:"图片", biz:"存量", channel:"广点通", optimizer:"崔志恒", date:"2026-06-16", source:"手动上传", size:"680KB"},
+  {id:15, name:"快闪促销_前贴02_限时优惠.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"黄佩贤", date:"2026-06-16", source:"自动入库", size:"9.8MB"},
+  {id:16, name:"贴片中段_口播版_优化师A.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"黎舒晴", date:"2026-06-15", source:"自动入库", size:"21.1MB"},
+  {id:17, name:"落地页预览图_权益详情.jpg", type:"图片", biz:"权益", channel:"头条", optimizer:"李雨航", date:"2026-06-15", source:"手动上传", size:"280KB"},
+  {id:18, name:"品牌背书_中段素材_权威认证.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"谭嘉颖", date:"2026-06-14", source:"自动入库", size:"16.4MB"},
+  {id:19, name:"动态Banner_富媒体_点击动画.gif", type:"图片", biz:"权益", channel:"头条", optimizer:"林金维", date:"2026-06-14", source:"手动上传", size:"1.8MB"},
+  {id:20, name:"成品合集_多尺寸输出_720p+1080p.zip", type:"视频", biz:"存量", channel:"广点通", optimizer:"陈羽思", date:"2026-06-13", source:"自动入库", size:"45.2MB"},
 ];
 var uploadSelectedFiles = [];
 
+/* ========== 优化师下拉搜索功能 ========== */
+function initSearchSelect(selectId, dropdownId) {
+  var select = document.getElementById(selectId);
+  var dropdown = document.getElementById(dropdownId);
+  
+  // 点击 select 时显示下拉
+  select.addEventListener('click', function(e) {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+    if (dropdown.classList.contains('show')) {
+      var input = dropdown.querySelector('.search-input');
+      input.focus();
+      filterOptimizerOptions(input.value, selectId, dropdownId);
+    }
+  });
+  
+  // 点击页面其他区域时关闭下拉
+  document.addEventListener('click', function() {
+    dropdown.classList.remove('show');
+  });
+  
+  dropdown.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+}
+
+function filterOptimizerOptions(keyword, selectId, dropdownId) {
+  var select = document.getElementById(selectId);
+  var dropdown = document.getElementById(dropdownId);
+  var input = dropdown.querySelector('.search-input');
+  var keyword = input.value.toLowerCase();
+  
+  // 清空下拉选项
+  var existingOptions = dropdown.querySelectorAll('.option-item');
+  existingOptions.forEach(function(item) { item.remove(); });
+  
+  // 获取 select 中的所有选项
+  var options = select.options;
+  var hasMatch = false;
+  
+  for (var i = 0; i < options.length; i++) {
+    var text = options[i].text;
+    if (text.toLowerCase().indexOf(keyword) !== -1 || options[i].value === "") {
+      var item = document.createElement('div');
+      item.className = 'option-item';
+      if (options[i].selected) item.classList.add('selected');
+      item.textContent = text;
+      item.setAttribute('data-value', options[i].value);
+      item.onclick = (function(idx) {
+        return function() {
+          select.selectedIndex = idx;
+          dropdown.classList.remove('show');
+          if (selectId === 'optimizerFilter') applyFilter();
+        };
+      })(i);
+      dropdown.appendChild(item);
+      if (text.toLowerCase().indexOf(keyword) !== -1) hasMatch = true;
+    }
+  }
+}
+
+// 初始化所有搜索下拉框
+initSearchSelect('optimizerFilter', 'optimizerFilterDropdown');
+initSearchSelect('uploadOptimizer', 'uploadOptimizerDropdown');
+
+/* ========== 筛选和渲染 ========== */
+function applyFilter() {
+  renderGrid();
+}
+
 function getFilteredData() {
-  var nameKw = (document.getElementById("nameFilter").value || "").trim().toLowerCase();
-  var typeVal = document.getElementById("typeFilter").value;
-  var sourceVal = document.getElementById("sourceFilter").value;
+  var nameEl = document.getElementById("nameFilter");
+  var typeEl = document.getElementById("typeFilter");
+  var sourceEl = document.getElementById("sourceFilter");
+  var optEl = document.getElementById("optimizerFilter");
+
+  var nameKw = (nameEl && nameEl.value || "").trim().toLowerCase();
+  var typeVal = (typeEl && typeEl.value) || "全部类型";
+  var sourceVal = (sourceEl && sourceEl.value) || "全部来源";
+  var optimizerVal = (optEl && optEl.value) || "";
+
   var result = [];
   for (var i = 0; i < materialData.length; i++) {
     var m = materialData[i];
     if (nameKw && m.name.toLowerCase().indexOf(nameKw) === -1) continue;
     if (typeVal !== "全部类型" && m.type !== typeVal) continue;
     if (sourceVal !== "全部来源" && m.source !== sourceVal) continue;
+    if (optimizerVal && m.optimizer !== optimizerVal) continue;
     result.push(m);
   }
   return result;
 }
 
-function renderAll() { renderGrid(); renderList(); }
-
 function renderGrid() {
+  try {
   var data = getFilteredData();
   var el = document.getElementById("gridView");
+  if (!el) { console.error("gridView not found"); return; }
   if (data.length === 0) {
-    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">📂</div><div class="title">暂无素材</div><div class="desc">试试调整筛选条件，或上传新素材</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无素材</div><div class="desc">试试调整筛选条件，或上传新素材</div></div>';
     return;
   }
   var html = "";
@@ -269,8 +447,8 @@ function renderGrid() {
     var m = data[i];
     var bg = "linear-gradient(135deg,#1a1a2e,#16213e)";
     if (m.type === "图片") bg = "linear-gradient(135deg,#f093fb,#f5576c)";
-    var badgeCls = m.type === "视频" ? "bade-video" : "bade-image";
-    var sourceCls = m.source === "自动入库" ? "bade-auto" : "bade-manual";
+    var badgeCls = m.type === "视频" ? "badge-video" : "badge-image";
+    var sourceCls = m.source === "自动入库" ? "badge-auto" : "badge-manual";
     html += '<div class="grid-card" onclick="openPreview(' + m.id + ')">' +
       '<div class="thumb" style="background:' + bg + '">' +
         '<div style="color:rgba(255,255,255,.3);font-size:36px">' + (m.type === "视频" ? "🎬" : "🖼️") + '</div>' +
@@ -283,41 +461,11 @@ function renderGrid() {
       '</div></div>';
   }
   el.innerHTML = html;
-}
-
-function renderList() {
-  var data = getFilteredData();
-  var el = document.getElementById("listView");
-  if (data.length === 0) {
-    el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无素材</div></div>';
-    return;
+  } catch(e) {
+    console.error("renderGrid error:", e);
+    var el2 = document.getElementById("gridView");
+    if (el2) el2.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div class="title">渲染出错</div><div class="desc">' + e.message + '</div></div>';
   }
-  var html = "";
-  for (var i = 0; i < data.length; i++) {
-    var m = data[i];
-    var badgeCls = m.type === "视频" ? "bade-video" : "bade-image";
-    var sourceCls = m.source === "自动入库" ? "bade-auto" : "bade-manual";
-    html += '<div class="list-row" onclick="openPreview(' + m.id + ')">' +
-      '<div class="thumb-sm" style="background:#f0f0f0;color:#ccc">' + (m.type === "视频" ? "🎬" : "🖼️") + '</div>' +
-      '<div class="info">' +
-        '<div class="name">' + m.name + '</div>' +
-        '<div class="meta"><span class="badge ' + badgeCls + '">' + m.type + '</span>' +
-        '<span class="badge ' + sourceCls + '">' + m.source + '</span></div>' +
-      '</div>' +
-      '<div class="date">' + m.date + '</div>' +
-      '<button class="preview-btn" title="预览" onclick="event.stopPropagation();openPreview(' + m.id + ')">👁</button>' +
-      '</div>';
-  }
-  el.innerHTML = html;
-}
-
-function switchView(view, btn) {
-  document.getElementById("gridView").classList.remove("active");
-  document.getElementById("listView").classList.remove("active");
-  document.getElementById(view + "View").classList.add("active");
-  var btns = document.querySelectorAll(".view-toggle button");
-  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
-  btn.classList.add("active");
 }
 
 function openPreview(id) {
@@ -334,15 +482,20 @@ function openPreview(id) {
   document.getElementById("detailOptimizer").textContent = m.optimizer;
   document.getElementById("detailDate").textContent = m.date;
   document.getElementById("detailSource").textContent = m.source;
-  var icon = document.getElementById("previewIcon");
-  var tip = document.getElementById("previewTip");
+  
+  var placeholder = document.getElementById("previewPlaceholder");
+  var videoWrap = document.getElementById("previewVideoWrap");
+  var imageWrap = document.getElementById("previewImageWrap");
+  placeholder.style.display = "none";
+  videoWrap.style.display = "none";
+  imageWrap.style.display = "none";
+  
   if (m.type === "视频") {
-    icon.textContent = "▶";
-    tip.textContent = "此为原型预览，实际将播放真实视频内容";
+    videoWrap.style.display = "flex";
   } else {
-    icon.textContent = "🖼️";
-    tip.textContent = "此为原型预览，实际将展示真实图片内容";
+    imageWrap.style.display = "flex";
   }
+  
   document.getElementById("previewModal").classList.add("active");
   document.body.style.overflow = "hidden";
 }
@@ -402,12 +555,13 @@ function submitUpload() {
       size: (file.size/1024/1024).toFixed(1) + "MB"
     });
   }
-  renderAll();
+  renderGrid();
   closeUploadModal();
   alert("成功上传 " + uploadSelectedFiles.length + " 个素材");
   uploadSelectedFiles = [];
 }
 
+/* 拖拽上传 */
 var dropArea = document.getElementById("uploadFileDrop");
 if (dropArea) {
   dropArea.addEventListener("dragover", function(e) { e.preventDefault(); dropArea.classList.add("drag-over"); });
@@ -421,6 +575,7 @@ if (dropArea) {
   });
 }
 
+/* 点击弹窗外部关闭 */
 document.getElementById("previewModal").addEventListener("click", function(e) {
   if (e.target === this) closePreview();
 });
@@ -428,7 +583,8 @@ document.getElementById("uploadOverlay").addEventListener("click", function(e) {
   if (e.target === this) closeUploadModal();
 });
 
-renderAll();
+/* 初始渲染 */
+try { renderGrid(); } catch(e) { console.error("renderGrid init failed:", e); }
 </script>
 </body>
 </html>
