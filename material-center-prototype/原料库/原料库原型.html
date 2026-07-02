@@ -182,7 +182,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
       <div class="ms-fm-group">
         <label>原料类型 <span class="req">*</span></label>
-        <select id="msUploadType" onchange="refreshContentTagTypeOptions();onContentTagTypeChange();">
+        <select id="msUploadType" onchange="renderContentTagFields();">
           <option>前贴</option>
           <option>中段</option>
           <option>尾帧</option>
@@ -223,36 +223,30 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </select>
       </div>
       <div style="border-top:1px solid var(--border-light);margin:14px 0;padding-top:6px">
-        <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px">🏷️ 标签配置</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px">🏷️ 标签配置 <span style="font-size:11px;color:var(--danger);font-weight:400">* 全部必填</span></div>
         <div class="ms-fm-group">
-          <label>用户标签</label>
-          <select id="msUserTag1" onchange="onUserTag1Change()">
-            <option value="">请选择</option>
-            <option>地区</option>
-            <option>年龄</option>
-            <option>性别</option>
-          </select>
-          <select id="msUserTag2" style="margin-top:6px;display:none">
-            <option value="">请选择</option>
-          </select>
+          <label>用户标签 <span class="req">*</span></label>
+          <div style="display:flex;gap:8px">
+            <select id="msUserTag1" onchange="onUserTag1Change()" style="flex:1">
+              <option value="">请选择</option>
+              <option>地区</option>
+              <option>年龄</option>
+              <option>性别</option>
+            </select>
+            <select id="msUserTag2" style="flex:1">
+              <option value="">请选择</option>
+            </select>
+          </div>
         </div>
         <div class="ms-fm-group">
-          <label>产品标签</label>
+          <label>产品标签 <span class="req">*</span></label>
           <select id="msProductTag">
             <option value="">请选择</option>
             <option>39元</option>
             <option>59元</option>
           </select>
         </div>
-        <div class="ms-fm-group">
-          <label>内容标签</label>
-          <select id="msContentTagType" onchange="onContentTagTypeChange()">
-            <option value="">请选择</option>
-          </select>
-          <select id="msContentTagValue" style="margin-top:6px;display:none">
-            <option value="">请选择</option>
-          </select>
-        </div>
+        <div id="msContentTagsWrap"></div>
       </div>
     </div>
     <div class="ms-modal-ft">
@@ -361,6 +355,23 @@ function updateMaterialTags(cfg) {
 
 loadTagConfig();
 
+function extractTagValues(tags) {
+  var values = [];
+  if (!tags) return values;
+  if (Array.isArray(tags)) {
+    for (var i = 0; i < tags.length; i++) values.push(tags[i]);
+  } else {
+    if (tags.userValue) values.push(tags.userValue);
+    if (tags.product) values.push(tags.product);
+    if (tags.content) {
+      for (var k in tags.content) {
+        if (tags.content.hasOwnProperty(k)) values.push(tags.content[k]);
+      }
+    }
+  }
+  return values;
+}
+
 function renderMsGrid() {
   var grid = document.getElementById("msGrid");
   if (msMaterials.length === 0) {
@@ -378,9 +389,10 @@ function renderMsGrid() {
     var icon = thumbIcons[m.type] || "🎬";
     var bg = thumbColors[m.type] || "#f5f5f5";
     var tagPills = "";
-    if (m.tags && m.tags.length) {
-      for (var t = 0; t < m.tags.length; t++) {
-        tagPills += '<span class="tag-pill">' + m.tags[t] + '</span>';
+    var tagValues = extractTagValues(m.tags);
+    if (tagValues.length) {
+      for (var t = 0; t < tagValues.length; t++) {
+        tagPills += '<span class="tag-pill">' + tagValues[t] + '</span>';
       }
     }
     html += '<div class="ms-card" onclick="openMsPreview(' + m.id + ')">' +
@@ -405,13 +417,9 @@ function openUploadModal() {
   msSelectedFiles = [];
   document.getElementById("msUploadFileInfo").style.display = "none";
   document.getElementById("msUserTag1").value = "";
-  document.getElementById("msUserTag2").style.display = "none";
-  document.getElementById("msUserTag2").innerHTML = '<option value="">请选择</option>';
+  onUserTag1Change();
   document.getElementById("msProductTag").value = "";
-  refreshContentTagTypeOptions();
-  document.getElementById("msContentTagType").value = "";
-  document.getElementById("msContentTagValue").style.display = "none";
-  document.getElementById("msContentTagValue").innerHTML = '<option value="">请选择</option>';
+  renderContentTagFields();
 }
 
 function onUserTag1Change() {
@@ -422,36 +430,26 @@ function onUserTag1Change() {
     for (var i = 0; i < USER_TAG2_MAP[s1].length; i++) {
       s2.innerHTML += '<option>' + USER_TAG2_MAP[s1][i] + '</option>';
     }
-    s2.style.display = "block";
-  } else {
-    s2.style.display = "none";
   }
 }
 
-function refreshContentTagTypeOptions() {
+function renderContentTagFields() {
   var type = document.getElementById("msUploadType").value;
-  var sel = document.getElementById("msContentTagType");
+  var wrap = document.getElementById("msContentTagsWrap");
   var cfg = CONTENT_TAG_CONFIG[type] || {};
-  sel.innerHTML = '<option value="">请选择</option>';
+  var html = '<div class="ms-fm-group"><label>内容标签 <span class="req">*</span></label></div>';
   for (var k in cfg) {
-    if (cfg.hasOwnProperty(k)) sel.innerHTML += '<option>' + k + '</option>';
-  }
-}
-
-function onContentTagTypeChange() {
-  var type = document.getElementById("msUploadType").value;
-  var t1 = document.getElementById("msContentTagType").value;
-  var s2 = document.getElementById("msContentTagValue");
-  s2.innerHTML = '<option value="">请选择</option>';
-  var cfg = CONTENT_TAG_CONFIG[type] || {};
-  if (t1 && cfg[t1]) {
-    for (var i = 0; i < cfg[t1].length; i++) {
-      s2.innerHTML += '<option>' + cfg[t1][i] + '</option>';
+    if (!cfg.hasOwnProperty(k)) continue;
+    html += '<div class="ms-fm-group">' +
+      '<div class="sub-label">' + k + '</div>' +
+      '<select class="ms-content-tag" data-type="' + k + '">' +
+        '<option value="">请选择</option>';
+    for (var i = 0; i < cfg[k].length; i++) {
+      html += '<option>' + cfg[k][i] + '</option>';
     }
-    s2.style.display = "block";
-  } else {
-    s2.style.display = "none";
+    html += '</select></div>';
   }
+  wrap.innerHTML = html;
 }
 
 function closeUploadModal(e) {
@@ -485,12 +483,23 @@ function submitUpload() {
   var userTag1 = document.getElementById("msUserTag1").value;
   var userTag2 = document.getElementById("msUserTag2").value;
   var productTag = document.getElementById("msProductTag").value;
-  var contentType = document.getElementById("msContentTagType").value;
-  var contentValue = document.getElementById("msContentTagValue").value;
-  var tags = [];
-  if (userTag1 && userTag2) tags.push("用户:" + userTag1 + "-" + userTag2);
-  if (productTag) tags.push("产品:" + productTag);
-  if (contentType && contentValue) tags.push("内容:" + contentType + "-" + contentValue);
+  if (!userTag1 || !userTag2) { showToast("请选择用户标签", "warning"); return; }
+  if (!productTag) { showToast("请选择产品标签", "warning"); return; }
+  var contentTags = {};
+  var ctgSelects = document.querySelectorAll(".ms-content-tag");
+  for (var i = 0; i < ctgSelects.length; i++) {
+    var s = ctgSelects[i];
+    var k = s.getAttribute("data-type");
+    var v = s.value;
+    if (!v) { showToast("请填写完整的内容标签", "warning"); return; }
+    contentTags[k] = v;
+  }
+  var tags = {
+    userCategory: userTag1,
+    userValue: userTag2,
+    product: productTag,
+    content: contentTags
+  };
   for (var i = 0; i < msSelectedFiles.length; i++) {
     var file = msSelectedFiles[i];
     msMaterials.push({
@@ -502,7 +511,7 @@ function submitUpload() {
       optimizer: optimizer,
       date: new Date().toISOString().slice(0,10),
       size: (file.size/1024/1024).toFixed(1) + "MB",
-      tags: tags.slice()
+      tags: tags
     });
   }
   renderMsGrid();
@@ -524,9 +533,10 @@ function openMsPreview(id) {
       document.getElementById("msPVDate").textContent = m.date;
       document.getElementById("msPVSize").textContent = m.size;
       var tagHtml = "";
-      if (m.tags && m.tags.length) {
-        for (var t = 0; t < m.tags.length; t++) {
-          tagHtml += '<span class="tag-pill">' + m.tags[t] + '</span>';
+      var tagValues = extractTagValues(m.tags);
+      if (tagValues.length) {
+        for (var t = 0; t < tagValues.length; t++) {
+          tagHtml += '<span class="tag-pill">' + tagValues[t] + '</span>';
         }
       } else {
         tagHtml = '<span style="color:var(--text-3)">无</span>';
