@@ -29,9 +29,27 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .filter-bar-title{font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px}
 .filter-bar-toggle{font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block}
 .filter-bar-toggle.collapsed{transform:rotate(-90deg)}
-.filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;overflow:hidden;transition:max-height .3s,opacity .2s;max-height:200px;opacity:1}
+.filter-bar{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;overflow:hidden;transition:max-height .3s,opacity .2s;max-height:200px;opacity:1;padding-bottom:4px}
 .filter-bar.collapsed{max-height:0;opacity:0;margin:0;padding:0}
 .filter-group{display:flex;align-items:center;gap:6px}
+.filter-group label{font-size:12px;color:var(--text-3);font-weight:500;white-space:nowrap}
+.tag-filter-wrap{margin-top:6px}
+.tag-filter-body{overflow:hidden;transition:max-height .3s,opacity .2s;max-height:600px;opacity:1;padding-top:8px}
+.tag-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
+.tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.tag-filter-row .filter-group{margin-bottom:0}
+.tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
+.filter-group select,.filter-group input[type="date"],.filter-group input[type="text"]{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;}
+.filter-group select:focus,.filter-group input:focus{border-color:var(--primary)}
+.filter-group .date-sep{font-size:11px;color:#999}
+
+/* 标签筛选区样式 */
+.tag-filter-wrap{margin-top:4px}
+.tag-filter-body{overflow:hidden;transition:max-height .3s,opacity .2s;max-height:500px;opacity:1}
+.tag-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
+.tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.tag-filter-row .filter-group{margin-bottom:0}
+.tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap}
 .filter-group label{font-size:12px;color:var(--text-3);font-weight:500;white-space:nowrap}
 .filter-group select,.filter-group input[type="date"],.filter-group input[type="text"]{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;}
 .filter-group select:focus,.filter-group input:focus{border-color:var(--primary)}
@@ -115,8 +133,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <button class="btn btn-primary" onclick="openUploadModal()">↑ 上传素材</button>
   </div>
   <div class="filter-bar-wrap">
+    <!-- 基础筛选（默认展开） -->
     <div class="filter-bar-header" onclick="toggleFilterBar()">
-      <div class="filter-bar-title">🔍 筛选条件 <span class="filter-bar-toggle" id="filterBarToggle">▼</span></div>
+      <div class="filter-bar-title">🔍 基础筛选 <span class="filter-bar-toggle" id="filterBarToggle">▼</span></div>
     </div>
     <div class="filter-bar" id="filterBar">
       <div class="filter-group">
@@ -170,49 +189,80 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <span class="date-sep">~</span>
         <input type="date" id="dateEnd" value="2026-06-24" onchange="applyFilter()">
       </div>
-      <div class="filter-group">
-        <label>用户标签</label>
-        <select id="userTagFilter" onchange="applyFilter()">
-          <option value="">全部</option>
-        </select>
+      <div class="filter-group" style="margin-left:auto">
+        <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="resetFilter()">重置</button>
       </div>
-      <div class="filter-group">
-        <label>产品标签</label>
-        <select id="productTagFilter" onchange="applyFilter()">
-          <option value="">全部</option>
-          <option>39元</option>
-          <option>59元</option>
-        </select>
+    </div>
+
+    <!-- 标签筛选（默认折叠） -->
+    <div class="filter-bar-header tag-filter-wrap" onclick="toggleTagFilter()">
+      <div class="filter-bar-title">🏷️ 标签筛选 <span class="filter-bar-toggle collapsed" id="tagFilterToggle">▶</span></div>
+    </div>
+    <div class="filter-bar tag-filter-body collapsed" id="tagFilterBar">
+      <!-- 用户标签行：地区、年龄、性别 -->
+      <div class="tag-filter-row">
+        <div class="filter-group">
+          <label>地区</label>
+          <select id="filterUserRegion" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>年龄</label>
+          <select id="filterUserAge" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>性别</label>
+          <select id="filterUserGender" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
       </div>
-      <div class="filter-group">
-        <label>文案</label>
-        <select id="filterContentWenan" onchange="applyFilter()">
-          <option value="">全部</option>
-        </select>
+      <!-- 产品标签行 -->
+      <div class="tag-filter-row">
+        <div class="filter-group">
+          <label>产品标签</label>
+          <select id="filterProductTag" onchange="applyFilter()">
+            <option value="">全部</option>
+            <option>39元</option>
+            <option>59元</option>
+          </select>
+        </div>
       </div>
-      <div class="filter-group">
-        <label>宣传卖点</label>
-        <select id="filterContentMaidian" onchange="applyFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>场景</label>
-        <select id="filterContentChangjing" onchange="applyFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>对话</label>
-        <select id="filterContentDuihua" onchange="applyFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>口播</label>
-        <select id="filterContentKoubo" onchange="applyFilter()">
-          <option value="">全部</option>
-        </select>
+      <!-- 内容标签行：文案、宣传卖点、场景、对话、口播 -->
+      <div class="tag-filter-row">
+        <div class="filter-group">
+          <label>文案</label>
+          <select id="filterContentWenan" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>宣传卖点</label>
+          <select id="filterContentMaidian" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>场景</label>
+          <select id="filterContentChangjing" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>对话</label>
+          <select id="filterContentDuihua" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>口播</label>
+          <select id="filterContentKoubo" onchange="applyFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -482,12 +532,39 @@ function toggleFilterBar() {
   }
 }
 
+function toggleTagFilter() {
+  var bar = document.getElementById("tagFilterBar");
+  var toggle = document.getElementById("tagFilterToggle");
+  if (bar.classList.contains("collapsed")) {
+    bar.classList.remove("collapsed");
+    toggle.classList.remove("collapsed");
+  } else {
+    bar.classList.add("collapsed");
+    toggle.classList.add("collapsed");
+  }
+}
+
 function initTagFilters() {
-  // 用户标签
-  var userSel = document.getElementById("userTagFilter");
-  var userValues = collectAllUserTagValues();
-  for (var i = 0; i < userValues.length; i++) {
-    userSel.innerHTML += '<option>' + userValues[i] + '</option>';
+  // 用户标签 - 地区
+  var regionSel = document.getElementById("filterUserRegion");
+  if (regionSel && USER_TAG_CATEGORIES["地区"]) {
+    for (var i = 0; i < USER_TAG_CATEGORIES["地区"].length; i++) {
+      regionSel.innerHTML += '<option>' + USER_TAG_CATEGORIES["地区"][i] + '</option>';
+    }
+  }
+  // 用户标签 - 年龄
+  var ageSel = document.getElementById("filterUserAge");
+  if (ageSel && USER_TAG_CATEGORIES["年龄"]) {
+    for (var i = 0; i < USER_TAG_CATEGORIES["年龄"].length; i++) {
+      ageSel.innerHTML += '<option>' + USER_TAG_CATEGORIES["年龄"][i] + '</option>';
+    }
+  }
+  // 用户标签 - 性别
+  var genderSel = document.getElementById("filterUserGender");
+  if (genderSel && USER_TAG_CATEGORIES["性别"]) {
+    for (var i = 0; i < USER_TAG_CATEGORIES["性别"].length; i++) {
+      genderSel.innerHTML += '<option>' + USER_TAG_CATEGORIES["性别"][i] + '</option>';
+    }
   }
   // 产品标签（固定值，已在HTML中）
   // 内容标签 - 按类型分拆
@@ -609,13 +686,37 @@ function applyFilter() {
   renderGrid();
 }
 
+function resetFilter() {
+  var el;
+  el = document.getElementById("nameFilter"); if (el) el.value = "";
+  el = document.getElementById("typeFilter"); if (el) el.value = "全部类型";
+  el = document.getElementById("sourceFilter"); if (el) el.value = "全部来源";
+  el = document.getElementById("optimizerFilter"); if (el) el.value = "";
+  el = document.getElementById("dateStart"); if (el) el.value = "";
+  el = document.getElementById("dateEnd"); if (el) el.value = "";
+  el = document.getElementById("filterUserRegion"); if (el) el.value = "";
+  el = document.getElementById("filterUserAge"); if (el) el.value = "";
+  el = document.getElementById("filterUserGender"); if (el) el.value = "";
+  el = document.getElementById("filterProductTag"); if (el) el.value = "";
+  el = document.getElementById("filterContentWenan"); if (el) el.value = "";
+  el = document.getElementById("filterContentMaidian"); if (el) el.value = "";
+  el = document.getElementById("filterContentChangjing"); if (el) el.value = "";
+  el = document.getElementById("filterContentDuihua"); if (el) el.value = "";
+  el = document.getElementById("filterContentKoubo"); if (el) el.value = "";
+  renderGrid();
+}
+
 function getFilteredData() {
   var nameEl = document.getElementById("nameFilter");
   var typeEl = document.getElementById("typeFilter");
   var sourceEl = document.getElementById("sourceFilter");
   var optEl = document.getElementById("optimizerFilter");
-  var userTagEl = document.getElementById("userTagFilter");
-  var productTagEl = document.getElementById("productTagFilter");
+  // 用户标签三个下拉
+  var userRegionVal = document.getElementById("filterUserRegion").value;
+  var userAgeVal = document.getElementById("filterUserAge").value;
+  var userGenderVal = document.getElementById("filterUserGender").value;
+  // 产品标签
+  var productTagVal = document.getElementById("filterProductTag").value;
   // 内容标签按类型分拆
   var contentFilterEls = {
     "文案": document.getElementById("filterContentWenan"),
@@ -629,8 +730,6 @@ function getFilteredData() {
   var typeVal = (typeEl && typeEl.value) || "全部类型";
   var sourceVal = (sourceEl && sourceEl.value) || "全部来源";
   var optimizerVal = (optEl && optEl.value) || "";
-  var userTagVal = (userTagEl && userTagEl.value) || "";
-  var productTagVal = (productTagEl && productTagEl.value) || "";
   // 收集内容标签筛选条件
   var contentFilterVals = {};
   for (var k in contentFilterEls) {
@@ -650,8 +749,16 @@ function getFilteredData() {
     // 标签筛选
     var pass = true;
     if (m.tags) {
-      if (userTagVal && m.tags.userValue !== userTagVal) pass = false;
-      if (productTagVal && m.tags.product !== productTagVal) pass = false;
+      // 用户标签筛选：按地区、年龄、性别分别筛选（OR关系）
+      if (userRegionVal || userAgeVal || userGenderVal) {
+        var userPass = false;
+        if (userRegionVal && m.tags.userCategory === "地区" && m.tags.userValue === userRegionVal) userPass = true;
+        if (userAgeVal && m.tags.userCategory === "年龄" && m.tags.userValue === userAgeVal) userPass = true;
+        if (userGenderVal && m.tags.userCategory === "性别" && m.tags.userValue === userGenderVal) userPass = true;
+        if (!userPass) continue;
+      }
+      // 产品标签筛选
+      if (productTagVal && m.tags.product !== productTagVal) continue;
       // 内容标签按类型筛选
       if (m.tags.content) {
         for (var ck in contentFilterVals) {
@@ -665,7 +772,7 @@ function getFilteredData() {
       }
     } else {
       // 素材没有tags，但有标签筛选条件
-      if (userTagVal || productTagVal || Object.keys(contentFilterVals).length > 0) pass = false;
+      if (userRegionVal || userAgeVal || userGenderVal || productTagVal || Object.keys(contentFilterVals).length > 0) pass = false;
     }
     if (!pass) continue;
     result.push(m);
