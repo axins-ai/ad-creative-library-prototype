@@ -28,6 +28,12 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .ms-filter-title{font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px}
 .ms-filter-toggle{font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block}
 .ms-filter-toggle.collapsed{transform:rotate(-90deg)}
+.tag-filter-wrap{margin-top:6px}
+.tag-filter-body{overflow:hidden;transition:max-height .3s,opacity .2s;max-height:600px;opacity:1;padding-top:8px}
+.tag-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
+.tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.tag-filter-row .ms-filter-item{margin-bottom:0}
+.tag-filter-row .ms-filter-item label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
 .ms-filter-body{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;overflow:hidden;transition:max-height .3s,opacity .2s;max-height:200px;opacity:1}
 .ms-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
 .ms-filter-item{display:flex;flex-direction:column;gap:3px;min-width:0}
@@ -100,6 +106,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <div class="ms-filter-title">🔍 筛选条件 <span class="ms-filter-toggle" id="msFilterToggle">▼</span></div>
     </div>
     <div class="ms-filter-body" id="msFilterBody">
+      <!-- 基础筛选 -->
       <div class="ms-filter-item">
         <label>类型</label>
         <select id="filterType" onchange="applyMsFilter()">
@@ -153,52 +160,82 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           <input type="date" id="filterDateEnd" onchange="applyMsFilter()">
         </div>
       </div>
-      <div class="ms-filter-item">
-        <label>用户标签</label>
-        <select id="filterMsUserTag" onchange="applyMsFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>产品标签</label>
-        <select id="filterMsProductTag" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>39元</option>
-          <option>59元</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>文案</label>
-        <select id="filterMsContentWenan" onchange="applyMsFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>宣传卖点</label>
-        <select id="filterMsContentMaidian" onchange="applyMsFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>场景</label>
-        <select id="filterMsContentChangjing" onchange="applyMsFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>对话</label>
-        <select id="filterMsContentDuihua" onchange="applyMsFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>口播</label>
-        <select id="filterMsContentKoubo" onchange="applyMsFilter()">
-          <option value="">全部</option>
-        </select>
-      </div>
       <div class="ms-filter-actions">
         <button class="ms-btn ms-btn-outline" onclick="resetMsFilter()">重置</button>
+      </div>
+    </div>
+
+    <!-- 标签筛选（默认折叠） -->
+    <div class="tag-filter-wrap" onclick="toggleMsTagFilter()" style="cursor:pointer;user-select:none;margin-top:8px">
+      <div style="font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px">
+        🏷️ 标签筛选 <span id="msTagFilterToggle" style="font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block">▶</span>
+      </div>
+    </div>
+    <div class="tag-filter-body collapsed" id="msTagFilterBody">
+      <!-- 用户标签行：地区、年龄、性别 -->
+      <div class="tag-filter-row">
+        <div class="ms-filter-item">
+          <label>地区</label>
+          <select id="filterMsUserRegion" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="ms-filter-item">
+          <label>年龄</label>
+          <select id="filterMsUserAge" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="ms-filter-item">
+          <label>性别</label>
+          <select id="filterMsUserGender" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+      </div>
+      <!-- 产品标签行 -->
+      <div class="tag-filter-row">
+        <div class="ms-filter-item">
+          <label>产品标签</label>
+          <select id="filterMsProductTag" onchange="applyMsFilter()">
+            <option value="">全部</option>
+            <option>39元</option>
+            <option>59元</option>
+          </select>
+        </div>
+      </div>
+      <!-- 内容标签行 -->
+      <div class="tag-filter-row">
+        <div class="ms-filter-item">
+          <label>文案</label>
+          <select id="filterMsContentWenan" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="ms-filter-item">
+          <label>宣传卖点</label>
+          <select id="filterMsContentMaidian" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="ms-filter-item">
+          <label>场景</label>
+          <select id="filterMsContentChangjing" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="ms-filter-item">
+          <label>对话</label>
+          <select id="filterMsContentDuihua" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="ms-filter-item">
+          <label>口播</label>
+          <select id="filterMsContentKoubo" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -403,14 +440,28 @@ function toggleMsFilter() {
 }
 
 function initMsTagFilters() {
-  // 用户标签
-  var userSel = document.getElementById("filterMsUserTag");
-  for (var k in USER_TAG2_MAP) {
-    if (!USER_TAG2_MAP.hasOwnProperty(k)) continue;
-    for (var i = 0; i < USER_TAG2_MAP[k].length; i++) {
-      userSel.innerHTML += '<option>' + USER_TAG2_MAP[k][i] + '</option>';
+  // 用户标签 - 地区
+  var regionSel = document.getElementById("filterMsUserRegion");
+  if (regionSel) {
+    for (var i = 0; i < (USER_TAG2_MAP["地区"] || []).length; i++) {
+      regionSel.innerHTML += '<option>' + USER_TAG2_MAP["地区"][i] + '</option>';
     }
   }
+  // 用户标签 - 年龄
+  var ageSel = document.getElementById("filterMsUserAge");
+  if (ageSel) {
+    for (var i = 0; i < (USER_TAG2_MAP["年龄"] || []).length; i++) {
+      ageSel.innerHTML += '<option>' + USER_TAG2_MAP["年龄"][i] + '</option>';
+    }
+  }
+  // 用户标签 - 性别
+  var genderSel = document.getElementById("filterMsUserGender");
+  if (genderSel) {
+    for (var i = 0; i < (USER_TAG2_MAP["性别"] || []).length; i++) {
+      genderSel.innerHTML += '<option>' + USER_TAG2_MAP["性别"][i] + '</option>';
+    }
+  }
+  // 产品标签（已在HTML中初始化）
   // 内容标签 - 按类型分拆（使用所有类型的标签配置）
   var allContentTypes = ["文案", "宣传卖点", "场景", "对话", "口播"];
   var contentIds = {
@@ -458,13 +509,19 @@ function resetMsFilter() {
   document.getElementById("filterOptimizer").value = "";
   document.getElementById("filterDateStart").value = "";
   document.getElementById("filterDateEnd").value = "";
-  document.getElementById("filterMsUserTag").value = "";
-  document.getElementById("filterMsProductTag").value = "";
-  document.getElementById("filterMsContentWenan").value = "";
-  document.getElementById("filterMsContentMaidian").value = "";
-  document.getElementById("filterMsContentChangjing").value = "";
-  document.getElementById("filterMsContentDuihua").value = "";
-  document.getElementById("filterMsContentKoubo").value = "";
+  var regionSel = document.getElementById("filterMsUserRegion");
+  if (regionSel) regionSel.value = "";
+  var ageSel = document.getElementById("filterMsUserAge");
+  if (ageSel) ageSel.value = "";
+  var genderSel = document.getElementById("filterMsUserGender");
+  if (genderSel) genderSel.value = "";
+  var prodSel = document.getElementById("filterMsProductTag");
+  if (prodSel) prodSel.value = "";
+  var sels = ["filterMsContentWenan", "filterMsContentMaidian", "filterMsContentChangjing", "filterMsContentDuihua", "filterMsContentKoubo"];
+  for (var i = 0; i < sels.length; i++) {
+    var sel = document.getElementById(sels[i]);
+    if (sel) sel.value = "";
+  }
   renderMsGrid();
 }
 
@@ -501,8 +558,19 @@ function getFilteredMsMaterials() {
     if (dateStart && m.date < dateStart) continue;
     if (dateEnd && m.date > dateEnd) continue;
     // 标签筛选
+    var pass = true;
     if (m.tags) {
-      if (userTagVal && m.tags.userValue !== userTagVal) continue;
+      // 用户标签筛选（地区/年龄/性别，OR关系）
+      var msUserRegionVal = document.getElementById("filterMsUserRegion") ? document.getElementById("filterMsUserRegion").value : "";
+      var msUserAgeVal = document.getElementById("filterMsUserAge") ? document.getElementById("filterMsUserAge").value : "";
+      var msUserGenderVal = document.getElementById("filterMsUserGender") ? document.getElementById("filterMsUserGender").value : "";
+      if (msUserRegionVal || msUserAgeVal || msUserGenderVal) {
+        var userMatch = false;
+        if (msUserRegionVal && m.tags.userCategory === "地区" && m.tags.userValue === msUserRegionVal) userMatch = true;
+        if (msUserAgeVal && m.tags.userCategory === "年龄" && m.tags.userValue === msUserAgeVal) userMatch = true;
+        if (msUserGenderVal && m.tags.userCategory === "性别" && m.tags.userValue === msUserGenderVal) userMatch = true;
+        if (!userMatch) { result.push(m); continue; }
+      }
       if (productTagVal && m.tags.product !== productTagVal) continue;
       if (m.tags.content) {
         var pass = true;
