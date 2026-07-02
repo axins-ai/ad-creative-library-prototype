@@ -23,7 +23,14 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
 .btn-primary:hover{background:var(--primary-dark)}
 .content{flex:1;padding:20px 24px;overflow-y:auto}
-.filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.filter-bar-wrap{margin-bottom:20px;flex-shrink:0}
+.filter-bar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none}
+.filter-bar-header:hover .filter-bar-toggle{color:var(--primary)}
+.filter-bar-title{font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px}
+.filter-bar-toggle{font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block}
+.filter-bar-toggle.collapsed{transform:rotate(-90deg)}
+.filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;overflow:hidden;transition:max-height .3s,opacity .2s;max-height:200px;opacity:1}
+.filter-bar.collapsed{max-height:0;opacity:0;margin:0;padding:0}
 .filter-group{display:flex;align-items:center;gap:6px}
 .filter-group label{font-size:12px;color:var(--text-3);font-weight:500;white-space:nowrap}
 .filter-group select,.filter-group input[type="date"],.filter-group input[type="text"]{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;}
@@ -107,77 +114,106 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <h1 style="font-size:17px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:8px">📂 素材库 <span style="font-size:11px;color:var(--text-3);font-weight:400" id="scCount">共 0 个素材</span></h1>
     <button class="btn btn-primary" onclick="openUploadModal()">↑ 上传素材</button>
   </div>
-  <div class="filter-bar">
-    <div class="filter-group">
-      <label>名称搜索</label>
-      <input type="text" id="nameFilter" placeholder="搜索素材名称..." oninput="applyFilter()">
+  <div class="filter-bar-wrap">
+    <div class="filter-bar-header" onclick="toggleFilterBar()">
+      <div class="filter-bar-title">🔍 筛选条件 <span class="filter-bar-toggle" id="filterBarToggle">▼</span></div>
     </div>
-    <div class="filter-group">
-      <label>类型</label>
-      <select id="typeFilter" onchange="applyFilter()">
-        <option>全部类型</option>
-        <option>视频</option>
-        <option>图片</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>来源</label>
-      <select id="sourceFilter" onchange="applyFilter()">
-        <option>全部来源</option>
-        <option>自动入库</option>
-        <option>手动上传</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>优化师</label>
-      <div class="search-select" id="optimizerFilterWrap">
-        <select id="optimizerFilter" onchange="applyFilter()">
-          <option value="">全部</option>
-          <option>崔志恒</option>
-          <option>黄佩贤</option>
-          <option>黎舒晴</option>
-          <option>李雨航</option>
-          <option>谭嘉颖</option>
-          <option>林金维</option>
-          <option>陈羽思</option>
-          <option>叶首龙</option>
-          <option>赖嘉俊</option>
-          <option>戚嘉豪</option>
-          <option>黄雄伟</option>
-          <option>姚丰育</option>
-          <option>卢俭聪</option>
+    <div class="filter-bar" id="filterBar">
+      <div class="filter-group">
+        <label>名称搜索</label>
+        <input type="text" id="nameFilter" placeholder="搜索素材名称..." oninput="applyFilter()">
+      </div>
+      <div class="filter-group">
+        <label>类型</label>
+        <select id="typeFilter" onchange="applyFilter()">
+          <option>全部类型</option>
+          <option>视频</option>
+          <option>图片</option>
         </select>
-        <div class="select-arrow">▼</div>
-        <div class="search-select-dropdown" id="optimizerFilterDropdown">
-          <input type="text" class="search-input" placeholder="搜索优化师..." oninput="filterOptimizerOptions(this.value, 'optimizerFilter', 'optimizerFilterDropdown')">
+      </div>
+      <div class="filter-group">
+        <label>来源</label>
+        <select id="sourceFilter" onchange="applyFilter()">
+          <option>全部来源</option>
+          <option>自动入库</option>
+          <option>手动上传</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>优化师</label>
+        <div class="search-select" id="optimizerFilterWrap">
+          <select id="optimizerFilter" onchange="applyFilter()">
+            <option value="">全部</option>
+            <option>崔志恒</option>
+            <option>黄佩贤</option>
+            <option>黎舒晴</option>
+            <option>李雨航</option>
+            <option>谭嘉颖</option>
+            <option>林金维</option>
+            <option>陈羽思</option>
+            <option>叶首龙</option>
+            <option>赖嘉俊</option>
+            <option>戚嘉豪</option>
+            <option>黄雄伟</option>
+            <option>姚丰育</option>
+            <option>卢俭聪</option>
+          </select>
+          <div class="select-arrow">▼</div>
+          <div class="search-select-dropdown" id="optimizerFilterDropdown">
+            <input type="text" class="search-input" placeholder="搜索优化师..." oninput="filterOptimizerOptions(this.value, 'optimizerFilter', 'optimizerFilterDropdown')">
+          </div>
         </div>
       </div>
-    </div>
-    <div class="filter-group">
-      <label>上传日期</label>
-      <input type="date" id="dateStart" value="2026-06-01" onchange="applyFilter()">
-      <span class="date-sep">~</span>
-      <input type="date" id="dateEnd" value="2026-06-24" onchange="applyFilter()">
-    </div>
-    <div class="filter-group">
-      <label>用户标签</label>
-      <select id="userTagFilter" onchange="applyFilter()">
-        <option value="">全部</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>产品标签</label>
-      <select id="productTagFilter" onchange="applyFilter()">
-        <option value="">全部</option>
-        <option>39元</option>
-        <option>59元</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>内容标签</label>
-      <select id="contentTagFilter" onchange="applyFilter()">
-        <option value="">全部</option>
-      </select>
+      <div class="filter-group">
+        <label>上传日期</label>
+        <input type="date" id="dateStart" value="2026-06-01" onchange="applyFilter()">
+        <span class="date-sep">~</span>
+        <input type="date" id="dateEnd" value="2026-06-24" onchange="applyFilter()">
+      </div>
+      <div class="filter-group">
+        <label>用户标签</label>
+        <select id="userTagFilter" onchange="applyFilter()">
+          <option value="">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>产品标签</label>
+        <select id="productTagFilter" onchange="applyFilter()">
+          <option value="">全部</option>
+          <option>39元</option>
+          <option>59元</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>文案</label>
+        <select id="filterContentWenan" onchange="applyFilter()">
+          <option value="">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>宣传卖点</label>
+        <select id="filterContentMaidian" onchange="applyFilter()">
+          <option value="">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>场景</label>
+        <select id="filterContentChangjing" onchange="applyFilter()">
+          <option value="">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>对话</label>
+        <select id="filterContentDuihua" onchange="applyFilter()">
+          <option value="">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>口播</label>
+        <select id="filterContentKoubo" onchange="applyFilter()">
+          <option value="">全部</option>
+        </select>
+      </div>
     </div>
   </div>
   <div class="grid-view" id="gridView"></div>
@@ -434,16 +470,44 @@ function collectAllUserTagValues() {
   return values;
 }
 
+function toggleFilterBar() {
+  var bar = document.getElementById("filterBar");
+  var toggle = document.getElementById("filterBarToggle");
+  if (bar.classList.contains("collapsed")) {
+    bar.classList.remove("collapsed");
+    toggle.classList.remove("collapsed");
+  } else {
+    bar.classList.add("collapsed");
+    toggle.classList.add("collapsed");
+  }
+}
+
 function initTagFilters() {
+  // 用户标签
   var userSel = document.getElementById("userTagFilter");
   var userValues = collectAllUserTagValues();
   for (var i = 0; i < userValues.length; i++) {
     userSel.innerHTML += '<option>' + userValues[i] + '</option>';
   }
-  var contentSel = document.getElementById("contentTagFilter");
-  var contentValues = collectAllContentTagValues();
-  for (var i = 0; i < contentValues.length; i++) {
-    contentSel.innerHTML += '<option>' + contentValues[i] + '</option>';
+  // 产品标签（固定值，已在HTML中）
+  // 内容标签 - 按类型分拆
+  var contentTypes = ["文案", "宣传卖点", "场景", "对话", "口播"];
+  var contentIds = {
+    "文案": "filterContentWenan",
+    "宣传卖点": "filterContentMaidian",
+    "场景": "filterContentChangjing",
+    "对话": "filterContentDuihua",
+    "口播": "filterContentKoubo"
+  };
+  for (var t = 0; t < contentTypes.length; t++) {
+    var typeName = contentTypes[t];
+    var selId = contentIds[typeName];
+    var sel = document.getElementById(selId);
+    if (!sel) continue;
+    var values = CONTENT_TAG_CONFIG_ZHONGHOU[typeName] || [];
+    for (var j = 0; j < values.length; j++) {
+      sel.innerHTML += '<option>' + values[j] + '</option>';
+    }
   }
 }
 
@@ -552,7 +616,14 @@ function getFilteredData() {
   var optEl = document.getElementById("optimizerFilter");
   var userTagEl = document.getElementById("userTagFilter");
   var productTagEl = document.getElementById("productTagFilter");
-  var contentTagEl = document.getElementById("contentTagFilter");
+  // 内容标签按类型分拆
+  var contentFilterEls = {
+    "文案": document.getElementById("filterContentWenan"),
+    "宣传卖点": document.getElementById("filterContentMaidian"),
+    "场景": document.getElementById("filterContentChangjing"),
+    "对话": document.getElementById("filterContentDuihua"),
+    "口播": document.getElementById("filterContentKoubo")
+  };
 
   var nameKw = (nameEl && nameEl.value || "").trim().toLowerCase();
   var typeVal = (typeEl && typeEl.value) || "全部类型";
@@ -560,7 +631,14 @@ function getFilteredData() {
   var optimizerVal = (optEl && optEl.value) || "";
   var userTagVal = (userTagEl && userTagEl.value) || "";
   var productTagVal = (productTagEl && productTagEl.value) || "";
-  var contentTagVal = (contentTagEl && contentTagEl.value) || "";
+  // 收集内容标签筛选条件
+  var contentFilterVals = {};
+  for (var k in contentFilterEls) {
+    if (contentFilterEls.hasOwnProperty(k) && contentFilterEls[k]) {
+      var v = contentFilterEls[k].value;
+      if (v) contentFilterVals[k] = v;
+    }
+  }
 
   var result = [];
   for (var i = 0; i < materialData.length; i++) {
@@ -569,10 +647,27 @@ function getFilteredData() {
     if (typeVal !== "全部类型" && m.type !== typeVal) continue;
     if (sourceVal !== "全部来源" && m.source !== sourceVal) continue;
     if (optimizerVal && m.optimizer !== optimizerVal) continue;
-    var tagValues = extractTagValues(m.tags);
-    if (userTagVal && tagValues.indexOf(userTagVal) === -1) continue;
-    if (productTagVal && tagValues.indexOf(productTagVal) === -1) continue;
-    if (contentTagVal && tagValues.indexOf(contentTagVal) === -1) continue;
+    // 标签筛选
+    var pass = true;
+    if (m.tags) {
+      if (userTagVal && m.tags.userValue !== userTagVal) pass = false;
+      if (productTagVal && m.tags.product !== productTagVal) pass = false;
+      // 内容标签按类型筛选
+      if (m.tags.content) {
+        for (var ck in contentFilterVals) {
+          if (contentFilterVals.hasOwnProperty(ck) && m.tags.content[ck] !== contentFilterVals[ck]) {
+            pass = false;
+            break;
+          }
+        }
+      } else if (Object.keys(contentFilterVals).length > 0) {
+        pass = false; // 有内容标签筛选但素材没有标签
+      }
+    } else {
+      // 素材没有tags，但有标签筛选条件
+      if (userTagVal || productTagVal || Object.keys(contentFilterVals).length > 0) pass = false;
+    }
+    if (!pass) continue;
     result.push(m);
   }
   return result;
