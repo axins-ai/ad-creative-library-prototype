@@ -115,6 +115,10 @@ body{font-family:var(--font);color:var(--text-1);line-height:1.6;-webkit-font-sm
         <span class="mi-icon">📊</span>
         <span class="mi-label">素材报表 V2</span>
       </div>
+      <div class="menu-item" data-target="标签库" onclick="switchMenu(this)">
+        <span class="mi-icon">🏷️</span>
+        <span class="mi-label">标签库</span>
+      </div>
     </div>
   </div>
   <div class="bottom-area">
@@ -143,6 +147,7 @@ var MENU_CONFIG = {
   "生产工作台": { file: "生产工作台/生产工作台原型.html?v=" + Date.now(), title: "生产工作台" },
   "素材报表":     { file: "素材报表V1/素材报表V1原型.html?v=" + Date.now(), title: "素材报表（V1 基础报表）" },
   "素材报表V2": { file: "素材报表V2/素材报表V2原型.html?v=" + Date.now(), title: "素材报表（V2）" },
+  "标签库":       { file: "标签库/标签库原型.html?v=" + Date.now(), title: "标签库" },
 };
 
 function switchMenu(el) {
@@ -160,6 +165,15 @@ function switchMenu(el) {
   document.getElementById('contentFrame').src = cfg.file;
   document.getElementById('pageTitle').innerHTML =
     cfg.title + ' <span class="tag">原型预览</span>';
+}
+
+function updateMaterialTags(cfg) {
+  var frame = document.getElementById('contentFrame');
+  try {
+    if (frame && frame.contentWindow && frame.contentWindow.updateMaterialTags) {
+      frame.contentWindow.updateMaterialTags(cfg);
+    }
+  } catch (e) {}
 }
 
 // 默认高亮第一个
