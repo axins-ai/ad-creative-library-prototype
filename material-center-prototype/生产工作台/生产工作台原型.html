@@ -624,12 +624,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </label>
         <div id="saveLibTypeWrap" style="display:none;align-items:center;gap:8px;font-size:13px;color:var(--text-2)">
           <span style="font-weight:500">保存类型：</span>
-          <select id="saveMaterialType" style="height:32px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:#fff;outline:none;cursor:pointer;font-weight:500">
-            <option>前贴</option>
-            <option>中段</option>
-            <option selected>中后段</option>
-            <option>尾帧</option>
-          </select>
+          <span style="color:var(--primary);font-weight:600">中后段</span>
+          <span style="font-size:11px;color:var(--text-3)">（保存后的素材将归类到中后段原料）</span>
         </div>
       </div>
 
@@ -649,6 +645,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <button class="close-btn" onclick="closeModal()">×</button>
     </div>
     <div class="modal-filters">
+      <!-- 前贴/尾帧：锁定类型，不显示类型筛选 -->
+      <div class="locked-label" id="lockedLabel">
+        <span>🔒 已锁定类型：</span><strong id="lockedTypeName"></strong>
+      </div>
+      <!-- 未锁定（全部页）或中段：显示类型筛选 -->
       <div class="type-tabs" id="typeTabs">
         <div class="type-tab active" data-type="" onclick="switchTypeTab(this, '')">全部</div>
         <div class="type-tab" data-type="前贴" onclick="switchTypeTab(this, '前贴')">前贴</div>
@@ -656,9 +657,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <div class="type-tab" data-type="尾帧" onclick="switchTypeTab(this, '尾帧')">尾帧</div>
         <div class="type-tab" data-type="中后段" onclick="switchTypeTab(this, '中后段')">中后段</div>
       </div>
-      <div class="locked-label" id="lockedLabel">
-        <span>🔒 已锁定类型：</span><strong id="lockedTypeName"></strong>
-        <button class="unlock-btn" onclick="unlockType()" title="解除锁定">✕</button>
+      <!-- 中段槽位专用：仅中段/中后段 -->
+      <div class="type-tabs" id="midTypeTabs" style="display:none">
+        <div class="type-tab active" data-type="" onclick="switchMidTypeTab(this, '')">全部</div>
+        <div class="type-tab" data-type="中段" onclick="switchMidTypeTab(this, '中段')">中段</div>
+        <div class="type-tab" data-type="中后段" onclick="switchMidTypeTab(this, '中后段')">中后段</div>
       </div>
       <input class="search-input" id="searchInput" placeholder="搜索原料名称…" oninput="renderModalList()">
       <input class="date-input" id="dateStart" type="date" onchange="renderModalList()" title="上传开始日期">
@@ -1361,15 +1364,31 @@ function openModal(lockType, slotIdx) {
     }
   }
 
-  if (gModal.lockedType) {
-    // 锁定模式：隐藏类型tabs，显示锁定标签
+  // 重置类型筛选状态
+  gModal.activeTab = "";
+  
+  if (gModal.lockedType === "前贴" || gModal.lockedType === "尾帧") {
+    // 前贴/尾帧：锁定类型，不显示类型筛选，写死类型
     document.getElementById("typeTabs").style.display = "none";
+    document.getElementById("midTypeTabs").style.display = "none";
     document.getElementById("lockedLabel").style.display = "flex";
     document.getElementById("lockedTypeName").textContent = gModal.lockedType;
     document.getElementById("modalTitle").textContent = "选择" + gModal.lockedType + "原料（支持多选）";
+  } else if (gModal.lockedType === "中段") {
+    // 中段：显示专用类型筛选（仅中段/中后段），默认为"全部"
+    document.getElementById("typeTabs").style.display = "none";
+    document.getElementById("midTypeTabs").style.display = "flex";
+    document.getElementById("lockedLabel").style.display = "none";
+    document.getElementById("modalTitle").textContent = "选择中段原料（支持多选）";
+    // 重置中段类型筛选到"全部"
+    var midTabs = document.getElementById("midTypeTabs").children;
+    for (var i = 0; i < midTabs.length; i++) {
+      midTabs[i].classList.toggle("active", midTabs[i].getAttribute("data-type") === "");
+    }
   } else {
-    // 未锁定：显示tabs，重置到"全部"
+    // 未锁定（从贴槽外打开，或解锁后）：显示完整类型筛选
     document.getElementById("typeTabs").style.display = "flex";
+    document.getElementById("midTypeTabs").style.display = "none";
     document.getElementById("lockedLabel").style.display = "none";
     document.getElementById("modalTitle").textContent = "选择原料（支持多选）";
     var tabs = document.getElementById("typeTabs").children;
@@ -1409,11 +1428,18 @@ function unlockType() {
   gModal.lockedType = "";
   gModal.activeTab = "";
   document.getElementById("typeTabs").style.display = "flex";
+  document.getElementById("midTypeTabs").style.display = "none";
   document.getElementById("lockedLabel").style.display = "none";
   document.getElementById("modalTitle").textContent = "选择原料（支持多选）";
+  // 重置 typeTabs 到"全部"
   var tabs = document.getElementById("typeTabs").children;
   for (var i = 0; i < tabs.length; i++) {
     tabs[i].classList.toggle("active", tabs[i].getAttribute("data-type") === "");
+  }
+  // 重置 midTypeTabs 到"全部"
+  var midTabs = document.getElementById("midTypeTabs").children;
+  for (var j = 0; j < midTabs.length; j++) {
+    midTabs[j].classList.toggle("active", midTabs[j].getAttribute("data-type") === "");
   }
   renderModalList();
 }
@@ -1428,13 +1454,48 @@ function switchTypeTab(el, type) {
   renderModalList();
 }
 
+function switchMidTypeTab(el, type) {
+  // 中段槽位专用：仅中段/中后段
+  gModal.activeTab = type;
+  var tabs = document.getElementById("midTypeTabs").children;
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.toggle("active", tabs[i].getAttribute("data-type") === type);
+  }
+  renderModalList();
+}
+
 function renderModalList() {
   var kw   = (document.getElementById("searchInput").value || "").trim().toLowerCase();
   var dS   = document.getElementById("dateStart").value;
   var dE   = document.getElementById("dateEnd").value;
   var src  = document.getElementById("sourceFilter").value;
-  // 锁定模式下使用 lockedType，否则使用 activeTab
-  var fType = gModal.lockedType || gModal.activeTab || "";
+  
+  // 确定类型筛选：
+  // 1. 前贴/尾帧锁定：直接用 lockedType
+  // 2. 中段槽位：读取 midTypeTabs 的选中状态
+  // 3. 未锁定（全部页）：读取 typeTabs 的选中状态
+  var fType = "";
+  if (gModal.lockedType === "前贴" || gModal.lockedType === "尾帧") {
+    fType = gModal.lockedType;
+  } else if (gModal.lockedType === "中段") {
+    // 中段槽位：读取 midTypeTabs 的选中状态
+    var midTabs = document.getElementById("midTypeTabs").children;
+    for (var mi = 0; mi < midTabs.length; mi++) {
+      if (midTabs[mi].classList.contains("active")) {
+        fType = midTabs[mi].getAttribute("data-type");
+        break;
+      }
+    }
+  } else {
+    // 未锁定：读取 typeTabs 的选中状态
+    var tabs = document.getElementById("typeTabs").children;
+    for (var ti = 0; ti < tabs.length; ti++) {
+      if (tabs[ti].classList.contains("active")) {
+        fType = tabs[ti].getAttribute("data-type");
+        break;
+      }
+    }
+  }
 
   var result = [];
   for (var i = 0; i < MATERIALS_DB.length; i++) {
@@ -1539,7 +1600,15 @@ function updateCount() {
   }
   formula += ") × 尾帧 " + w;
   document.getElementById("countFormula").textContent = formula;
-  document.getElementById("countResult").innerHTML = total + " <span>个成品素材</span>";
+  document.getElementById("countResult").innerHTML = total + " <span>个素材</span>";
+  
+  // 素材数量校验：单次上限1000个
+  if (total > 1000) {
+    showToast("⚠️ 素材数量不能超过1000个，当前为 " + total + " 个，请减少原料选择", "w");
+    document.getElementById("countResult").style.color = "var(--danger)";
+  } else {
+    document.getElementById("countResult").style.color = "";
+  }
 }
 
 // ===== 命名参数 =====
@@ -1743,7 +1812,8 @@ function startProduction() {
   // 保存到原料库（如果勾选了）
   var saveLib = document.getElementById("saveAsMaterial").checked;
   if (saveLib) {
-    var saveType = document.getElementById("saveMaterialType").value;
+    // 写死保存类型为中后段
+    var saveType = "中后段";
     // 生成一个占位成品保存到原料库
     var cnameParts = [];
     for (var qi = 0; qi < gSelected["前贴"].length; qi++) cnameParts.push(gSelected["前贴"][qi].name);
