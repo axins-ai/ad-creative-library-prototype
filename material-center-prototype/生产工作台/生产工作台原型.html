@@ -603,7 +603,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
 
       <div class="count-review">
-        <div class="count-formula" id="countFormula">成品数量公式：前贴 0 × 中段 0 × 尾帧 0</div>
+        <div class="count-formula" id="countFormula">素材数量公式：前贴 0 × 中段 0 × 尾帧 0</div>
         <div class="count-result" id="countResult">0 <span>个成品素材</span></div>
       </div>
 
@@ -1592,7 +1592,7 @@ function updateCount() {
   }
   var total = (q > 0 ? q : 1) * midCombos * (w > 0 ? w : 1);
   // 显示公式
-  var formula = "成品数量公式：前贴 " + q;
+  var formula = "素材数量公式：前贴 " + q;
   formula += " × 中段(";
   for (var zi = 0; zi < zSlots.length; zi++) {
     if (zi > 0) formula += "+";
