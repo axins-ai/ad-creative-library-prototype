@@ -686,16 +686,43 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <script>
 // ===== 原料数据 =====
 var MATERIALS_DB = [
-  {id:1, name:"开场动画A",    type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:15", size:"12.3 MB", source:"自动入库"},
-  {id:2, name:"产品介绍B",    type:"中段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-21", duration:"00:30", size:"28.7 MB", source:"手动上传"},
-  {id:3, name:"行动号召C",    type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:10", size:"8.1 MB", source:"自动入库"},
-  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-22", duration:"00:18", size:"15.2 MB", source:"自动入库"},
-  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-21", duration:"00:35", size:"32.4 MB", source:"手动上传"},
-  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-22", duration:"00:12", size:"9.6 MB", source:"自动入库"},
-  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB", source:"手动上传"},
-  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB", source:"自动入库"},
-  {id:9, name:"中后段-合成样片A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", duration:"00:28", size:"18.5 MB", source:"手动上传"},
+  // ===== 前贴 =====
+  {id:1,  name:"开场动画A",       type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:15", size:"12.3 MB", source:"自动入库"},
+  {id:4,  name:"前贴片-夏日版",   type:"前贴", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-22", duration:"00:18", size:"15.2 MB", source:"自动入库"},
+  {id:7,  name:"前贴-品牌露出",     type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB", source:"手动上传"},
+  {id:11, name:"前贴-促销倒计",     type:"前贴", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-24", duration:"00:12", size:"10.1 MB", source:"自动入库"},
+  {id:12, name:"前贴-品牌故事",     type:"前贴", biz:"存量", channel:"广点通", optimizer:"王五", date:"2026-06-25", duration:"00:22", size:"20.5 MB", source:"手动上传"},
+  {id:13, name:"前贴-新品首发",     type:"前贴", biz:"权益", channel:"头条",   optimizer:"张三", date:"2026-06-26", duration:"00:16", size:"14.8 MB", source:"自动入库"},
+  {id:14, name:"前贴-节日氛围",     type:"前贴", biz:"存量", channel:"头条",   optimizer:"李四", date:"2026-06-28", duration:"00:14", size:"11.2 MB", source:"手动上传"},
+  {id:15, name:"前贴-用户证言",     type:"前贴", biz:"权益", channel:"广点通", optimizer:"王五", date:"2026-06-30", duration:"00:19", size:"16.7 MB", source:"自动入库"},
+  {id:16, name:"前贴-功能亮点",     type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-07-01", duration:"00:17", size:"13.4 MB", source:"手动上传"},
+  {id:17, name:"前贴-活动预热",     type:"前贴", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-07-02", duration:"00:21", size:"19.6 MB", source:"自动入库"},
+
+  // ===== 中段 =====
+  {id:2,  name:"产品介绍B",       type:"中段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-21", duration:"00:30", size:"28.7 MB", source:"手动上传"},
+  {id:5,  name:"中段-功能演示",     type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-21", duration:"00:35", size:"32.4 MB", source:"手动上传"},
+  {id:8,  name:"中段-优惠说明",     type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB", source:"自动入库"},
+  {id:18, name:"中段-使用教程",     type:"中段", biz:"存量", channel:"头条",   optimizer:"王五", date:"2026-06-24", duration:"00:40", size:"38.2 MB", source:"自动入库"},
+  {id:19, name:"中段-场景代入",     type:"中段", biz:"权益", channel:"头条",   optimizer:"张三", date:"2026-06-25", duration:"00:28", size:"25.6 MB", source:"手动上传"},
+  {id:20, name:"中段-对比评测",     type:"中段", biz:"存量", channel:"广点通", optimizer:"李四", date:"2026-06-27", duration:"00:33", size:"30.1 MB", source:"自动入库"},
+  {id:21, name:"中段-福利揭秘",     type:"中段", biz:"权益", channel:"广点通", optimizer:"王五", date:"2026-06-29", duration:"00:22", size:"18.8 MB", source:"手动上传"},
+  {id:22, name:"中段-品牌理念",     type:"中段", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-07-01", duration:"00:36", size:"35.4 MB", source:"自动入库"},
+
+  // ===== 尾帧 =====
+  {id:3,  name:"行动号召C",       type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:10", size:"8.1 MB", source:"自动入库"},
+  {id:6,  name:"尾帧-下载引导",     type:"尾帧", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-22", duration:"00:12", size:"9.6 MB", source:"自动入库"},
+  {id:23, name:"尾帧-立即咨询",     type:"尾帧", biz:"存量", channel:"头条",   optimizer:"王五", date:"2026-06-24", duration:"00:08", size:"6.3 MB", source:"手动上传"},
+  {id:24, name:"尾帧-领取优惠",     type:"尾帧", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-26", duration:"00:11", size:"7.9 MB", source:"自动入库"},
+  {id:25, name:"尾帧-关注公众号",   type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-28", duration:"00:09", size:"7.1 MB", source:"手动上传"},
+  {id:26, name:"尾帧-预约试驾",     type:"尾帧", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-30", duration:"00:13", size:"10.8 MB", source:"自动入库"},
+  {id:27, name:"尾帧-分享有礼",     type:"尾帧", biz:"存量", channel:"头条",   optimizer:"李四", date:"2026-07-01", duration:"00:10", size:"8.4 MB", source:"手动上传"},
+
+  // ===== 中后段 =====
+  {id:9,  name:"中后段-合成样片A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", duration:"00:28", size:"18.5 MB", source:"手动上传"},
   {id:10, name:"中后段-合成样片B", type:"中后段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-28", duration:"00:22", size:"14.3 MB", source:"自动入库"},
+  {id:28, name:"中后段-口播带货",   type:"中后段", biz:"权益", channel:"广点通", optimizer:"王五", date:"2026-06-29", duration:"00:32", size:"26.7 MB", source:"手动上传"},
+  {id:29, name:"中后段-剧情反转",   type:"中后段", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-07-02", duration:"00:25", size:"21.3 MB", source:"自动入库"},
+  {id:30, name:"中后段-测评实拍",   type:"中后段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-07-03", duration:"00:30", size:"24.9 MB", source:"手动上传"},
 ];
 
 // ===== 弹窗状态 =====
