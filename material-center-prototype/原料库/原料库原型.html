@@ -103,7 +103,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 <main class="main-content">
   <div class="ms-filter-card">
-    <!-- 基础筛选（无折叠按钮，始终可见） -->
+    <!-- 基础筛选（可折叠） -->
+    <div class="ms-filter-header" onclick="toggleMsFilter()" style="cursor:pointer;user-select:none">
+      <div class="ms-filter-title">🔍 基础筛选 <span class="ms-filter-toggle" id="msFilterToggle">▼</span></div>
+    </div>
     <div class="ms-filter-body" id="msFilterBody">
       <div class="ms-filter-item">
         <label>类型</label>
@@ -388,6 +391,19 @@ var DEFAULT_CONTENT_TAG_CONFIG = {
 
 var USER_TAG2_MAP = JSON.parse(JSON.stringify(DEFAULT_USER_TAG2_MAP));
 var CONTENT_TAG_CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONTENT_TAG_CONFIG));
+
+function toggleMsFilter() {
+  var body = document.getElementById("msFilterBody");
+  var toggle = document.getElementById("msFilterToggle");
+  if (!body || !toggle) return;
+  if (body.classList.contains("collapsed")) {
+    body.classList.remove("collapsed");
+    toggle.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    toggle.classList.add("collapsed");
+  }
+}
 
 function toggleMsTagFilter() {
   var body = document.getElementById("msTagFilterBody");
