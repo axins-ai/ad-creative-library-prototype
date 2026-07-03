@@ -380,6 +380,70 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 @keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
 
 .empty-s{text-align:center;padding:32px 16px;color:var(--text-3);font-size:13px}
+
+/* ===== 校验提醒弹窗 ===== */
+.validate-modal-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.45);z-index:20000;
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .2s ease;
+}
+.validate-modal-box{
+  background:#fff;border-radius:var(--radius-m);box-shadow:var(--shadow-l);
+  width:420px;max-width:92vw;overflow:hidden;
+  animation:scaleIn .25s ease;
+}
+.validate-modal-header{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--border-light);
+}
+.validate-modal-header .icon{
+  font-size:22px;line-height:1;
+}
+.validate-modal-header .title{
+  font-size:15px;font-weight:600;color:var(--text-1);
+}
+.validate-modal-body{
+  padding:16px 20px 20px;
+}
+.validate-modal-body .tip{
+  font-size:13px;color:var(--text-2);margin-bottom:12px;
+}
+.validate-modal-body .missing-list{
+  list-style:none;padding:0;margin:0;
+}
+.validate-modal-body .missing-list li{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;
+  background:#fff8e1;border:1px solid #ffe082;
+  border-radius:var(--radius-s);
+  margin-bottom:8px;
+  font-size:13px;color:var(--warning);
+}
+.validate-modal-body .missing-list li:last-child{margin-bottom:0}
+.validate-modal-body .missing-list li .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--warning);flex-shrink:0;
+}
+.validate-modal-footer{
+  display:flex;justify-content:flex-end;gap:10px;
+  padding:12px 20px 16px;
+  border-top:1px solid var(--border-light);
+}
+.validate-modal-footer .btn-cancel{
+  padding:7px 18px;border-radius:var(--radius-s);font-size:13px;
+  background:#fff;border:1px solid var(--border);color:var(--text-2);cursor:pointer;
+  transition:all .15s;
+}
+.validate-modal-footer .btn-cancel:hover{background:var(--bg-hover)}
+.validate-modal-footer .btn-confirm{
+  padding:7px 18px;border-radius:var(--radius-s);font-size:13px;
+  background:var(--primary);border:none;color:#fff;cursor:pointer;
+  transition:all .15s;
+}
+.validate-modal-footer .btn-confirm:hover{background:var(--primary-dark)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 </style>
 
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -687,6 +751,7 @@ var gNextTaskId = 4;
 var gEditingTaskId = null;
 var gBatchSelected = [];
 var gSortOrder = ""; // 创建时间排序: "", "asc", "desc"
+var gMissingFields = null; // 校验弹窗：当前缺失字段列表
 
 // 基础属性筛选键
 var BASIC_ATTRS_KEYS = ["biz","channel","optimizer"];
@@ -1484,18 +1549,48 @@ function updateNamingPreview() {
 
 // ===== 开始生产（含表单校验）=====
 function validateForm() {
+  var missing = [];
   var name = document.getElementById("taskNameInput").value.trim();
-  if (!name) { showToast("请填写任务名称", "w"); document.getElementById("taskNameInput").focus(); return false; }
-  if (!gBasicAttrs.biz) { showToast("请选择业务类型", "w"); return false; }
-  if (!gBasicAttrs.channel) { showToast("请选择渠道", "w"); return false; }
-  if (!gBasicAttrs.optimizer) { showToast("请选择优化师", "w"); return false; }
+  if (!name) missing.push("任务名称");
+  if (!gBasicAttrs.biz) missing.push("业务类型");
+  if (!gBasicAttrs.channel) missing.push("渠道");
+  if (!gBasicAttrs.optimizer) missing.push("优化师");
   var q = gSelected["前贴"].length;
   var zTotalCount = 0;
   for (var zi = 0; zi < gMidSlotList.length; zi++) zTotalCount += gMidSlotList[zi].length;
   var w = gSelected["尾帧"].length;
   var typeCount = (q>0?1:0) + (zTotalCount>0?1:0) + (w>0?1:0);
-  if (typeCount < 2) { showToast("请至少选择两类原料（前贴/中段/尾帧）", "w"); return false; }
+  if (typeCount < 2) missing.push("原料选择（需至少选择两类：前贴/中段/尾帧）");
+
+  if (missing.length > 0) {
+    showValidateModal(missing);
+    return false;
+  }
   return true;
+}
+
+function showValidateModal(fields) {
+  var list = document.getElementById("missingList");
+  var html = "";
+  for (var i = 0; i < fields.length; i++) {
+    html += "<li><span class=\"dot\"></span>" + fields[i] + "</li>";
+  }
+  list.innerHTML = html;
+  document.getElementById("validateModal").style.display = "flex";
+  // 存储缺失字段，用于关闭后聚焦
+  gMissingFields = fields;
+}
+
+function closeValidateModal(focus) {
+  document.getElementById("validateModal").style.display = "none";
+  if (focus && gMissingFields && gMissingFields.length > 0) {
+    var first = gMissingFields[0];
+    if (first === "任务名称") {
+      document.getElementById("taskNameInput").focus();
+    }
+    // 其他字段的聚焦逻辑可按需扩展
+  }
+  gMissingFields = null;
 }
 
 function toggleSaveLib() {
@@ -1644,5 +1739,24 @@ document.addEventListener("DOMContentLoaded", function() {
   switchView('list');
 });
 </script>
+
+<!-- 校验提醒弹窗 -->
+<div class="validate-modal-overlay" id="validateModal" style="display:none" onclick="if(event.target===this)closeValidateModal()">
+  <div class="validate-modal-box">
+    <div class="validate-modal-header">
+      <span class="icon">⚠️</span>
+      <span class="title">请完善必填信息</span>
+    </div>
+    <div class="validate-modal-body">
+      <p class="tip">以下必填字段尚未填写，请完善后再提交：</p>
+      <ul class="missing-list" id="missingList"></ul>
+    </div>
+    <div class="validate-modal-footer">
+      <button class="btn-cancel" onclick="closeValidateModal()">取消</button>
+      <button class="btn-confirm" onclick="closeValidateModal(true)">我知道了</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
