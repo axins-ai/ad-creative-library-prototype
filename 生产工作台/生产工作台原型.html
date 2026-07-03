@@ -1860,11 +1860,9 @@ function startProduction() {
   btn.disabled = false;
   btn.textContent = "⚙ 开始生产并保存任务";
   goBackToList();
-}
-
+};
 // ===== 基础属性更新 =====
 function updateBasicAttrs() {
-  gBasicAttrs.biz = document.getElementById("pBiz").value;
   gBasicAttrs.channel = document.getElementById("pChannel").value;
   gBasicAttrs.optimizer = document.getElementById("pOptimizer").value;
   // 更新卡片选中状态
