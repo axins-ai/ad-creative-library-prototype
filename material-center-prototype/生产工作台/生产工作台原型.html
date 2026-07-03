@@ -382,7 +382,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
   <!-- 视图1：任务列表（默认显示） -->
   <div class="view" id="viewList" style="display:none">
-    <div class="list-header" style="flex-direction:column;gap:10px">
+    <div class="list-header">
       <div class="left" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <select id="filterCreator" onchange="renderTaskList()" style="height:34px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:#fff;color:var(--text-2);outline:none;cursor:pointer">
           <option value="">全部创建人</option>
@@ -395,7 +395,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </select>
         <input class="search-box" id="taskSearch" placeholder="搜索任务名称…" oninput="renderTaskList()">
       </div>
-      <div class="right" style="display:flex;justify-content:flex-end">
+      <div class="right">
         <button class="btn-primary" onclick="newTask()">＋ 新建生产任务</button>
       </div>
     </div>
