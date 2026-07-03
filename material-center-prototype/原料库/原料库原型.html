@@ -144,6 +144,32 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .tag-cat-row:last-child{margin-bottom:0}
 .tag-cat-label{font-size:11px;font-weight:600;color:var(--text-2);min-width:56px;padding-top:8px;white-space:nowrap;flex-shrink:0}
 .tag-cat-items{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+
+/* 消息弹窗 */
+.msg-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s}
+.msg-modal-overlay.active{display:flex}
+.msg-modal{background:#fff;border-radius:12px;width:400px;max-width:90vw;box-shadow:0 12px 40px rgba(0,0,0,.2);animation:slideUp .25s;text-align:center;overflow:hidden}
+.msg-modal .msg-icon{font-size:48px;margin:24px 0 8px}
+.msg-modal .msg-text{font-size:14px;color:var(--text-1);padding:0 24px 20px;line-height:1.6}
+.msg-modal .msg-btn{padding:12px 0;font-size:14px;font-weight:500;color:var(--primary);cursor:pointer;border-top:1px solid var(--border-light);transition:background .15s}
+.msg-modal .msg-btn:hover{background:var(--bg-hover)}
+
+/* 上传结果弹窗 */
+.result-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s}
+.result-modal-overlay.active{display:flex}
+.result-modal{background:#fff;border-radius:12px;width:420px;max-width:90vw;box-shadow:0 12px 40px rgba(0,0,0,.2);animation:slideUp .25s;overflow:hidden}
+.result-modal .result-header{padding:20px 24px 12px;text-align:center}
+.result-modal .result-header .result-icon{font-size:48px;margin-bottom:8px}
+.result-modal .result-header .result-title{font-size:16px;font-weight:600;color:var(--text-1)}
+.result-modal .result-body{padding:0 24px 16px}
+.result-modal .result-row{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid var(--border-light)}
+.result-modal .result-row:last-child{border-bottom:none}
+.result-modal .result-label{color:var(--text-2)}
+.result-modal .result-value{font-weight:600}
+.result-modal .result-value.success{color:var(--success)}
+.result-modal .result-value.fail{color:var(--danger)}
+.result-modal .result-fail-list{margin-top:8px;padding:8px 12px;background:var(--bg-page);border-radius:6px;font-size:11px;color:var(--danger);max-height:100px;overflow-y:auto;text-align:left}
+.result-modal .result-actions{padding:16px 24px;border-top:1px solid var(--border-light);display:flex;justify-content:center}
 </style>
 </head>
 <body>
@@ -470,16 +496,35 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px">🏷️ 标签配置 <span style="font-size:11px;color:var(--danger);font-weight:400">* 全部必填</span></div>
         <div class="fm-group">
           <label>用户标签 <span class="req">*</span></label>
-          <div style="display:flex;gap:8px">
-            <select id="msUploadUserTag1" onchange="onMsUploadUserTag1Change()" style="flex:1">
-              <option value="">请选择</option>
-              <option>地区</option>
-              <option>年龄</option>
-              <option>性别</option>
-            </select>
-            <select id="msUploadUserTag2" style="flex:1">
-              <option value="">请选择</option>
-            </select>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="flex:1;min-width:120px">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">地区</div>
+              <select id="msUploadUserRegion" style="width:100%">
+                <option value="">请选择地区</option>
+                <option>一线城市</option>
+                <option>二线城市</option>
+                <option>三四线城市</option>
+                <option>农村</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:120px">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">年龄</div>
+              <select id="msUploadUserAge" style="width:100%">
+                <option value="">请选择年龄</option>
+                <option>18-24</option>
+                <option>25-34</option>
+                <option>35-44</option>
+                <option>45+</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:120px">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">性别</div>
+              <select id="msUploadUserGender" style="width:100%">
+                <option value="">请选择性别</option>
+                <option>男</option>
+                <option>女</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="fm-group">
@@ -501,6 +546,35 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 </div>
 
 <script>
+
+function showMsgModal(msg) {
+  document.getElementById("msgModalText").textContent = msg;
+  document.getElementById("msgModalOverlay").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+function closeMsgModal() {
+  document.getElementById("msgModalOverlay").classList.remove("active");
+  document.body.style.overflow = "";
+}
+function showUploadResultModal(total, success, fail, failNames) {
+  var icon = fail === 0 ? "✅" : (success === 0 ? "❌" : "⚠️");
+  document.getElementById("resultModalIcon").textContent = icon;
+  var bodyHtml = "";
+  bodyHtml += "<div class=\"result-row\"><span class=\"result-label\">本次上传</span><span class=\"result-value\">" + total + " 条</span></div>";
+  bodyHtml += "<div class=\"result-row\"><span class=\"result-label\">成功</span><span class=\"result-value success\">" + success + " 条</span></div>";
+  bodyHtml += "<div class=\"result-row\"><span class=\"result-label\">失败</span><span class=\"result-value fail\">" + fail + " 条</span></div>";
+  if (failNames.length > 0) {
+    bodyHtml += "<div class=\"result-fail-list\">失败文件：<br>" + failNames.join("<br>") + "</div>";
+  }
+  document.getElementById("resultModalBody").innerHTML = bodyHtml;
+  document.getElementById("resultModalOverlay").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+function closeResultModal() {
+  document.getElementById("resultModalOverlay").classList.remove("active");
+  document.body.style.overflow = "";
+}
+
 var msMaterials = [
   {id:1, name:"开场动画A", type:"前贴", biz:"存量", channel:"广点通", optimizer:"崔志恒", designer:"设计师A", date:"2026-06-20", source:"自动入库", size:"2.3MB", tags:{userCategory:"地区", userValue:"一线城市", product:"39元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
   {id:2, name:"产品介绍B", type:"中段", biz:"权益", channel:"头条", optimizer:"黄佩贤", designer:"设计师A", date:"2026-06-19", source:"手动上传", size:"5.1MB", tags:{userCategory:"地区", userValue:"二线城市", product:"59元", content:{"文案":"系统通知","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
@@ -660,16 +734,7 @@ function initMsTagFilters() {
   }
 }
 
-function onMsUploadUserTag1Change() {
-  var s1 = document.getElementById("msUploadUserTag1").value;
-  var s2 = document.getElementById("msUploadUserTag2");
-  s2.innerHTML = '<option value="">请选择</option>';
-  if (s1 && USER_TAG_CATEGORIES[s1]) {
-    for (var i = 0; i < USER_TAG_CATEGORIES[s1].length; i++) {
-      s2.innerHTML += '<option>' + USER_TAG_CATEGORIES[s1][i] + '</option>';
-    }
-  }
-}
+// onMsUploadUserTag1Change removed - user tags now 3 independent selects
 
 function renderMsUploadContentTagFields() {
   var wrap = document.getElementById("msUploadContentTagsWrap");
@@ -962,8 +1027,9 @@ function openMsUploadModal() {
   uploadSelectedFiles = [];
   document.getElementById("msUploadFileList").style.display = "none";
   document.getElementById("msUploadFileList").innerHTML = "";
-  document.getElementById("msUploadUserTag1").value = "";
-  onMsUploadUserTag1Change();
+  document.getElementById("msUploadUserRegion").value = "";
+  document.getElementById("msUploadUserAge").value = "";
+  document.getElementById("msUploadUserGender").value = "";
   document.getElementById("msUploadProductTag").value = "";
   renderMsUploadContentTagFields();
   // 根据当前类型渲染标签
@@ -992,45 +1058,57 @@ function renderMsUploadFileList() {
 }
 
 function submitMsUpload() {
-  if (uploadSelectedFiles.length === 0) { alert("请先选择原料文件"); return; }
+  if (uploadSelectedFiles.length === 0) { showMsgModal("请先选择原料文件"); return; }
   var fileType = document.getElementById("msUploadFileType").value;
   var biz = document.getElementById("msUploadBiz").value;
   var channel = document.getElementById("msUploadChannel").value;
   var optimizer = document.getElementById("msUploadOptimizer").value || "未设置";
-  var userTag1 = document.getElementById("msUploadUserTag1").value;
-  var userTag2 = document.getElementById("msUploadUserTag2").value;
+  var userRegion = document.getElementById("msUploadUserRegion").value;
+  var userAge = document.getElementById("msUploadUserAge").value;
+  var userGender = document.getElementById("msUploadUserGender").value;
   var productTag = document.getElementById("msUploadProductTag").value;
-  if (!userTag1 || !userTag2) { alert("请选择用户标签"); return; }
-  if (!productTag) { alert("请选择产品标签"); return; }
+  if (!userRegion || !userAge || !userGender) { showMsgModal("请完整填写用户标签（地区、年龄、性别）"); return; }
+  if (!productTag) { showMsgModal("请选择产品标签"); return; }
   var contentTags = {};
   var ctgSelects = document.querySelectorAll(".upload-content-tag");
   for (var i = 0; i < ctgSelects.length; i++) {
     var s = ctgSelects[i];
     var k = s.getAttribute("data-type");
     var v = s.value;
-    if (!v) { alert("请填写完整的内容标签"); return; }
+    if (!v) { showMsgModal("请填写完整的内容标签"); return; }
     contentTags[k] = v;
   }
-  var tags = { userCategory: userTag1, userValue: userTag2, product: productTag, content: contentTags };
+  // 模拟上传：部分成功/失败
+  var total = uploadSelectedFiles.length;
+  var success = 0;
+  var fail = 0;
+  var failNames = [];
   for (var i = 0; i < uploadSelectedFiles.length; i++) {
     var file = uploadSelectedFiles[i];
-    msMaterials.push({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      type: fileType,
-      biz: biz,
-      channel: channel,
-      optimizer: optimizer,
-      date: new Date().toISOString().slice(0,10),
-      source: "手动上传",
-      size: (file.size/1024/1024).toFixed(1) + "MB",
-      tags: tags
-    });
+    // 模拟：文件名含 "fail" 则失败，否则成功
+    if (file.name.indexOf("fail") !== -1) {
+      fail++;
+      failNames.push(file.name);
+    } else {
+      success++;
+      msMaterials.push({
+        id: Date.now() + Math.random(),
+        name: file.name,
+        type: fileType,
+        biz: biz,
+        channel: channel,
+        optimizer: optimizer,
+        date: new Date().toISOString().slice(0,10),
+        source: "手动上传",
+        size: (file.size/1024/1024).toFixed(1) + "MB",
+        tags: { userCategory: "地区", userValue: userRegion, product: productTag, content: contentTags }
+      });
+    }
   }
   renderMsGrid();
   closeMsUploadModal();
-  alert("成功上传 " + uploadSelectedFiles.length + " 个原料");
   uploadSelectedFiles = [];
+  showUploadResultModal(total, success, fail, failNames);
 }
 
 /* 拖拽上传 */
@@ -1060,5 +1138,28 @@ try { initMsTagFilters(); } catch(e) { console.error("initMsTagFilters failed:",
 try { renderMsUploadContentTagFields(); } catch(e) { console.error("renderMsUploadContentTagFields failed:", e); }
 try { renderMsGrid(); } catch(e) { console.error("renderMsGrid init failed:", e); }
 </script>
+
+<!-- 消息弹窗 -->
+<div class="msg-modal-overlay" id="msgModalOverlay">
+  <div class="msg-modal">
+    <div class="msg-icon" id="msgModalIcon">⚠️</div>
+    <div class="msg-text" id="msgModalText"></div>
+    <div class="msg-btn" onclick="closeMsgModal()">确认</div>
+  </div>
+</div>
+
+<!-- 上传结果弹窗 -->
+<div class="result-modal-overlay" id="resultModalOverlay">
+  <div class="result-modal">
+    <div class="result-header">
+      <div class="result-icon" id="resultModalIcon">✅</div>
+      <div class="result-title">上传结果</div>
+    </div>
+    <div class="result-body" id="resultModalBody"></div>
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="closeResultModal()" style="min-width:120px">确定</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
