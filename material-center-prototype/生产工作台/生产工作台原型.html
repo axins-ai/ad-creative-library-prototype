@@ -106,13 +106,26 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .empty-list p{font-size:14px;margin-bottom:4px}
 .empty-list .sub{font-size:12px;color:var(--text-3)}
 
-.config-back{
-  display:flex;align-items:center;gap:8px;
-  padding:12px 0;cursor:pointer;color:var(--primary);font-size:13px;font-weight:500;
-  transition:opacity .15s;
+.config-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;margin-bottom:4px;
 }
-.config-back:hover{opacity:.7}
-.config-back .arrow{font-size:16px}
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;font-size:14px;font-weight:500;
+  background:#fff;color:var(--text-1);
+  border:1px solid var(--border);border-radius:var(--radius-s);
+  cursor:pointer;transition:all .15s;
+}
+.back-btn:hover{background:var(--bg-2);border-color:var(--text-3)}
+.draft-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;font-size:14px;font-weight:500;
+  background:#fff;color:var(--primary);
+  border:1px solid var(--primary);border-radius:var(--radius-s);
+  cursor:pointer;transition:all .15s;
+}
+.draft-btn:hover{background:rgba(22,100,255,.06)}
 .config-task-name{
   font-size:15px;font-weight:600;color:var(--text-1);margin-bottom:16px;
   display:flex;align-items:center;gap:12px;
@@ -428,8 +441,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
   <!-- 视图2：任务配置 -->
   <div class="view" id="viewConfig">
-    <div class="config-back" onclick="goBackToList()">
-      <span class="arrow">←</span> 返回任务列表
+    <div class="config-header">
+      <button class="back-btn" onclick="goBackToList()">← 返回任务列表</button>
+      <button class="draft-btn" onclick="saveDraft()">📝 保存为草稿</button>
     </div>
     <div class="config-task-name">
       <input type="text" id="taskNameInput" placeholder="请输入任务名称…">
@@ -912,6 +926,70 @@ function openTask(id) {
 }
 
 // ===== 保存/删除任务 =====
+// 保存为草稿（不需要完整填写表单）
+function saveDraft() {
+  var name = document.getElementById("taskNameInput").value.trim();
+  if (!name) name = "未命名任务";
+
+  var td = {
+    name: name,
+    materials: { "前贴": [], "中段": [], "尾帧": [] },
+    params: {
+      resolution: document.getElementById("pResolution").value,
+      framerate: document.getElementById("pFramerate").value,
+      bitrate:   document.getElementById("pBitrate").value,
+      format:    document.getElementById("pFormat").value,
+    },
+    namingParams: gActiveParams.slice(),
+    basicAttrs: { biz:gBasicAttrs.biz, channel:gBasicAttrs.channel, optimizer:gBasicAttrs.optimizer },
+    outputs: []
+  };
+  var keys = ["前贴","尾帧"];
+  for (var t = 0; t < keys.length; t++) {
+    for (var i = 0; i < gSelected[keys[t]].length; i++) {
+      td.materials[keys[t]].push(gSelected[keys[t]][i]);
+    }
+  }
+  var midAll = [];
+  for (var si = 0; si < gMidSlotList.length; si++) {
+    for (var mi = 0; mi < gMidSlotList[si].length; mi++) {
+      midAll.push(gMidSlotList[si][mi]);
+    }
+  }
+  td.materials["中段"] = midAll;
+
+  if (gEditingTaskId) {
+    for (var k = 0; k < gTasks.length; k++) {
+      if (gTasks[k].id === gEditingTaskId) {
+        gTasks[k].name = name;
+        gTasks[k].materials = td.materials;
+        gTasks[k].params = td.params;
+        gTasks[k].namingParams = td.namingParams;
+        gTasks[k].basicAttrs = td.basicAttrs;
+        gTasks[k].status = "draft";
+        break;
+      }
+    }
+    showToast("草稿已更新", "s");
+  } else {
+    var nid = gNextTaskId++;
+    var now = new Date();
+    var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
+    var ts = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + ":" + pad(now.getMinutes());
+    gTasks.push({
+      id: nid, name: name, createTime: ts, status: "draft",
+      materials: td.materials,
+      params: td.params,
+      namingParams: td.namingParams,
+      basicAttrs: td.basicAttrs,
+      outputs: []
+    });
+    gEditingTaskId = nid;
+    showToast("草稿已保存", "s");
+  }
+  goBackToList();
+}
+
 function saveTask() {
   var name = document.getElementById("taskNameInput").value.trim();
   if (!name) { showToast("请输入任务名称", "w"); return; }
