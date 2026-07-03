@@ -1444,10 +1444,9 @@ function renderModalList() {
     if (dS && m.date < dS) continue;
     if (dE && m.date > dE) continue;
     if (src && m.source !== src) continue;
-    // 基础属性筛选（渠道等已在基础属性中配置）
+    // 基础属性筛选（业务类型和渠道，优化师不用于筛选原料）
     if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
     if (gBasicAttrs.channel && m.channel !== gBasicAttrs.channel) continue;
-    if (gBasicAttrs.optimizer && m.optimizer !== gBasicAttrs.optimizer) continue;
     result.push(m);
   }
 
