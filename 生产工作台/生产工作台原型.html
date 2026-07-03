@@ -1802,7 +1802,11 @@ function startProduction() {
   if (!gEditingTaskId) {
     var nid = gNextTaskId++;
     gTasks.push({
-      id: nid, name: name, creator: gBasicAttrs.optimizer || "杨鑫", createTime: ts, status: "processing",
+      id: nid,
+      name: name,
+      creator: gBasicAttrs.optimizer || "杨鑫",
+      createTime: ts,
+      status: "processing",
       taskType: taskType,
       materials: { "前贴": gSelected["前贴"].slice(), "中段": midArr, "尾帧": gSelected["尾帧"].slice() },
       params: { resolution: document.getElementById("pResolution").value, framerate: document.getElementById("pFramerate").value, bitrate: document.getElementById("pBitrate").value, format: fmt },
