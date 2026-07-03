@@ -144,13 +144,12 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <body>
 
 <div class="content">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h1 style="font-size:17px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:8px">📂 素材库 <span style="font-size:11px;color:var(--text-3);font-weight:400" id="scCount">共 0 个素材</span></h1>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
     <button class="btn btn-primary" onclick="openUploadModal()">↑ 上传素材</button>
   </div>
   <div class="filter-card">
     <div class="filter-card-header" onclick="toggleFilterBar()">
-      <div class="filter-card-title">🔍 基础筛选 <span class="filter-card-toggle" id="filterBarToggle">▼</span></div>
+      <div class="filter-card-title">🔍 基础筛选 <span style="font-size:11px;color:var(--text-3);font-weight:400;margin-left:8px" id="scCountInline"></span><span class="filter-card-toggle" id="filterBarToggle" style="margin-left:8px">▼</span></div>
     </div>
     <div class="filter-card-body" id="filterBar">
       <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
@@ -860,7 +859,7 @@ function renderGrid() {
       '</div></div>';
   }
   el.innerHTML = html;
-  var countEl = document.getElementById("scCount");
+  var countEl = document.getElementById("scCountInline");
   if (countEl) countEl.textContent = "共 " + data.length + " 个素材";
   } catch(e) {
     console.error("renderGrid error:", e);
