@@ -661,6 +661,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <input class="date-input" id="dateStart" type="date" onchange="renderModalList()" title="上传开始日期">
       <span class="date-sep">至</span>
       <input class="date-input" id="dateEnd" type="date" onchange="renderModalList()" title="上传结束日期">
+      <select class="date-input" id="sourceFilter" onchange="renderModalList()" title="来源筛选" style="padding:0 8px;cursor:pointer">
+        <option value="">全部来源</option>
+        <option value="自动入库">自动入库</option>
+        <option value="手动上传">手动上传</option>
+      </select>
     </div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-ft">
@@ -678,16 +683,16 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <script>
 // ===== 原料数据 =====
 var MATERIALS_DB = [
-  {id:1, name:"开场动画A",    type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:15", size:"12.3 MB"},
-  {id:2, name:"产品介绍B",    type:"中段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-21", duration:"00:30", size:"28.7 MB"},
-  {id:3, name:"行动号召C",    type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:10", size:"8.1 MB"},
-  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-22", duration:"00:18", size:"15.2 MB"},
-  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-21", duration:"00:35", size:"32.4 MB"},
-  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-22", duration:"00:12", size:"9.6 MB"},
-  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB"},
-  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB"},
-  {id:9, name:"中后段-合成样片A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", duration:"00:28", size:"18.5 MB"},
-  {id:10, name:"中后段-合成样片B", type:"中后段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-28", duration:"00:22", size:"14.3 MB"},
+  {id:1, name:"开场动画A",    type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:15", size:"12.3 MB", source:"自动入库"},
+  {id:2, name:"产品介绍B",    type:"中段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-21", duration:"00:30", size:"28.7 MB", source:"手动上传"},
+  {id:3, name:"行动号召C",    type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:10", size:"8.1 MB", source:"自动入库"},
+  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-22", duration:"00:18", size:"15.2 MB", source:"自动入库"},
+  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-21", duration:"00:35", size:"32.4 MB", source:"手动上传"},
+  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-22", duration:"00:12", size:"9.6 MB", source:"自动入库"},
+  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB", source:"手动上传"},
+  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB", source:"自动入库"},
+  {id:9, name:"中后段-合成样片A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", duration:"00:28", size:"18.5 MB", source:"手动上传"},
+  {id:10, name:"中后段-合成样片B", type:"中后段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-28", duration:"00:22", size:"14.3 MB", source:"自动入库"},
 ];
 
 // ===== 弹窗状态 =====
@@ -1234,6 +1239,7 @@ function renderCards() {
   var orderWrap = document.getElementById("midOrderWrap");
   if (orderWrap) orderWrap.style.display = gMidSlotList.length > 1 ? "flex" : "none";
   updateCount();
+  updateSaveLibCheckbox();
 }
 
 function renderOneCard(type,cls,tagCls) {
@@ -1342,6 +1348,7 @@ function openModal(lockType, slotIdx) {
   };
   document.getElementById("dateStart").value = fmt(lastMonth);
   document.getElementById("dateEnd").value = fmt(today);
+  document.getElementById("sourceFilter").value = "";
 
   renderModalList();
   document.getElementById("overlay").classList.add("show");
@@ -1383,6 +1390,7 @@ function renderModalList() {
   var kw   = (document.getElementById("searchInput").value || "").trim().toLowerCase();
   var dS   = document.getElementById("dateStart").value;
   var dE   = document.getElementById("dateEnd").value;
+  var src  = document.getElementById("sourceFilter").value;
   // 锁定模式下使用 lockedType，否则使用 activeTab
   var fType = gModal.lockedType || gModal.activeTab || "";
 
@@ -1393,6 +1401,7 @@ function renderModalList() {
     if (kw && m.name.toLowerCase().indexOf(kw) === -1) continue;
     if (dS && m.date < dS) continue;
     if (dE && m.date > dE) continue;
+    if (src && m.source !== src) continue;
     // 基础属性筛选（渠道等已在基础属性中配置）
     if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
     if (gBasicAttrs.channel && m.channel !== gBasicAttrs.channel) continue;
@@ -1591,6 +1600,19 @@ function closeValidateModal(focus) {
     // 其他字段的聚焦逻辑可按需扩展
   }
   gMissingFields = null;
+}
+
+function updateSaveLibCheckbox() {
+  var cb = document.getElementById("saveAsMaterial");
+  var hasPre = gSelected["前贴"].length > 0;
+  cb.disabled = hasPre;
+  if (hasPre) {
+    cb.checked = false;
+    cb.title = "前贴槽位已有原料，不可保存为原料";
+    document.getElementById("saveLibTypeWrap").style.display = "none";
+  } else {
+    cb.title = "";
+  }
 }
 
 function toggleSaveLib() {
