@@ -23,8 +23,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .app-header .page-title{font-size:15px;font-weight:600;color:var(--text-1)}
 .main-content{flex:1;display:flex;flex-direction:column;padding:16px 20px;gap:12px;min-height:0;overflow:auto}
 .ms-filter-card{background:var(--bg-card);border-radius:var(--radius-l);padding:12px 14px;box-shadow:var(--shadow-s);flex-shrink:0;}
-.ms-filter-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none}
-.ms-filter-header:hover .ms-filter-toggle{color:var(--primary)}
+
+.ms-filter-header:hover 
 .ms-filter-title{font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px}
 .ms-filter-toggle{font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block}
 .ms-filter-toggle.collapsed{transform:rotate(-90deg)}
@@ -34,14 +34,14 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .tag-filter-row .ms-filter-item{margin-bottom:0}
 .tag-filter-row .ms-filter-item label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
-.ms-filter-body{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;overflow:hidden;transition:max-height .3s,opacity .2s;max-height:200px;opacity:1}
+
 .ms-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
 .ms-filter-item{display:flex;flex-direction:column;gap:3px;min-width:0}
 .ms-filter-item label{font-size:11px;color:var(--text-3);font-weight:500;padding-left:1px}
 .ms-filter-item select,.ms-filter-item input[type="date"]{height:30px;padding:0 8px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;background:#fff;transition:border .2s;min-width:110px;}
 .ms-filter-item select:focus,.ms-filter-item input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,100,255,.12)}
 .ms-filter-item .date-sep{font-size:11px;color:var(--text-3);white-space:nowrap;flex-shrink:0;line-height:30px}
-.ms-filter-actions{display:flex;gap:6px;align-items:flex-end;margin-left:auto}
+
 .ms-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:30px;padding:0 12px;border:none;border-radius:var(--radius-s);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;user-select:none;white-space:nowrap;}
 .ms-btn-primary{background:var(--primary);color:#fff}
 .ms-btn-primary:hover{background:var(--primary-dark)}
@@ -103,68 +103,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <main class="main-content">
   <div class="ms-filter-card">
     <!-- 基础筛选（默认展开） -->
-    <div class="ms-filter-header" onclick="toggleMsFilter()" style="cursor:pointer;user-select:none">
-      <div class="ms-filter-title">🔍 基础筛选 <span class="ms-filter-toggle" id="msFilterToggle">▼</span></div>
-    </div>
-    <div class="ms-filter-body" id="msFilterBody">
-      <div class="ms-filter-item">
-        <label>类型</label>
-        <select id="filterType" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>前贴</option>
-          <option>中段</option>
-          <option>尾帧</option>
-          <option>中后段</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>业务</label>
-        <select id="filterBiz" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>存量</option>
-          <option>权益</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>渠道</label>
-        <select id="filterChannel" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>广点通</option>
-          <option>头条</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>优化师</label>
-        <select id="filterOptimizer" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>崔志恒</option>
-          <option>黄佩贤</option>
-          <option>黎舒晴</option>
-          <option>李雨航</option>
-          <option>谭嘉颖</option>
-          <option>林金维</option>
-          <option>陈羽思</option>
-          <option>叶首龙</option>
-          <option>赖嘉俊</option>
-          <option>戚嘉豪</option>
-          <option>黄雄伟</option>
-          <option>姚丰育</option>
-          <option>卢俭聪</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>上传日期</label>
-        <div style="display:flex;align-items:center;gap:4px">
-          <input type="date" id="filterDateStart" onchange="applyMsFilter()">
-          <span class="date-sep">~</span>
-          <input type="date" id="filterDateEnd" onchange="applyMsFilter()">
-        </div>
-      </div>
-      <div class="ms-filter-actions">
-        <button class="ms-btn ms-btn-outline" onclick="resetMsFilter()">重置</button>
-      </div>
-    </div>
-
     <!-- 标签筛选（默认折叠） -->
     <div class="tag-filter-wrap" onclick="toggleMsTagFilter()" style="cursor:pointer;user-select:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light)">
       <div class="ms-filter-title">🏷️ 标签筛选 <span id="msTagFilterToggle" style="font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block;margin-left:6px">▶</span></div>
@@ -427,18 +365,6 @@ var DEFAULT_CONTENT_TAG_CONFIG = {
 var USER_TAG2_MAP = JSON.parse(JSON.stringify(DEFAULT_USER_TAG2_MAP));
 var CONTENT_TAG_CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONTENT_TAG_CONFIG));
 
-function toggleMsFilter() {
-  var body = document.getElementById("msFilterBody");
-  var toggle = document.getElementById("msFilterToggle");
-  if (body.classList.contains("collapsed")) {
-    body.classList.remove("collapsed");
-    toggle.classList.remove("collapsed");
-  } else {
-    body.classList.add("collapsed");
-    toggle.classList.add("collapsed");
-  }
-}
-
 function toggleMsTagFilter() {
   var body = document.getElementById("msTagFilterBody");
   var toggle = document.getElementById("msTagFilterToggle");
@@ -517,52 +443,27 @@ function applyMsFilter() {
 }
 
 function resetMsFilter() {
-  document.getElementById("filterType").value = "";
-  document.getElementById("filterBiz").value = "";
-  document.getElementById("filterChannel").value = "";
-  document.getElementById("filterOptimizer").value = "";
-  document.getElementById("filterDateStart").value = "";
-  document.getElementById("filterDateEnd").value = "";
-  var regionSel = document.getElementById("filterMsUserRegion");
-  if (regionSel) regionSel.value = "";
-  var ageSel = document.getElementById("filterMsUserAge");
-  if (ageSel) ageSel.value = "";
-  var genderSel = document.getElementById("filterMsUserGender");
-  if (genderSel) genderSel.value = "";
-  var prodSel = document.getElementById("filterMsProductTag");
-  if (prodSel) prodSel.value = "";
-  var sels = ["filterMsContentWenan","filterMsContentMaidian","filterMsContentChangjing","filterMsContentDuihua","filterMsContentKoubo"];
-  for (var i = 0; i < sels.length; i++) {
-    var sel = document.getElementById(sels[i]);
-    if (sel) sel.value = "";
-  }
+  var sel;
+  if (sel = document.getElementById('filterMsUserRegion')) sel.value = '';
+  if (sel = document.getElementById('filterMsUserAge')) sel.value = '';
+  if (sel = document.getElementById('filterMsUserGender')) sel.value = '';
+  if (sel = document.getElementById('filterMsProductTag')) sel.value = '';
+  var ids = ['filterMsContentWenan','filterMsContentMaidian','filterMsContentChangjing','filterMsContentDuihua','filterMsContentKoubo'];
+  for (var i = 0; i < ids.length; i++) { if (sel = document.getElementById(ids[i])) sel.value = ''; }
   renderMsGrid();
 }
 }
 
 function getFilteredMsMaterials() {
-  // Basic filters
-  var typeVal = document.getElementById("filterType").value;
-  var bizVal = document.getElementById("filterBiz").value;
-  var channelVal = document.getElementById("filterChannel").value;
-  var optimizerVal = document.getElementById("filterOptimizer").value;
-  var dateStart = document.getElementById("filterDateStart").value;
-  var dateEnd = document.getElementById("filterDateEnd").value;
   // User tag filters
-  var userRegionVal = document.getElementById("filterMsUserRegion") ? document.getElementById("filterMsUserRegion").value : "";
-  var userAgeVal = document.getElementById("filterMsUserAge") ? document.getElementById("filterMsUserAge").value : "";
-  var userGenderVal = document.getElementById("filterMsUserGender") ? document.getElementById("filterMsUserGender").value : "";
+  var userRegionVal = document.getElementById("filterMsUserRegion") ? document.getElementById("filterMsUserRegion").value : '';
+  var userAgeVal = document.getElementById("filterMsUserAge") ? document.getElementById("filterMsUserAge").value : '';
+  var userGenderVal = document.getElementById("filterMsUserGender") ? document.getElementById("filterMsUserGender").value : '';
   // Product tag filter
-  var productTagVal = document.getElementById("filterMsProductTag") ? document.getElementById("filterMsProductTag").value : "";
+  var productTagVal = document.getElementById("filterMsProductTag") ? document.getElementById("filterMsProductTag").value : '';
   // Content tag filters
   var contentFilterVals = {};
-  var contentIds = {
-    "文案": "filterMsContentWenan",
-    "宣传卖点": "filterMsContentMaidian",
-    "场景": "filterMsContentChangjing",
-    "对话": "filterMsContentDuihua",
-    "口播": "filterMsContentKoubo"
-  };
+  var contentIds = { '文案': 'filterMsContentWenan', '宣传卖点': 'filterMsContentMaidian', '场景': 'filterMsContentChangjing', '对话': 'filterMsContentDuihua', '口播': 'filterMsContentKoubo' };
   for (var k in contentIds) {
     if (!contentIds.hasOwnProperty(k)) continue;
     var sel = document.getElementById(contentIds[k]);
@@ -572,35 +473,25 @@ function getFilteredMsMaterials() {
   var result = [];
   for (var i = 0; i < msMaterials.length; i++) {
     var m = msMaterials[i];
-    // Basic filters
-    if (typeVal && m.type !== typeVal) continue;
-    if (bizVal && m.biz !== bizVal) continue;
-    if (channelVal && m.channel !== channelVal) continue;
-    if (optimizerVal && m.optimizer !== optimizerVal) continue;
-    if (dateStart && m.date < dateStart) continue;
-    if (dateEnd && m.date > dateEnd) continue;
-    // Tag filters
     var pass = true;
     if (m.tags) {
       // User tags (OR)
       if (userRegionVal || userAgeVal || userGenderVal) {
         var userMatch = false;
-        if (userRegionVal && m.tags.userCategory === "地区" && m.tags.userValue === userRegionVal) userMatch = true;
-        if (userAgeVal && m.tags.userCategory === "年龄" && m.tags.userValue === userAgeVal) userMatch = true;
-        if (userGenderVal && m.tags.userCategory === "性别" && m.tags.userValue === userGenderVal) userMatch = true;
+        if (userRegionVal && m.tags.userCategory === '地区' && m.tags.userValue === userRegionVal) userMatch = true;
+        if (userAgeVal && m.tags.userCategory === '年龄' && m.tags.userValue === userAgeVal) userMatch = true;
+        if (userGenderVal && m.tags.userCategory === '性别' && m.tags.userValue === userGenderVal) userMatch = true;
         if (!userMatch) continue;
       }
       // Product tag
       if (productTagVal && m.tags.product !== productTagVal) continue;
       // Content tags
       if (m.tags.content) {
+        var contentPass = true;
         for (var ck in contentFilterVals) {
-          if (contentFilterVals.hasOwnProperty(ck) && m.tags.content[ck] !== contentFilterVals[ck]) {
-            pass = false;
-            break;
-          }
+          if (contentFilterVals.hasOwnProperty(ck) && m.tags.content[ck] !== contentFilterVals[ck]) { contentPass = false; break; }
         }
-        if (!pass) continue;
+        if (!contentPass) continue;
       } else if (Object.keys(contentFilterVals).length > 0) {
         continue;
       }
@@ -611,6 +502,7 @@ function getFilteredMsMaterials() {
   }
   return result;
 }
+
 
 
 
