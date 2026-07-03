@@ -406,8 +406,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <div class="fm-group">
         <label>素材类型 <span class="req">*</span></label>
         <select id="uploadFileType">
-          <option>视频</option>
-          <option>图片</option>
+          <option>前贴</option>
+          <option>中段</option>
+          <option>尾帧</option>
+          <option>中后段</option>
         </select>
       </div>
       <div class="fm-group">
@@ -515,11 +517,12 @@ var USER_TAG_CATEGORIES = {
 };
 
 var CONTENT_TAG_CONFIG_ZHONGHOU = {
-  "文案": ["紧迫性", "系统通知"],
+  "文案": ["默认文案"],
   "宣传卖点": ["话费", "流量"],
   "场景": ["营业厅", "公园", "小区", "街头"],
   "对话": ["老年男人", "老年女人"],
-  "口播": ["口播女", "口播男"]
+  "口播": ["口播女", "口播男"],
+  "内容": ["风景", "猛宠", "花鸟"]
 };
 
 function extractTagValues(tags) {
