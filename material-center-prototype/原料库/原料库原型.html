@@ -47,8 +47,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .ms-btn-primary:hover{background:var(--primary-dark)}
 .ms-btn-outline{background:#fff;color:var(--text-2);border:1px solid var(--border)}
 .ms-btn-outline:hover{background:var(--bg-hover);color:var(--text-1)}
-.ms-upload-bar{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border-radius:var(--radius-l);padding:10px 14px;box-shadow:var(--shadow-s);flex-shrink:0;}
-.ms-upload-bar .title{font-size:13px;font-weight:600;color:var(--text-1)}
+
+
 .ms-list-area{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-s);flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
 .ms-list-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
 .ms-list-header .title{font-size:13px;font-weight:600;color:var(--text-1)}
@@ -102,74 +102,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 <main class="main-content">
   <div class="ms-filter-card">
-    <div class="ms-filter-header" onclick="toggleMsFilter()">
-      <div class="ms-filter-title">🔍 筛选条件 <span class="ms-filter-toggle" id="msFilterToggle">▼</span></div>
-    </div>
-    <div class="ms-filter-body" id="msFilterBody">
-      <!-- 基础筛选 -->
-      <div class="ms-filter-item">
-        <label>类型</label>
-        <select id="filterType" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>前贴</option>
-          <option>中段</option>
-          <option>尾帧</option>
-          <option>中后段</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>业务</label>
-        <select id="filterBiz" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>存量</option>
-          <option>权益</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>渠道</label>
-        <select id="filterChannel" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>广点通</option>
-          <option>头条</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>优化师</label>
-        <select id="filterOptimizer" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>崔志恒</option>
-          <option>黄佩贤</option>
-          <option>黎舒晴</option>
-          <option>李雨航</option>
-          <option>谭嘉颖</option>
-          <option>林金维</option>
-          <option>陈羽思</option>
-          <option>叶首龙</option>
-          <option>赖嘉俊</option>
-          <option>戚嘉豪</option>
-          <option>黄雄伟</option>
-          <option>姚丰育</option>
-          <option>卢俭聪</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>上传日期</label>
-        <div style="display:flex;align-items:center;gap:4px">
-          <input type="date" id="filterDateStart" onchange="applyMsFilter()">
-          <span class="date-sep">~</span>
-          <input type="date" id="filterDateEnd" onchange="applyMsFilter()">
-        </div>
-      </div>
-      <div class="ms-filter-actions">
-        <button class="ms-btn ms-btn-outline" onclick="resetMsFilter()">重置</button>
-      </div>
-    </div>
-
-    <!-- 标签筛选（默认折叠） -->
-    <div class="tag-filter-wrap" onclick="toggleMsTagFilter()" style="cursor:pointer;user-select:none;margin-top:8px">
-      <div style="font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px">
-        🏷️ 标签筛选 <span id="msTagFilterToggle" style="font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block">▶</span>
-      </div>
+    <div class="tag-filter-wrap" onclick="toggleMsTagFilter()" style="cursor:pointer;user-select:none;padding:12px 14px">
+      <div class="ms-filter-title">🏷️ 标签筛选 <span id="msTagFilterToggle" style="font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block;margin-left:6px">▶</span></div>
     </div>
     <div class="tag-filter-body collapsed" id="msTagFilterBody">
       <!-- 用户标签行：地区、年龄、性别 -->
@@ -237,16 +171,18 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           </select>
         </div>
       </div>
+      <div style="margin-top:8px">
+        <button class="ms-btn ms-btn-outline" onclick="resetMsFilter()" style="height:28px;padding:0 10px;font-size:11px">重置筛选</button>
+      </div>
     </div>
   </div>
-  <div class="ms-upload-bar">
-    <div class="title">原料列表</div>
-    <button class="ms-btn ms-btn-primary" onclick="openUploadModal()">↑ 上传原料</button>
-  </div>
+
+
   <div class="ms-list-area">
     <div class="ms-list-header">
       <span class="title">全部原料</span>
-      <span class="count" id="msCount">共 12 个原料</span>
+      <span class="count" id="msCount">共 0 个</span>
+      <button class="ms-btn ms-btn-primary" onclick="openUploadModal()" style="height:28px;padding:0 12px;font-size:12px;margin-left:auto">↑ 上传原料</button>
     </div>
     <div class="ms-grid" id="msGrid"></div>
   </div>
@@ -427,15 +363,17 @@ var DEFAULT_CONTENT_TAG_CONFIG = {
 var USER_TAG2_MAP = JSON.parse(JSON.stringify(DEFAULT_USER_TAG2_MAP));
 var CONTENT_TAG_CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONTENT_TAG_CONFIG));
 
-function toggleMsFilter() {
-  var body = document.getElementById("msFilterBody");
-  var toggle = document.getElementById("msFilterToggle");
+function toggleMsTagFilter() {
+  var body = document.getElementById("msTagFilterBody");
+  var toggle = document.getElementById("msTagFilterToggle");
   if (body.classList.contains("collapsed")) {
     body.classList.remove("collapsed");
     toggle.classList.remove("collapsed");
+    toggle.textContent = "▼";
   } else {
     body.classList.add("collapsed");
     toggle.classList.add("collapsed");
+    toggle.textContent = "▶";
   }
 }
 
@@ -503,12 +441,6 @@ function applyMsFilter() {
 }
 
 function resetMsFilter() {
-  document.getElementById("filterType").value = "";
-  document.getElementById("filterBiz").value = "";
-  document.getElementById("filterChannel").value = "";
-  document.getElementById("filterOptimizer").value = "";
-  document.getElementById("filterDateStart").value = "";
-  document.getElementById("filterDateEnd").value = "";
   var regionSel = document.getElementById("filterMsUserRegion");
   if (regionSel) regionSel.value = "";
   var ageSel = document.getElementById("filterMsUserAge");
@@ -526,14 +458,12 @@ function resetMsFilter() {
 }
 
 function getFilteredMsMaterials() {
-  var typeVal = document.getElementById("filterType").value;
-  var bizVal = document.getElementById("filterBiz").value;
-  var channelVal = document.getElementById("filterChannel").value;
-  var optimizerVal = document.getElementById("filterOptimizer").value;
-  var dateStart = document.getElementById("filterDateStart").value;
-  var dateEnd = document.getElementById("filterDateEnd").value;
-  var userTagVal = document.getElementById("filterMsUserTag").value;
-  var productTagVal = document.getElementById("filterMsProductTag").value;
+  // 标签筛选
+  var userRegionVal = document.getElementById("filterMsUserRegion") ? document.getElementById("filterMsUserRegion").value : "";
+  var userAgeVal = document.getElementById("filterMsUserAge") ? document.getElementById("filterMsUserAge").value : "";
+  var userGenderVal = document.getElementById("filterMsUserGender") ? document.getElementById("filterMsUserGender").value : "";
+  var productTagVal = document.getElementById("filterMsProductTag") ? document.getElementById("filterMsProductTag").value : "";
+  // 内容标签筛选
   var contentFilterVals = {};
   var contentIds = {
     "文案": "filterMsContentWenan",
@@ -551,46 +481,44 @@ function getFilteredMsMaterials() {
   var result = [];
   for (var i = 0; i < msMaterials.length; i++) {
     var m = msMaterials[i];
-    if (typeVal && m.type !== typeVal) continue;
-    if (bizVal && m.biz !== bizVal) continue;
-    if (channelVal && m.channel !== channelVal) continue;
-    if (optimizerVal && m.optimizer !== optimizerVal) continue;
-    if (dateStart && m.date < dateStart) continue;
-    if (dateEnd && m.date > dateEnd) continue;
     // 标签筛选
     var pass = true;
     if (m.tags) {
       // 用户标签筛选（地区/年龄/性别，OR关系）
-      var msUserRegionVal = document.getElementById("filterMsUserRegion") ? document.getElementById("filterMsUserRegion").value : "";
-      var msUserAgeVal = document.getElementById("filterMsUserAge") ? document.getElementById("filterMsUserAge").value : "";
-      var msUserGenderVal = document.getElementById("filterMsUserGender") ? document.getElementById("filterMsUserGender").value : "";
-      if (msUserRegionVal || msUserAgeVal || msUserGenderVal) {
+      if (userRegionVal || userAgeVal || userGenderVal) {
         var userMatch = false;
-        if (msUserRegionVal && m.tags.userCategory === "地区" && m.tags.userValue === msUserRegionVal) userMatch = true;
-        if (msUserAgeVal && m.tags.userCategory === "年龄" && m.tags.userValue === msUserAgeVal) userMatch = true;
-        if (msUserGenderVal && m.tags.userCategory === "性别" && m.tags.userValue === msUserGenderVal) userMatch = true;
-        if (!userMatch) { result.push(m); continue; }
+        if (userRegionVal && m.tags.userCategory === "地区" && m.tags.userValue === userRegionVal) userMatch = true;
+        if (userAgeVal && m.tags.userCategory === "年龄" && m.tags.userValue === userAgeVal) userMatch = true;
+        if (userGenderVal && m.tags.userCategory === "性别" && m.tags.userValue === userGenderVal) userMatch = true;
+        if (!userMatch) { pass = false; }
       }
-      if (productTagVal && m.tags.product !== productTagVal) continue;
+      if (!pass) { result.push(m); continue; }
+      // 产品标签筛选
+      if (productTagVal && m.tags.product !== productTagVal) { pass = false; }
+      if (!pass) { result.push(m); continue; }
+      // 内容标签按类型筛选
       if (m.tags.content) {
-        var pass = true;
+        var contentPass = true;
         for (var ck in contentFilterVals) {
           if (contentFilterVals.hasOwnProperty(ck) && m.tags.content[ck] !== contentFilterVals[ck]) {
-            pass = false;
+            contentPass = false;
             break;
           }
         }
-        if (!pass) continue;
+        if (!contentPass) { pass = false; }
       } else if (Object.keys(contentFilterVals).length > 0) {
-        continue;
+        pass = false;
       }
     } else {
-      if (userTagVal || productTagVal || Object.keys(contentFilterVals).length > 0) continue;
+      // 素材没有tags，但有标签筛选条件
+      if (userRegionVal || userAgeVal || userGenderVal || productTagVal || Object.keys(contentFilterVals).length > 0) pass = false;
     }
+    if (!pass) continue;
     result.push(m);
   }
   return result;
 }
+
 
 function loadTagConfig() {
   try {
@@ -631,7 +559,7 @@ function renderMsGrid() {
   var data = getFilteredMsMaterials();
   if (data.length === 0) {
     grid.innerHTML = '<div class="ms-empty">暂无原料，请点击「上传原料」添加</div>';
-    document.getElementById("msCount").textContent = "共 0 个原料";
+    document.getElementById("msCount").textContent = "共 0 个";
     return;
   }
   var html = "";
@@ -664,7 +592,7 @@ function renderMsGrid() {
       '</div></div>';
   }
   grid.innerHTML = html;
-  document.getElementById("msCount").textContent = "共 " + data.length + " 个原料";
+  document.getElementById("msCount").textContent = "共 " + data.length + " 个";
 }
 
 function openUploadModal() {
