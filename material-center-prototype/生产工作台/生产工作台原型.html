@@ -309,11 +309,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   background:#fff;color:var(--text-1);outline:none;transition:border .15s;
 }
 .modal-filters .search-input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,100,255,.1)}
-.modal-filters .filter-select{
-  height:32px;padding:0 8px;font-size:12px;border:1px solid var(--border);
-  border-radius:var(--radius-s);background:#fff;color:var(--text-2);outline:none;cursor:pointer;
-}
-.modal-filters .filter-select:focus{border-color:var(--primary)}
 .modal-filters .date-input{
   height:32px;padding:0 8px;font-size:12px;border:1px solid var(--border);
   border-radius:var(--radius-s);background:#fff;color:var(--text-2);outline:none;
@@ -599,11 +594,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <button class="unlock-btn" onclick="unlockType()" title="解除锁定">✕</button>
       </div>
       <input class="search-input" id="searchInput" placeholder="搜索原料名称…" oninput="renderModalList()">
-      <select class="filter-select" id="channelFilter" onchange="renderModalList()">
-        <option value="">全部渠道</option>
-        <option>广点通</option>
-        <option>头条</option>
-      </select>
       <input class="date-input" id="dateStart" type="date" onchange="renderModalList()" title="上传开始日期">
       <span class="date-sep">至</span>
       <input class="date-input" id="dateEnd" type="date" onchange="renderModalList()" title="上传结束日期">
@@ -1275,11 +1265,18 @@ function openModal(lockType, slotIdx) {
     }
   }
 
-  // 清空筛选
+  // 清空筛选，默认展示近一个月
   document.getElementById("searchInput").value = "";
-  document.getElementById("channelFilter").value = "";
-  document.getElementById("dateStart").value = "";
-  document.getElementById("dateEnd").value = "";
+  // 默认上传日期：近一个月
+  var today = new Date();
+  var lastMonth = new Date(today);
+  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  var fmt = function(d) {
+    var y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
+    return y + "-" + (m < 10 ? "0" + m : m) + "-" + (day < 10 ? "0" + day : day);
+  };
+  document.getElementById("dateStart").value = fmt(lastMonth);
+  document.getElementById("dateEnd").value = fmt(today);
 
   renderModalList();
   document.getElementById("overlay").classList.add("show");
@@ -1319,7 +1316,6 @@ function switchTypeTab(el, type) {
 
 function renderModalList() {
   var kw   = (document.getElementById("searchInput").value || "").trim().toLowerCase();
-  var ch   = document.getElementById("channelFilter").value;
   var dS   = document.getElementById("dateStart").value;
   var dE   = document.getElementById("dateEnd").value;
   // 锁定模式下使用 lockedType，否则使用 activeTab
@@ -1330,15 +1326,19 @@ function renderModalList() {
     var m = MATERIALS_DB[i];
     if (fType && m.type !== fType) continue;
     if (kw && m.name.toLowerCase().indexOf(kw) === -1) continue;
-    if (ch && m.channel !== ch) continue;
     if (dS && m.date < dS) continue;
     if (dE && m.date > dE) continue;
-    // 基础属性筛选
+    // 基础属性筛选（渠道等已在基础属性中配置）
     if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
     if (gBasicAttrs.channel && m.channel !== gBasicAttrs.channel) continue;
     if (gBasicAttrs.optimizer && m.optimizer !== gBasicAttrs.optimizer) continue;
     result.push(m);
   }
+
+  // 按上传日期降序排列（最新的在前面）
+  result.sort(function(a, b) {
+    return (b.date || "").localeCompare(a.date || "");
+  });
 
   var html = "";
   for (var i = 0; i < result.length; i++) {
