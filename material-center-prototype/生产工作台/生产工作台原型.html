@@ -382,10 +382,20 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
   <!-- 视图1：任务列表（默认显示） -->
   <div class="view" id="viewList" style="display:none">
-    <div class="list-header">
-      <div class="left"></div>
-      <div class="right">
+    <div class="list-header" style="flex-direction:column;gap:10px">
+      <div class="left" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <select id="filterCreator" onchange="renderTaskList()" style="height:34px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:#fff;color:var(--text-2);outline:none;cursor:pointer">
+          <option value="">全部创建人</option>
+        </select>
+        <select id="filterStatus" onchange="renderTaskList()" style="height:34px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:#fff;color:var(--text-2);outline:none;cursor:pointer">
+          <option value="">全部状态</option>
+          <option value="draft">⏳ 草稿</option>
+          <option value="processing">⚙ 生产中</option>
+          <option value="done">✅ 已完成</option>
+        </select>
         <input class="search-box" id="taskSearch" placeholder="搜索任务名称…" oninput="renderTaskList()">
+      </div>
+      <div class="right" style="display:flex;justify-content:flex-end">
         <button class="btn-primary" onclick="newTask()">＋ 新建生产任务</button>
       </div>
     </div>
@@ -401,12 +411,13 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <thead>
           <tr>
             <th style="width:36px"><input type="checkbox" class="task-cb" id="selectAllCb" onchange="toggleSelectAll(this)"></th>
+            <th style="width:70px">任务ID</th>
             <th>任务名称</th>
             <th>状态</th>
             <th>创建人</th>
             <th>原料数量</th>
             <th>成品数量</th>
-            <th>创建时间</th>
+            <th style="cursor:pointer;user-select:none" onclick="toggleSort()">创建时间 <span id="sortIcon">⇅</span></th>
             <th style="width:180px">操作</th>
           </tr>
         </thead>
@@ -671,6 +682,7 @@ initTaskMaterials();
 var gNextTaskId = 4;
 var gEditingTaskId = null;
 var gBatchSelected = [];
+var gSortOrder = ""; // 创建时间排序: "", "asc", "desc"
 
 // 基础属性筛选键
 var BASIC_ATTRS_KEYS = ["biz","channel","optimizer"];
@@ -709,15 +721,31 @@ function switchView(name) {
 function renderTaskList() {
   var searchEl = document.getElementById("taskSearch");
   var kw = (searchEl ? (searchEl.value || "") : "").trim().toLowerCase();
+  var creatorVal = (document.getElementById("filterCreator") || {}).value || "";
+  var statusVal = (document.getElementById("filterStatus") || {}).value || "";
+
   var filtered = [];
   for (var i = 0; i < gTasks.length; i++) {
-    if (kw && gTasks[i].name.toLowerCase().indexOf(kw) === -1) continue;
-    filtered.push(gTasks[i]);
+    var t = gTasks[i];
+    if (kw && t.name.toLowerCase().indexOf(kw) === -1) continue;
+    if (creatorVal && t.creator !== creatorVal) continue;
+    if (statusVal && t.status !== statusVal) continue;
+    filtered.push(t);
   }
+
+  // 排序
+  if (gSortOrder) {
+    filtered.sort(function(a, b) {
+      var ta = a.createTime || "";
+      var tb = b.createTime || "";
+      return gSortOrder === "asc" ? (ta < tb ? -1 : 1) : (ta < tb ? 1 : -1);
+    });
+  }
+
   var tbody = document.getElementById("taskTableBody");
   if (!tbody) return;
   if (filtered.length === 0) {
-    tbody.innerHTML = "<tr><td colspan=\"8\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw ? "试试其他关键词" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
+    tbody.innerHTML = "<tr><td colspan=\"9\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw || creatorVal || statusVal ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw || creatorVal || statusVal ? "试试调整筛选条件" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
     updateBatchBar();
     return;
   }
@@ -735,12 +763,13 @@ function renderTaskList() {
     var st = t.status === "draft" ? "⏳ 草稿" : t.status === "processing" ? "⚙ 生产中" : "✅ 已完成";
     html += "<tr class=\"" + (isSel ? "selected" : "") + "\" onclick=\"openTask(" + t.id + ")\">" +
       "<td onclick=\"event.stopPropagation()\"><input type=\"checkbox\" class=\"task-cb\" " + (isSel ? "checked" : "") + " onchange=\"toggleBatchSelect(" + t.id + ", this)\"></td>" +
+      "<td style=\"font-size:12px;color:var(--text-3);font-weight:500\">" + t.id + "</td>" +
       "<td><span class=\"task-name\">" + esc(t.name) + "</span></td>" +
       "<td><span class=\"status-badge " + sc + "\">" + st + "</span></td>" +
       "<td style=\"color:var(--text-2);font-size:12px\">" + esc(t.creator || "-") + "</td>" +
       "<td>" + mc + " 个</td>" +
       "<td>" + oc + " 个</td>" +
-      "<td style=\"color:var(--text-3);font-size:12px\">" + t.createTime + "</td>" +
+      "<td style=\"color:var(--text-3);font-size:12px;white-space:nowrap\">" + t.createTime + "</td>" +
       "<td onclick=\"event.stopPropagation()\"><div class=\"action-btns\">" +
         (t.status === "done" ? "<button class=\"action-btn export-btn\" onclick=\"exportTask(" + t.id + ")\">⬇ 导出</button>" : "") +
         "<button class=\"action-btn\" onclick=\"openTask(" + t.id + ")\">编辑</button>" +
@@ -750,6 +779,14 @@ function renderTaskList() {
   }
   tbody.innerHTML = html;
   updateBatchBar();
+}
+
+function toggleSort() {
+  if (!gSortOrder) gSortOrder = "desc";
+  else if (gSortOrder === "desc") gSortOrder = "asc";
+  else gSortOrder = "";
+  document.getElementById("sortIcon").textContent = gSortOrder === "asc" ? "↑" : gSortOrder === "desc" ? "↓" : "⇅";
+  renderTaskList();
 }
 
 function updateBatchBar() {
@@ -1512,6 +1549,19 @@ function showToast(msg, type) {
 
 // ===== 初始化 =====
 document.addEventListener("DOMContentLoaded", function() {
+  // 填充创建人筛选下拉框
+  var creatorSel = document.getElementById("filterCreator");
+  if (creatorSel) {
+    var creators = {};
+    for (var i = 0; i < gTasks.length; i++) {
+      if (gTasks[i].creator) creators[gTasks[i].creator] = true;
+    }
+    for (var c in creators) {
+      if (creators.hasOwnProperty(c)) {
+        creatorSel.innerHTML += '<option>' + c + '</option>';
+      }
+    }
+  }
   renderTaskList();
   switchView('list');
 });
