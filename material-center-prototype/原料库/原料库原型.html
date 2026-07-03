@@ -307,8 +307,16 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
               <option value="">全部</option>
             </select>
           </div>
+          <div class="filter-group">
+            <label>内容</label>
+            <select id="filterContentNeirong" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
     </div>
   </div>
   <div class="ms-grid" id="msGrid"></div>
@@ -628,13 +636,14 @@ function initMsTagFilters() {
   }
   // 产品标签（固定值，已在HTML中）
   // 内容标签 - 按类型分拆
-  var contentTypes = ["文案", "宣传卖点", "场景", "对话", "口播"];
+  var contentTypes = ["文案", "宣传卖点", "场景", "对话", "口播", "内容"];
   var contentIds = {
     "文案": "filterContentWenan",
     "宣传卖点": "filterContentMaidian",
     "场景": "filterContentChangjing",
     "对话": "filterContentDuihua",
-    "口播": "filterContentKoubo"
+    "口播": "filterContentKoubo",
+    "内容": "filterContentNeirong"
   };
   for (var t = 0; t < contentTypes.length; t++) {
     var typeName = contentTypes[t];
@@ -771,6 +780,7 @@ function resetMsFilter() {
   el = document.getElementById("filterContentChangjing"); if (el) el.value = "";
   el = document.getElementById("filterContentDuihua"); if (el) el.value = "";
   el = document.getElementById("filterContentKoubo"); if (el) el.value = "";
+  el = document.getElementById("filterContentNeirong"); if (el) el.value = "";
   renderMsGrid();
 }
 
@@ -791,7 +801,8 @@ function getFilteredMsMaterials() {
     "宣传卖点": document.getElementById("filterContentMaidian"),
     "场景": document.getElementById("filterContentChangjing"),
     "对话": document.getElementById("filterContentDuihua"),
-    "口播": document.getElementById("filterContentKoubo")
+    "口播": document.getElementById("filterContentKoubo"),
+    "内容": document.getElementById("filterContentNeirong")
   };
 
   var nameKw = (nameEl && nameEl.value || "").trim().toLowerCase();
