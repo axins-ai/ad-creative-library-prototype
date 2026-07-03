@@ -190,8 +190,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .tag-zhd{background:#f0e6ff;color:#7b61ff;border:1px solid #d3adf7}
 .tag .rm{font-size:13px;cursor:pointer;opacity:.5;transition:opacity .15s;margin-left:2px}
 .tag .rm:hover{opacity:1;color:var(--danger)}
+.mat-card.disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.5)}
+.mat-card.disabled::before{opacity:.4}
+.mat-card.disabled .sel-btn{background:var(--bg-page);color:var(--text-3);border-color:var(--border)}
 
-  .slot-row{margin-top:8px;padding:8px;background:var(--bg-page);border-radius:var(--radius-s);}
+ .slot-row{margin-top:8px;padding:8px;background:var(--bg-page);border-radius:var(--radius-s);}
   .add-slot-btn{
     display:block;width:100%;padding:6px 0;text-align:center;
     font-size:12px;color:var(--primary);background:transparent;
@@ -1249,9 +1252,10 @@ function renderOneCard(type,cls,tagCls) {
     var m = list[i];
     tags += "<span class=\"tag "+tagCls+"\">"+esc(m.name)+" <span class=\"rm\" onclick=\"event.stopPropagation();rmMat("+m.id+",'"+type+"')\">×</span></span>";
   }
-  return "<div class=\"mat-card "+cls+(list.length>0?" selected":"")+"\" onclick=\"openModal('"+type+"')\">"+
+  var isBasicComplete = !!(gBasicAttrs.biz && gBasicAttrs.channel && gBasicAttrs.optimizer);
+  return "<div class=\"mat-card "+cls+(list.length>0?" selected":"")+(isBasicComplete?"":" disabled")+"\" onclick=\"openModal('"+type+"')\">"+
     "<div class=\"card-top\"><span class=\"type-label\">"+type+"</span><span class=\"count-badge\">"+list.length+" 个</span></div>"+
-    "<div class=\"sel-btn\">点击选择原料（支持多选）</div>"+
+    "<div class=\"sel-btn\">" + (isBasicComplete ? "点击选择原料（支持多选）" : "请先完成基础属性配置") + "</div>"+
     (tags?"<div class=\"tags-wrap\">"+tags+"</div>":"")+"</div>";
 }
 
@@ -1262,10 +1266,11 @@ function renderMidSlotCard(idx) {
     var m = list[i];
     tags += "<span class=\"tag tag-zd\">"+esc(m.name)+" <span class=\"rm\" onclick=\"event.stopPropagation();rmMat("+m.id+",'中段',"+idx+")\">×</span></span>";
   }
-  return "<div class=\"mat-card zd"+(list.length>0?" selected":"")+"\" onclick=\"openModal('中段',"+idx+")\">"+
+  var isBasicComplete = !!(gBasicAttrs.biz && gBasicAttrs.channel && gBasicAttrs.optimizer);
+  return "<div class=\"mat-card zd"+(list.length>0?" selected":"")+(isBasicComplete?"":" disabled")+"\" onclick=\"openModal('中段',"+idx+")\">"+
     "<div class=\"card-top\"><span class=\"type-label\">中段·槽"+(idx+1)+"</span><span class=\"count-badge\">"+list.length+" 个</span>"+
     (gMidSlotList.length>1?"<span class=\"slot-del\" onclick=\"event.stopPropagation();removeMidSlot("+idx+")\">删除此槽</span>":"")+"</div>"+
-    "<div class=\"sel-btn\">点击选择中段原料（支持多选）</div>"+
+    "<div class=\"sel-btn\">" + (isBasicComplete ? "点击选择中段原料（支持多选）" : "请先完成基础属性配置") + "</div>"+
     (tags?"<div class=\"tags-wrap\">"+tags+"</div>":"")+"</div>";
 }
 
@@ -1300,6 +1305,16 @@ function rmMat(id, type, slotIdx) {
 
 // ===== 弹窗：类型锁定 =====
 function openModal(lockType, slotIdx) {
+  // 必须先完成基础属性配置才能选择原料
+  var missing = [];
+  if (!gBasicAttrs.biz) missing.push("业务类型");
+  if (!gBasicAttrs.channel) missing.push("渠道");
+  if (!gBasicAttrs.optimizer) missing.push("优化师");
+  if (missing.length > 0) {
+    showValidateModal(missing, "请先完成基础属性配置，再选择原料：");
+    return;
+  }
+
   // lockType: "前贴"|"中段"|"尾帧"|""(未锁定)
   // slotIdx: 中段槽位索引
   gModal.lockedType = lockType || "";
@@ -1578,13 +1593,16 @@ function validateForm() {
   return true;
 }
 
-function showValidateModal(fields) {
+function showValidateModal(fields, msg) {
+  // msg: 可选，自定义提示语
   var list = document.getElementById("missingList");
   var html = "";
   for (var i = 0; i < fields.length; i++) {
     html += "<li><span class=\"dot\"></span>" + fields[i] + "</li>";
   }
   list.innerHTML = html;
+  // 更新提示语
+  document.getElementById("validateMsg").textContent = msg || "以下必填字段尚未填写，请完善后再提交：";
   document.getElementById("validateModal").style.display = "flex";
   // 存储缺失字段，用于关闭后聚焦
   gMissingFields = fields;
@@ -1594,10 +1612,27 @@ function closeValidateModal(focus) {
   document.getElementById("validateModal").style.display = "none";
   if (focus && gMissingFields && gMissingFields.length > 0) {
     var first = gMissingFields[0];
-    if (first === "任务名称") {
-      document.getElementById("taskNameInput").focus();
+    // 将缺失字段名映射到对应的表单元素ID
+    var idMap = {
+      "任务名称": "taskNameInput",
+      "业务类型": "pBiz",
+      "渠道": "pChannel",
+      "优化师": "pOptimizer"
+    };
+    var elId = idMap[first];
+    if (elId) {
+      var el = document.getElementById(elId);
+      if (el) {
+        el.focus();
+        // 下拉框聚焦时添加高亮动画提示
+        el.style.outline = "2px solid var(--primary)";
+        el.style.outlineOffset = "2px";
+        setTimeout(function() {
+          el.style.outline = "";
+          el.style.outlineOffset = "";
+        }, 2000);
+      }
     }
-    // 其他字段的聚焦逻辑可按需扩展
   }
   gMissingFields = null;
 }
