@@ -12,7 +12,7 @@
   --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
   --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
   --bg-page:#f0f2f5;--bg-card:#fff;
-  --border:#e8e8e8;--border-light:#f0f0f0;
+  --border:#e8e8e8;
   --radius:8px;--radius-l:12px;
 }
 body{
@@ -48,30 +48,12 @@ body{
   background:var(--bg-page);border-radius:var(--radius);
   padding:24px;overflow-x:auto;
 }
-.info-cards{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:20px;margin-top:24px;
-}
-.info-card{
-  background:var(--bg-page);border-radius:var(--radius);
-  padding:20px;border:1px solid var(--border);
-}
-.info-card h3{
-  font-size:15px;font-weight:600;color:var(--primary);
-  margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--primary-light);
-}
-.info-card ul{list-style:none;padding:0}
-.info-card li{
-  font-size:13px;color:var(--text-2);padding:8px 0;
-  border-bottom:1px solid var(--border-light);
-}
-.info-card li:last-child{border-bottom:none}
 .module-flow{display:flex;align-items:center;justify-content:center;gap:20px;margin:32px 0;flex-wrap:wrap}
 .module-box{padding:20px 32px;border-radius:var(--radius-l);font-size:16px;font-weight:600;text-align:center;min-width:160px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.module-box.tag{background:linear-gradient(135deg,#fff8e1 0%,#ffecb3 100%);color:#f57f17;border:2px solid #ffd54f}
 .module-box.raw{background:linear-gradient(135deg,#e3f2fd 0%,#bbdefb 100%);color:#1565c0;border:2px solid #90caf9}
 .module-box.production{background:linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 100%);color:#2e7d32;border:2px solid #a5d6a7}
 .module-box.material{background:linear-gradient(135deg,#f3e5f5 0%,#e1bee7 100%);color:#7b1fa2;border:2px solid #ce93d8}
-.module-box.report{background:linear-gradient(135deg,#fff8e1 0%,#ffecb3 100%);color:#f57f17;border:2px solid #ffd54f}
 .module-arrow{font-size:32px;color:var(--primary);padding:0 12px}
 @media(max-width:768px){.module-flow{flex-direction:column}.module-arrow{transform:rotate(90deg);padding:12px 0}}
 </style>
@@ -80,7 +62,7 @@ body{
 
 <div class="page-header">
   <h1>素材中心 - 整体业务流程图</h1>
-  <p>原料库 → 生产工作台 → 素材库 → 素材报表</p>
+  <p>标签库 → 原料库 → 生产工作台 → 素材库</p>
 </div>
 
 <!-- ===== 模块概览 ===== -->
@@ -89,6 +71,12 @@ body{
   <p class="desc">素材中心各模块之间的关系</p>
   
   <div class="module-flow">
+    <div class="module-box tag">
+      <div style="font-size:32px;margin-bottom:8px">🏷</div>
+      <div>标签库</div>
+      <div style="font-size:11px;margin-top:4px;opacity:.7">Tag Library</div>
+    </div>
+    <div class="module-arrow">→</div>
     <div class="module-box raw">
       <div style="font-size:32px;margin-bottom:8px">📥</div>
       <div>原料库</div>
@@ -106,156 +94,106 @@ body{
       <div>素材库</div>
       <div style="font-size:11px;margin-top:4px;opacity:.7">Material Library</div>
     </div>
-    <div class="module-arrow">→</div>
-    <div class="module-box report">
-      <div style="font-size:32px;margin-bottom:8px">📊</div>
-      <div>素材报表</div>
-      <div style="font-size:11px;margin-top:4px;opacity:.7">Material Report</div>
-    </div>
   </div>
 </div>
 
 <!-- ===== 1. 整体业务流程图 ===== -->
 <div class="diagram-section">
   <h2>📊 整体业务流程图</h2>
-  <p class="desc">从原料入库到成品使用的完整业务流程</p>
+  <p class="desc">从标签管理到成品入库的完整业务流程</p>
   <div class="mermaid">
 flowchart TD
-    A([开始]) --> B[原料入库]
-    
-    B --> C{入库方式}
-    C -->|自动入库| D[系统自动抓取]
-    C -->|手动上传| E[用户手动上传]
-    
-    D --> F[原料审核]
-    E --> F
-    
-    F --> G{审核通过？}
-    G -->|否| H[退回/重新上传]
-    H --> C
-    G -->|是| I[原料入库完成]
-    
-    I --> J[(原料库)]
-    
-    J --> K{使用原料？}
-    K -->|是| L[进入生产工作台]
-    K -->|否| M[继续管理原料]
-    M --> J
-    
-    L --> N[创建生产任务]
-    N --> O[选择原料]
-    O --> P[配置生产参数]
-    P --> Q[开始生产]
-    
-    Q --> R{生产成功？}
-    R -->|否| S[生产失败处理]
-    S --> N
-    R -->|是| T[成品生成]
-    
-    T --> U[(素材库)]
-    
-    U --> V{使用素材？}
-    V -->|是| W[进入广告投放]
-    V -->|否| X[继续管理素材]
-    X --> U
-    
-    W --> Y[投放广告]
-    Y --> Z[收集投放数据]
-    
-    Z --> AA[(素材报表)]
-    
-    AA --> AB[数据分析]
-    AB --> AC[优化策略]
-    AC --> AD[返回原料库]
-    AD --> B
-    
+    A([开始]) --> B[标签库管理]
+    B --> C[创建/编辑标签]
+    C --> D[(标签库)]
+    D --> E[原料入库]
+    E --> F[选择原料类型]
+    F --> G[填写标签]
+    G --> H[原料入库完成]
+    H --> I[(原料库)]
+    I --> J[创建生产任务]
+    J --> K[选择原料]
+    K --> L[配置生产参数]
+    L --> M[开始生产]
+    M --> N[成品生成]
+    N --> O[(素材库)]
+    O --> P[成品入库完成]
+    P --> Q{选择操作}
+    Q -->|导出| R[导出成品]
+    Q -->|查看| S[查看素材详情]
+    Q -->|返回| I
+    R --> T([结束])
+    S --> O
     style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style J fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style U fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style AA fill:#fff8e1,stroke:#f57f17,stroke-width:2px
-    style L fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
-    style W fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
-    style B fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style I fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style T fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style D fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    style I fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style O fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style T fill:#e1f5fe,stroke:#01579b,stroke-width:2px
   </div>
 </div>
 
-<!-- ===== 2. 数据流图 ===== -->
-<div class="diagram-section">
-  <h2>💾 数据流图</h2>
-  <p class="desc">各模块之间的数据流转关系</p>
-  <div class="mermaid">
-flowchart LR
-    A[原料入库] -->|原料数据| B[(原料库)]
-    B -->|原料选择| C[生产任务配置]
-    C -->|生产请求| D[生产处理]
-    D -->|成品数据| E[(素材库)]
-    E -->|素材选择| F[广告投放]
-    F -->|投放数据| G[(素材报表)]
-    G -->|数据分析| H[优化建议]
-    H -->|优化策略| A
-    
-    style A fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style B fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style C fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
-    style D fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
-    style E fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style F fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
-    style G fill:#fff8e1,stroke:#f57f17,stroke-width:2px
-    style H fill:#fff3e0,stroke:#e65100,stroke-width:2px
-  </div>
-</div>
-
-<!-- ===== 3. 各模块功能说明 ===== -->
+<!-- ===== 2. 各模块功能说明 ===== -->
 <div class="diagram-section">
   <h2>📋 各模块功能说明</h2>
   <p class="desc">素材中心各模块的核心功能</p>
   
-  <div class="info-cards">
-    <div class="info-card">
-      <h3>📥 原料库</h3>
-      <ul>
-        <li><strong>核心功能：</strong>管理视频原料（前贴、中段、中后段、尾帧）</li>
-        <li><strong>主要功能：</strong>原料入库、原料审核、原料筛选、原料编辑、原料删除</li>
-        <li><strong>数据来源：</strong>自动入库、手动上传</li>
-        <li><strong>数据去向：</strong>生产工作台（原料选择）</li>
-        <li><strong>关键指标：</strong>原料数量、原料类型分布、原料使用频率</li>
-      </ul>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:16px">
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:#f57f17;margin-bottom:12px">🏷 标签库</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>核心功能：</strong>管理素材中心所有标签</div>
+        <div><strong>主要功能：</strong>创建标签、编辑标签、删除标签、标签分类</div>
+        <div><strong>使用范围：</strong>原料库和素材库都使用标签库中的标签</div>
+        <div><strong>数据流向：</strong>标签库 → 原料库/素材库</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>⚙️ 生产工作台</h3>
-      <ul>
-        <li><strong>核心功能：</strong>使用原料库中的原料生成成品素材</li>
-        <li><strong>主要功能：</strong>创建任务、选择原料、配置参数、开始生产、导出成品</li>
-        <li><strong>数据来源：</strong>原料库（原料选择）</li>
-        <li><strong>数据去向：</strong>素材库（成品入库）</li>
-        <li><strong>关键指标：</strong>任务数量、生产成功率、素材数量</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:#1565c0;margin-bottom:12px">📥 原料库</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>核心功能：</strong>管理视频原料（前贴、中段、中后段、尾帧）</div>
+        <div><strong>主要功能：</strong>原料入库、原料筛选、原料编辑、原料删除</div>
+        <div><strong>数据来源：</strong>自动入库、手动上传</div>
+        <div><strong>数据去向：</strong>生产工作台（原料选择）</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>📦 素材库</h3>
-      <ul>
-        <li><strong>核心功能：</strong>管理成品素材</li>
-        <li><strong>主要功能：</strong>素材入库、素材筛选、素材编辑、素材导出、素材删除</li>
-        <li><strong>数据来源：</strong>生产工作台（生产生成）、手动上传</li>
-        <li><strong>数据去向：</strong>广告投放（素材使用）</li>
-        <li><strong>关键指标：</strong>素材数量、素材类型分布、素材使用频率</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:#2e7d32;margin-bottom:12px">⚙️ 生产工作台</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>核心功能：</strong>使用原料库中的原料生成成品素材</div>
+        <div><strong>主要功能：</strong>创建任务、选择原料、配置参数、开始生产</div>
+        <div><strong>数据来源：</strong>原料库（原料选择）</div>
+        <div><strong>数据去向：</strong>素材库（成品入库）</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>📊 素材报表</h3>
-      <ul>
-        <li><strong>核心功能：</strong>分析素材使用效果和投放数据</li>
-        <li><strong>主要功能：</strong>数据收集、数据分析、效果评估、优化建议</li>
-        <li><strong>数据来源：</strong>广告投放（投放数据）</li>
-        <li><strong>数据去向：</strong>优化策略（返回原料库）</li>
-        <li><strong>关键指标：</strong>投放效果、转化率、ROI</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:#7b1fa2;margin-bottom:12px">📦 素材库</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>核心功能：</strong>管理成品素材</div>
+        <div><strong>主要功能：</strong>素材入库、素材筛选、素材编辑、素材导出</div>
+        <div><strong>数据来源：</strong>生产工作台（生产生成）、手动上传</div>
+        <div><strong>数据去向：</strong>导出使用</div>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- ===== 3. 模块间数据流 ===== -->
+<div class="diagram-section">
+  <h2>💾 模块间数据流</h2>
+  <p class="desc">各模块之间的数据流转关系</p>
+  <div class="mermaid">
+flowchart LR
+    A[标签库] -->|标签数据| B[原料库]
+    A -->|标签数据| C[素材库]
+    B -->|原料数据| D[生产工作台]
+    D -->|成品数据| C
+    style A fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    style B fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style D fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
   </div>
 </div>
 
@@ -264,79 +202,43 @@ flowchart LR
   <h2>📏 业务规则说明</h2>
   <p class="desc">素材中心各模块之间的业务规则和限制</p>
   
-  <div class="info-cards">
-    <div class="info-card">
-      <h3>📥→⚙️ 原料库到生产工作台</h3>
-      <ul>
-        <li><strong>原料选择：</strong>必须配置基础属性后才能选择原料</li>
-        <li><strong>类型匹配：</strong>前贴槽只能选前贴类型原料</li>
-        <li><strong>数量限制：</strong>前贴和尾帧只能选1个</li>
-        <li><strong>中段多选：</strong>中段可选择多个并分槽位</li>
-        <li><strong>保存为原料：</strong>生产中可勾选保存为原料</li>
-      </ul>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:16px">
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">🏷 → 📥 标签库到原料库</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div>• 原料入库时可选择标签库中的标签</div>
+        <div>• 支持多选标签</div>
+        <div>• 标签用于原料分类和筛选</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>⚙️→📦 生产工作台到素材库</h3>
-      <ul>
-        <li><strong>成品生成：</strong>根据原料组合自动生成成品</li>
-        <li><strong>素材数量：</strong>前贴×中段×尾帧，上限1000</li>
-        <li><strong>命名规则：</strong>可按规则自动命名成品</li>
-        <li><strong>状态流转：</strong>生产中→已完成</li>
-        <li><strong>自动入库：</strong>成品自动入库到素材库</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">📥 → ⚙️ 原料库到生产工作台</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div>• 必须配置基础属性后才能选择原料</div>
+        <div>• 前贴槽位只能选择前贴类型原料</div>
+        <div>• 尾帧槽位只能选择尾帧类型原料</div>
+        <div>• 中段槽位可选择中段或中后段类型原料</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>📦→📊 素材库到素材报表</h3>
-      <ul>
-        <li><strong>素材使用：</strong>投放时从素材库选择素材</li>
-        <li><strong>数据收集：</strong>自动收集投放数据</li>
-        <li><strong>效果分析：</strong>分析素材投放效果</li>
-        <li><strong>优化建议：</strong>根据数据给出优化建议</li>
-        <li><strong>闭环优化：</strong>优化建议返回原料库</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- ===== 5. 用户角色说明 ===== -->
-<div class="diagram-section">
-  <h2>👥 用户角色说明</h2>
-  <p class="desc">素材中心各模块的用户角色和权限</p>
-  
-  <div class="info-cards">
-    <div class="info-card">
-      <h3>👤 优化师</h3>
-      <ul>
-        <li><strong>主要职责：</strong>管理原料、创建生产任务、投放广告</li>
-        <li><strong>原料库权限：</strong>查看、上传、编辑、删除自己的原料</li>
-        <li><strong>生产工作台权限：</strong>创建、编辑、删除自己的任务</li>
-        <li><strong>素材库权限：</strong>查看、使用、导出自己的素材</li>
-        <li><strong>素材报表权限：</strong>查看自己的投放数据</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">⚙️ → 📦 生产工作台到素材库</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div>• 成品自动入库到素材库</div>
+        <div>• 成品数量 = 前贴 × 中段 × 尾帧</div>
+        <div>• 单次生产上限1000个素材</div>
+        <div>• 成品入库后可在素材库管理</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>👨💼 设计师</h3>
-      <ul>
-        <li><strong>主要职责：</strong>制作原料、制作素材、配置命名规则</li>
-        <li><strong>原料库权限：</strong>上传、编辑、删除原料</li>
-        <li><strong>生产工作台权限：</strong>查看任务、配置命名规则</li>
-        <li><strong>素材库权限：</strong>上传、编辑、删除素材</li>
-        <li><strong>素材报表权限：</strong>查看素材效果数据</li>
-      </ul>
-    </div>
-    
-    <div class="info-card">
-      <h3>👨💼 管理员</h3>
-      <ul>
-        <li><strong>主要职责：</strong>管理所有原料、素材、任务，查看所有数据</li>
-        <li><strong>原料库权限：</strong>查看、上传、编辑、删除所有原料</li>
-        <li><strong>生产工作台权限：</strong>查看、编辑、删除所有任务</li>
-        <li><strong>素材库权限：</strong>查看、编辑、删除、导出所有素材</li>
-        <li><strong>素材报表权限：</strong>查看所有投放数据和分析报告</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">🏷 → 📦 标签库到素材库</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div>• 素材入库时可选择标签库中的标签</div>
+        <div>• 支持多选标签</div>
+        <div>• 标签用于素材分类和筛选</div>
+      </div>
     </div>
   </div>
 </div>
@@ -349,8 +251,8 @@ mermaid.initialize({
     useMaxWidth: true,
     htmlLabels: true,
     curve: 'linear',
-    rankSpacing: 50,
-    nodeSpacing: 50
+    rankSpacing: 60,
+    nodeSpacing: 40
   }
 });
 </script>
