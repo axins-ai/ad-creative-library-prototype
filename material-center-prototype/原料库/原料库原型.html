@@ -125,6 +125,22 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .upload-body .fm-group input,.upload-body .fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
 .upload-body .fm-group input:focus,.upload-body .fm-group select:focus{border-color:var(--primary)}
 .upload-actions{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--border-light);flex-shrink:0;}
+
+/* Filter card style */
+.filter-card{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-s);margin-bottom:16px;overflow:hidden}
+.filter-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border-light);transition:background .15s}
+.filter-card-header:hover{background:var(--bg-hover)}
+.filter-card-title{font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px}
+.filter-card-toggle{font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block}
+.filter-card-toggle.collapsed{transform:rotate(-90deg)}
+.filter-card-body{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:12px 16px;overflow:hidden;transition:max-height .3s,opacity .2s;max-height:300px;opacity:1}
+.filter-card-body.collapsed{max-height:0;opacity:0;padding:0 16px;margin:0}
+
+/* Tag filter category rows */
+.tag-cat-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.tag-cat-row:last-child{margin-bottom:0}
+.tag-cat-label{font-size:11px;font-weight:600;color:var(--text-2);min-width:56px;padding-top:8px;white-space:nowrap;flex-shrink:0}
+.tag-cat-items{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -134,12 +150,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <h1 style="font-size:17px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:8px">📦 原料库 <span style="font-size:11px;color:var(--text-3);font-weight:400" id="msCount">共 0 个原料</span></h1>
     <button class="btn btn-primary" onclick="openMsUploadModal()">↑ 上传素材</button>
   </div>
-  <div class="filter-bar-wrap">
-    <!-- 基础筛选（默认展开） -->
-    <div class="filter-bar-header" onclick="toggleMsFilterBar()">
-      <div class="filter-bar-title">🔍 基础筛选 <span class="filter-bar-toggle" id="msFilterBarToggle">▼</span></div>
+  <div class="filter-card">
+    <div class="filter-card-header" onclick="toggleMsFilterBar()">
+      <div class="filter-card-title">🔍 基础筛选 <span class="filter-card-toggle" id="msFilterBarToggle">▼</span></div>
     </div>
-    <div class="filter-bar" id="msFilterBar">
+    <div class="filter-card-body" id="msFilterBar">
       <div class="filter-group">
         <label>名称搜索</label>
         <input type="text" id="nameFilter" placeholder="搜索原料名称..." oninput="applyMsFilter()">
@@ -188,6 +203,21 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </div>
       </div>
       <div class="filter-group">
+        <label>设计师</label>
+        <div class="search-select" id="designerFilterWrap">
+          <select id="designerFilter" onchange="applyMsFilter()">
+            <option value="">全部</option>
+            <option>设计师A</option>
+            <option>设计师B</option>
+            <option>设计师C</option>
+          </select>
+          <div class="select-arrow">▼</div>
+          <div class="search-select-dropdown" id="designerFilterDropdown">
+            <input type="text" class="search-input" placeholder="搜索设计师..." oninput="filterMsOptimizerOptions(this.value, 'designerFilter', 'designerFilterDropdown')">
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
         <label>上传日期</label>
         <input type="date" id="dateStart" value="2026-06-01" onchange="applyMsFilter()">
         <span class="date-sep">~</span>
@@ -197,75 +227,85 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="resetMsFilter()">重置</button>
       </div>
     </div>
+  </div>
 
-    <!-- 标签筛选（默认折叠） -->
-    <div class="filter-bar-header tag-filter-wrap" onclick="toggleMsTagFilter()">
-      <div class="filter-bar-title">🏷️ 标签筛选 <span class="filter-bar-toggle collapsed" id="msTagFilterToggle">▶</span></div>
+  <div class="filter-card">
+    <div class="filter-card-header" onclick="toggleMsTagFilter()">
+      <div class="filter-card-title">🏷️ 标签筛选 <span class="filter-card-toggle collapsed" id="msTagFilterToggle">▶</span></div>
     </div>
-    <div class="filter-bar tag-filter-body collapsed" id="msTagFilterBar">
-      <!-- 用户标签行：地区、年龄、性别 -->
-      <div class="tag-filter-row">
-        <div class="filter-group">
-          <label>地区</label>
-          <select id="filterUserRegion" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>年龄</label>
-          <select id="filterUserAge" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>性别</label>
-          <select id="filterUserGender" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
-        </div>
-      </div>
-      <!-- 产品标签行 -->
-      <div class="tag-filter-row">
-        <div class="filter-group">
-          <label>产品标签</label>
-          <select id="filterProductTag" onchange="applyMsFilter()">
-            <option value="">全部</option>
-            <option>39元</option>
-            <option>59元</option>
-          </select>
+    <div class="filter-card-body collapsed" id="msTagFilterBar">
+      <!-- 用户标签 -->
+      <div class="tag-cat-row">
+        <div class="tag-cat-label">用户标签</div>
+        <div class="tag-cat-items">
+          <div class="filter-group">
+            <label>地区</label>
+            <select id="filterUserRegion" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>年龄</label>
+            <select id="filterUserAge" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>性别</label>
+            <select id="filterUserGender" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
         </div>
       </div>
-      <!-- 内容标签行：文案、宣传卖点、场景、对话、口播 -->
-      <div class="tag-filter-row">
-        <div class="filter-group">
-          <label>文案</label>
-          <select id="filterContentWenan" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
+      <!-- 产品标签 -->
+      <div class="tag-cat-row">
+        <div class="tag-cat-label">产品标签</div>
+        <div class="tag-cat-items">
+          <div class="filter-group">
+            <label>产品标签</label>
+            <select id="filterProductTag" onchange="applyMsFilter()">
+              <option value="">全部</option>
+              <option>39元</option>
+              <option>59元</option>
+            </select>
+          </div>
         </div>
-        <div class="filter-group">
-          <label>宣传卖点</label>
-          <select id="filterContentMaidian" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>场景</label>
-          <select id="filterContentChangjing" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>对话</label>
-          <select id="filterContentDuihua" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>口播</label>
-          <select id="filterContentKoubo" onchange="applyMsFilter()">
-            <option value="">全部</option>
-          </select>
+      </div>
+      <!-- 内容标签 -->
+      <div class="tag-cat-row">
+        <div class="tag-cat-label">内容标签</div>
+        <div class="tag-cat-items">
+          <div class="filter-group">
+            <label>文案</label>
+            <select id="filterContentWenan" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>宣传卖点</label>
+            <select id="filterContentMaidian" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>场景</label>
+            <select id="filterContentChangjing" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>对话</label>
+            <select id="filterContentDuihua" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>口播</label>
+            <select id="filterContentKoubo" onchange="applyMsFilter()">
+              <option value="">全部</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -450,18 +490,18 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 <script>
 var msMaterials = [
-  {id:1, name:"开场动画A", type:"前贴", biz:"存量", channel:"广点通", optimizer:"崔志恒", date:"2026-06-20", source:"自动入库", size:"2.3MB", tags:{userCategory:"地区", userValue:"一线城市", product:"39元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
-  {id:2, name:"产品介绍B", type:"中段", biz:"权益", channel:"头条", optimizer:"黄佩贤", date:"2026-06-19", source:"手动上传", size:"5.1MB", tags:{userCategory:"地区", userValue:"二线城市", product:"59元", content:{"文案":"系统通知","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
-  {id:3, name:"行动号召C", type:"尾帧", biz:"存量", channel:"广点通", optimizer:"黎舒晴", date:"2026-06-18", source:"自动入库", size:"1.8MB", tags:{userCategory:"年龄", userValue:"25-34", product:"39元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年男人","口播":"口播男"}}},
-  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条", optimizer:"李雨航", date:"2026-06-17", source:"手动上传", size:"3.2MB", tags:{userCategory:"地区", userValue:"三四线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"街头","对话":"老年女人","口播":"口播女"}}},
-  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"谭嘉颖", date:"2026-06-16", source:"自动入库", size:"8.4MB", tags:{userCategory:"地区", userValue:"农村", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
-  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条", optimizer:"林金维", date:"2026-06-15", source:"自动入库", size:"1.2MB", tags:{userCategory:"地区", userValue:"一线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
-  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条", optimizer:"陈羽思", date:"2026-06-14", source:"自动入库", size:"2.9MB", tags:{userCategory:"年龄", userValue:"35-44", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
-  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"叶首龙", date:"2026-06-13", source:"手动上传", size:"4.1MB", tags:{userCategory:"性别", userValue:"男", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
-  {id:9, name:"尾帧-立即行动", type:"尾帧", biz:"存量", channel:"头条", optimizer:"赖嘉俊", date:"2026-06-12", source:"自动入库", size:"1.5MB", tags:{userCategory:"地区", userValue:"二线城市", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
-  {id:10, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", date:"2026-06-11", source:"自动入库", size:"2.7MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
-  {id:11, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"黄雄伟", date:"2026-06-10", source:"自动入库", size:"6.3MB", tags:{userCategory:"性别", userValue:"女", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
-  {id:12, name:"尾帧-关注引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"姚丰育", date:"2026-06-09", source:"手动上传", size:"1.1MB", tags:{userCategory:"地区", userValue:"农村", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
+  {id:1, name:"开场动画A", type:"前贴", biz:"存量", channel:"广点通", optimizer:"崔志恒", designer:"设计师A", date:"2026-06-20", source:"自动入库", size:"2.3MB", tags:{userCategory:"地区", userValue:"一线城市", product:"39元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:2, name:"产品介绍B", type:"中段", biz:"权益", channel:"头条", optimizer:"黄佩贤", designer:"设计师A", date:"2026-06-19", source:"手动上传", size:"5.1MB", tags:{userCategory:"地区", userValue:"二线城市", product:"59元", content:{"文案":"系统通知","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
+  {id:3, name:"行动号召C", type:"尾帧", biz:"存量", channel:"广点通", optimizer:"黎舒晴", designer:"设计师A", date:"2026-06-18", source:"自动入库", size:"1.8MB", tags:{userCategory:"年龄", userValue:"25-34", product:"39元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年男人","口播":"口播男"}}},
+  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条", optimizer:"李雨航", designer:"设计师A", date:"2026-06-17", source:"手动上传", size:"3.2MB", tags:{userCategory:"地区", userValue:"三四线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"街头","对话":"老年女人","口播":"口播女"}}},
+  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"谭嘉颖", designer:"设计师A", date:"2026-06-16", source:"自动入库", size:"8.4MB", tags:{userCategory:"地区", userValue:"农村", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条", optimizer:"林金维", designer:"设计师A", date:"2026-06-15", source:"自动入库", size:"1.2MB", tags:{userCategory:"地区", userValue:"一线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
+  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条", optimizer:"陈羽思", designer:"设计师A", date:"2026-06-14", source:"自动入库", size:"2.9MB", tags:{userCategory:"年龄", userValue:"35-44", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
+  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"叶首龙", designer:"设计师A", date:"2026-06-13", source:"手动上传", size:"4.1MB", tags:{userCategory:"性别", userValue:"男", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
+  {id:9, name:"尾帧-立即行动", type:"尾帧", biz:"存量", channel:"头条", optimizer:"赖嘉俊", designer:"设计师A", date:"2026-06-12", source:"自动入库", size:"1.5MB", tags:{userCategory:"地区", userValue:"二线城市", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:10, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", designer:"设计师A", date:"2026-06-11", source:"自动入库", size:"2.7MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
+  {id:11, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"黄雄伟", designer:"设计师A", date:"2026-06-10", source:"自动入库", size:"6.3MB", tags:{userCategory:"性别", userValue:"女", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
+  {id:12, name:"尾帧-关注引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"姚丰育", designer:"设计师A", date:"2026-06-09", source:"手动上传", size:"1.1MB", tags:{userCategory:"地区", userValue:"农村", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
 ];
 var uploadSelectedFiles = [];
 
@@ -690,6 +730,7 @@ function resetMsFilter() {
   el = document.getElementById("typeFilter"); if (el) el.value = "全部类型";
   el = document.getElementById("sourceFilter"); if (el) el.value = "全部来源";
   el = document.getElementById("optimizerFilter"); if (el) el.value = "";
+  el = document.getElementById("designerFilter"); if (el) el.value = "";
   el = document.getElementById("dateStart"); if (el) el.value = "";
   el = document.getElementById("dateEnd"); if (el) el.value = "";
   el = document.getElementById("filterUserRegion"); if (el) el.value = "";
@@ -728,6 +769,7 @@ function getFilteredMsMaterials() {
   var typeVal = (typeEl && typeEl.value) || "全部类型";
   var sourceVal = (sourceEl && sourceEl.value) || "全部来源";
   var optimizerVal = (optEl && optEl.value) || "";
+  var designerVal = (document.getElementById("designerFilter") && document.getElementById("designerFilter").value) || "";
   // 收集内容标签筛选条件
   var contentFilterVals = {};
   for (var k in contentFilterEls) {
@@ -744,6 +786,7 @@ function getFilteredMsMaterials() {
     if (typeVal !== "全部类型" && m.type !== typeVal) continue;
     if (sourceVal !== "全部来源" && m.source !== sourceVal) continue;
     if (optimizerVal && m.optimizer !== optimizerVal) continue;
+    if (designerVal && m.designer !== designerVal) continue;
     // 标签筛选
     var pass = true;
     if (m.tags) {
