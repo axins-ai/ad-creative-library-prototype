@@ -468,6 +468,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           <option value="processing">⚙ 生产中</option>
           <option value="done">✅ 已完成</option>
         </select>
+        <select id="filterTaskType" onchange="renderTaskList()" style="height:34px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:#fff;color:var(--text-2);outline:none;cursor:pointer">
+          <option value="">全部类型</option>
+          <option value="成品">成品</option>
+          <option value="原料">原料</option>
+        </select>
         <input class="search-box" id="taskSearch" placeholder="搜索任务名称…" oninput="renderTaskList()">
       </div>
       <div class="right">
@@ -489,9 +494,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
             <th style="width:70px">任务ID</th>
             <th>任务名称</th>
             <th>状态</th>
+            <th>任务类型</th>
             <th>创建人</th>
             <th>原料数量</th>
-            <th>成品数量</th>
+            <th>素材数量</th>
             <th style="cursor:pointer;user-select:none" onclick="toggleSort()">创建时间 <span id="sortIcon">⇅</span></th>
             <th style="width:180px">操作</th>
           </tr>
@@ -830,6 +836,7 @@ function renderTaskList() {
   var kw = (searchEl ? (searchEl.value || "") : "").trim().toLowerCase();
   var creatorVal = (document.getElementById("filterCreator") || {}).value || "";
   var statusVal = (document.getElementById("filterStatus") || {}).value || "";
+  var typeVal = (document.getElementById("filterTaskType") || {}).value || "";
 
   var filtered = [];
   for (var i = 0; i < gTasks.length; i++) {
@@ -837,6 +844,7 @@ function renderTaskList() {
     if (kw && t.name.toLowerCase().indexOf(kw) === -1) continue;
     if (creatorVal && t.creator !== creatorVal) continue;
     if (statusVal && t.status !== statusVal) continue;
+    if (typeVal && t.taskType !== typeVal) continue;
     filtered.push(t);
   }
 
@@ -852,7 +860,7 @@ function renderTaskList() {
   var tbody = document.getElementById("taskTableBody");
   if (!tbody) return;
   if (filtered.length === 0) {
-    tbody.innerHTML = "<tr><td colspan=\"9\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw || creatorVal || statusVal ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw || creatorVal || statusVal ? "试试调整筛选条件" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
+    tbody.innerHTML = "<tr><td colspan=\"10\"><div class=\"empty-list\"><div class=\"empty-icon\">📋</div><p>" + (kw || creatorVal || statusVal || typeVal ? "没有找到匹配的任务" : "暂无生产任务") + "</p><p class=\"sub\">" + (kw || creatorVal || statusVal || typeVal ? "试试调整筛选条件" : "点击「新建生产任务」开始创建") + "</p></div></td></tr>";
     updateBatchBar();
     return;
   }
@@ -873,6 +881,7 @@ function renderTaskList() {
       "<td style=\"font-size:12px;color:var(--text-3);font-weight:500\">" + t.id + "</td>" +
       "<td><span class=\"task-name\">" + esc(t.name) + "</span></td>" +
       "<td><span class=\"status-badge " + sc + "\">" + st + "</span></td>" +
+      "<td style=\"font-size:12px;color:var(--text-2);font-weight:500\">" + (t.taskType || "成品") + "</td>" +
       "<td style=\"color:var(--text-2);font-size:12px\">" + esc(t.creator || "-") + "</td>" +
       "<td>" + mc + " 个</td>" +
       "<td>" + oc + " 个</td>" +
@@ -1023,6 +1032,8 @@ function openTask(id) {
 function saveDraft() {
   var name = document.getElementById("taskNameInput").value.trim();
   if (!name) name = "未命名任务";
+  var saveLib = document.getElementById("saveAsMaterial").checked;
+  var taskType = saveLib ? "原料" : "成品";
 
   var td = {
     name: name,
@@ -1060,6 +1071,7 @@ function saveDraft() {
         gTasks[k].namingParams = td.namingParams;
         gTasks[k].basicAttrs = td.basicAttrs;
         gTasks[k].status = "draft";
+        gTasks[k].taskType = taskType;
         break;
       }
     }
@@ -1070,7 +1082,8 @@ function saveDraft() {
     var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
     var ts = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + ":" + pad(now.getMinutes());
     gTasks.push({
-      id: nid, name: name, createTime: ts, status: "draft",
+      id: nid, name: name, creator: gBasicAttrs.optimizer || "杨鑫", createTime: ts, status: "draft",
+      taskType: taskType,
       materials: td.materials,
       params: td.params,
       namingParams: td.namingParams,
@@ -1772,6 +1785,8 @@ function startProduction() {
   var name = document.getElementById("taskNameInput").value.trim();
   if (!name) name = "未命名任务_"+new Date().toISOString().slice(0,10);
   var fmt = document.getElementById("pFormat").value;
+  var saveLib = document.getElementById("saveAsMaterial").checked;
+  var taskType = saveLib ? "原料" : "成品";
   var now = new Date();
   var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
   var ts = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + ":" + pad(now.getMinutes());
@@ -1788,6 +1803,7 @@ function startProduction() {
     var nid = gNextTaskId++;
     gTasks.push({
       id: nid, name: name, creator: gBasicAttrs.optimizer || "杨鑫", createTime: ts, status: "processing",
+      taskType: taskType,
       materials: { "前贴": gSelected["前贴"].slice(), "中段": midArr, "尾帧": gSelected["尾帧"].slice() },
       params: { resolution: document.getElementById("pResolution").value, framerate: document.getElementById("pFramerate").value, bitrate: document.getElementById("pBitrate").value, format: fmt },
       namingParams: gActiveParams.slice(),
@@ -1803,6 +1819,7 @@ function startProduction() {
         gTasks[k].namingParams = gActiveParams.slice();
         gTasks[k].basicAttrs = { biz:gBasicAttrs.biz, channel:gBasicAttrs.channel, optimizer:gBasicAttrs.optimizer };
         gTasks[k].status = "processing";
+        gTasks[k].taskType = taskType;
         gTasks[k].outputs = [];
         break;
       }
