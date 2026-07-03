@@ -12,7 +12,7 @@
   --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
   --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
   --bg-page:#f0f2f5;--bg-card:#fff;
-  --border:#e8e8e8;--border-light:#f0f0f0;
+  --border:#e8e8e8;
   --radius:8px;--radius-l:12px;
 }
 body{
@@ -48,25 +48,12 @@ body{
   background:var(--bg-page);border-radius:var(--radius);
   padding:24px;overflow-x:auto;
 }
-.info-cards{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:20px;margin-top:24px;
+.note-box{
+  background:#fff8e1;border-radius:var(--radius);padding:16px 20px;
+  margin-top:20px;border-left:4px solid var(--warning);
+  font-size:13px;color:var(--text-2);line-height:1.8;
 }
-.info-card{
-  background:var(--bg-page);border-radius:var(--radius);
-  padding:20px;border:1px solid var(--border);
-}
-.info-card h3{
-  font-size:15px;font-weight:600;color:var(--primary);
-  margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--primary-light);
-}
-.info-card ul{list-style:none;padding:0}
-.info-card li{
-  font-size:13px;color:var(--text-2);padding:8px 0;
-  border-bottom:1px solid var(--border-light);
-}
-.info-card li:last-child{border-bottom:none}
-@media(max-width:768px){.info-cards{grid-template-columns:1fr}}
+@media(max-width:768px){.mermaid{padding:12px}}
 </style>
 </head>
 <body>
@@ -78,86 +65,74 @@ body{
 
 <!-- ===== 1. 主流程图 ===== -->
 <div class="diagram-section">
-  <h2>📊 主流程图（原料库业务流）</h2>
-  <p class="desc">从原料入库到原料使用的完整业务流程</p>
+  <h2>📊 主流程图</h2>
+  <p class="desc">从原料获取到入库管理的完整业务流程</p>
   <div class="mermaid">
 flowchart TD
     A([开始]) --> B{原料来源}
+    B -->|自动入库| C[系统自动抓取原料]
+    B -->|手动上传| D[用户上传原料文件]
     
-    B -->|自动入库| C[系统自动抓取]
-    B -->|手动上传| D[用户手动上传]
+    C --> E[自动填写原料信息]
+    D --> F[用户填写原料信息]
     
-    C --> E[入库审核]
-    D --> E
+    E --> G[选择原料类型]
+    F --> G
     
-    E --> F{审核通过？}
+    G --> H{原料类型}
+    H -->|前贴| I1[标记为前贴原料]
+    H -->|中段| I2[标记为中段原料]
+    H -->|中后段| I3[标记为中后段原料]
+    H -->|尾帧| I4[标记为尾帧原料]
     
-    F -->|否| G[退回/重新上传]
-    G --> B
+    I1 --> J[填写标签]
+    I2 --> J
+    I3 --> J
+    I4 --> J
     
-    F -->|是| H[原料入库]
-    H --> I[填写原料信息]
+    J --> K[原料入库完成]
+    K --> L[(原料库)]
     
-    I --> J[选择原料类型]
-    J --> K{原料类型}
+    L --> M{选择操作}
+    M -->|查看| N[查看原料详情]
+    M -->|编辑| O[编辑原料信息]
+    M -->|删除| P[删除原料]
+    M -->|使用| Q[进入生产工作台]
     
-    K -->|前贴| L[标记为前贴原料]
-    K -->|中段| M[标记为中段原料]
-    K -->|中后段| N[标记为中后段原料]
-    K -->|尾帧| O[标记为尾帧原料]
-    
-    L --> P[填写标签]
-    M --> P
-    N --> P
-    O --> P
-    
-    P --> Q[原料入库完成]
-    Q --> R[原料库列表]
-    
-    R --> S{选择操作}
-    
-    S -->|查看详情| T[查看原料详情]
-    S -->|编辑| U[编辑原料信息]
-    S -->|删除| V[删除原料]
-    S -->|使用原料| W[进入生产工作台]
-    
-    T --> R
-    U --> R
-    V --> R
-    W --> X([进入生产工作台])
+    N --> L
+    O --> L
+    P --> L
+    Q --> R([进入生产工作台])
     
     style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
     style C fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
     style D fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style E fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style F fill:#ffebee,stroke:#c62828,stroke-width:2px
-    style H fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Q fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style R fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style W fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
-    style X fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style G fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style K fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style L fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style Q fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
+    style R fill:#e1f5fe,stroke:#01579b,stroke-width:2px
   </div>
 </div>
 
 <!-- ===== 2. 原料筛选流程 ===== -->
 <div class="diagram-section">
   <h2>🔍 原料筛选流程</h2>
-  <p class="desc">在原料库中筛选和查找原料的流程</p>
+  <p class="desc">在原料库中查找和筛选原料的流程</p>
   <div class="mermaid">
 flowchart TD
     A[进入原料库] --> B[显示原料列表]
     
     B --> C{筛选方式}
-    
-    C -->|按类型筛选| D[选择原料类型]
-    C -->|按业务筛选| E[选择业务类型]
-    C -->|按渠道筛选| F[选择渠道]
-    C -->|按优化师筛选| G[选择优化师]
-    C -->|按来源筛选| H[选择来源]
-    C -->|按日期筛选| I[选择上传日期]
-    C -->|按标签筛选| J[选择标签]
-    C -->|搜索| K[输入原料名称搜索]
+    C -->|类型| D[按原料类型筛选]
+    C -->|业务| E[按业务类型筛选]
+    C -->|渠道| F[按渠道筛选]
+    C -->|优化师| G[按优化师筛选]
+    C -->|来源| H[按来源筛选]
+    C -->|日期| I[按上传日期筛选]
+    C -->|标签| J[按标签筛选]
+    C -->|搜索| K[按名称搜索]
     
     D --> L[应用筛选条件]
     E --> L
@@ -170,11 +145,10 @@ flowchart TD
     
     L --> M[显示筛选结果]
     
-    M --> N{结果操作}
-    
-    N -->|查看详情| O[查看原料详情]
-    N -->|选择原料| P[勾选原料]
-    N -->|重置筛选| Q[重置所有筛选条件]
+    M --> N{选择操作}
+    N -->|查看| O[查看原料详情]
+    N -->|选择| P[勾选原料]
+    N -->|重置| Q[重置所有筛选]
     
     O --> M
     P --> R[进入生产工作台]
@@ -193,142 +167,80 @@ flowchart TD
 <!-- ===== 3. 原料类型说明 ===== -->
 <div class="diagram-section">
   <h2>📁 原料类型说明</h2>
-  <p class="desc">不同原料类型的特点和用途</p>
+  <p class="desc">四种原料类型的定义和用途</p>
   
-  <div class="info-cards">
-    <div class="info-card">
-      <h3>🎬 前贴</h3>
-      <ul>
-        <li><strong>说明：</strong>广告视频开头的引导部分</li>
-        <li><strong>位置：</strong>视频开头（0-5秒）</li>
-        <li><strong>用途：</strong>吸引用户注意力，引导观看</li>
-        <li><strong>特点：</strong>通常包含品牌logo、核心卖点</li>
-        <li><strong>使用限制：</strong>每个成品只能使用1个前贴</li>
-      </ul>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px">
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">🎬 前贴原料</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>定义：</strong>视频开头的引导素材</div>
+        <div><strong>用途：</strong>吸引用户注意力</div>
+        <div><strong>限制：</strong>每个成品只能使用1个</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>🎥 中段</h3>
-      <ul>
-        <li><strong>说明：</strong>广告视频的中间内容部分</li>
-        <li><strong>位置：</strong>视频中间（5-25秒）</li>
-        <li><strong>用途：</strong>展示产品特点、功能演示</li>
-        <li><strong>特点：</strong>可有多个槽位，灵活组合</li>
-        <li><strong>使用限制：</strong>每个成品可使用多个中段</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">🎥 中段原料</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>定义：</strong>视频中间的内容素材</div>
+        <div><strong>用途：</strong>展示产品特点和功能</div>
+        <div><strong>限制：</strong>每个成品可使用多个</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>🎞️ 中后段</h3>
-      <ul>
-        <li><strong>说明：</strong>中段+尾帧的组合素材</li>
-        <li><strong>位置：</strong>视频中后部分（15-30秒）</li>
-        <li><strong>用途：</strong>中段和尾帧的一体化素材</li>
-        <li><strong>特点：</strong>中段和尾帧已组合好</li>
-        <li><strong>使用限制：</strong>勾选"保存为原料"时生成</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">🎞️ 中后段原料</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>定义：</strong>中段+尾帧的组合素材</div>
+        <div><strong>用途：</strong>中段和尾帧的一体化素材</div>
+        <div><strong>来源：</strong>生产中勾选"保存为原料"生成</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>🎬 尾帧</h3>
-      <ul>
-        <li><strong>说明：</strong>广告视频结尾的行动引导部分</li>
-        <li><strong>位置：</strong>视频结尾（25-30秒）</li>
-        <li><strong>用途：</strong>引导用户行动（下载、购买等）</li>
-        <li><strong>特点：</strong>通常包含行动按钮、联系方式</li>
-        <li><strong>使用限制：</strong>每个成品只能使用1个尾帧</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">🎬 尾帧原料</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div><strong>定义：</strong>视频结尾的行动引导素材</div>
+        <div><strong>用途：</strong>引导用户行动（下载、购买等）</div>
+        <div><strong>限制：</strong>每个成品只能使用1个</div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ===== 4. 原料入库流程 ===== -->
+<!-- ===== 4. 业务规则 ===== -->
 <div class="diagram-section">
-  <h2>📥 原料入库流程</h2>
-  <p class="desc">原料从获取到入库的完整流程</p>
-  <div class="mermaid">
-flowchart TD
-    A([原料获取]) --> B{入库方式}
-    
-    B -->|自动入库| C[系统自动抓取]
-    B -->|手动上传| D[用户上传文件]
-    
-    C --> E[系统自动填写信息]
-    D --> F[用户填写基本信息]
-    
-    E --> G[系统自动分类]
-    F --> H[用户选择分类]
-    
-    G --> I[系统自动打标签]
-    H --> J[用户自定义标签]
-    
-    I --> K[入库审核]
-    J --> K
-    
-    K --> L{审核通过？}
-    
-    L -->|否| M[退回并说明原因]
-    M --> N[重新提交]
-    N --> K
-    
-    L -->|是| O[原料正式入库]
-    O --> P[生成原料ID]
-    P --> Q[原料库可查]
-    
-    Q --> R{后续操作}
-    
-    R -->|直接使用| S[进入生产工作台]
-    R -->|继续入库| B
-    R -->|返回列表| T([返回原料库列表])
-    
-    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style C fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style K fill:#ffebee,stroke:#c62828,stroke-width:2px
-    style O fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style S fill:#1664ff,color:#fff,stroke:#0952d9,stroke-width:2px
-    style T fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-  </div>
-</div>
-
-<!-- ===== 5. 业务规则说明 ===== -->
-<div class="diagram-section">
-  <h2>📏 业务规则说明</h2>
-  <p class="desc">原料库管理的业务规则和限制</p>
+  <h2>📏 业务规则</h2>
   
-  <div class="info-cards">
-    <div class="info-card">
-      <h3>📋 入库规则</h3>
-      <ul>
-        <li><strong>自动入库：</strong>系统定期抓取指定来源的原料</li>
-        <li><strong>手动上传：</strong>用户可随时上传新原料</li>
-        <li><strong>审核机制：</strong>所有原料入库前需审核</li>
-        <li><strong>信息完整：</strong>入库时必须填写完整信息</li>
-        <li><strong>标签管理：</strong>支持自定义标签分类</li>
-      </ul>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:16px">
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">📋 入库规则</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div>• 支持自动入库和手动上传两种方式</div>
+        <div>• 入库时必须选择原料类型</div>
+        <div>• 入库时可填写标签便于管理</div>
+        <div>• 系统自动记录上传时间和上传人</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>🔍 筛选规则</h3>
-      <ul>
-        <li><strong>多条件筛选：</strong>支持同时应用多个筛选条件</li>
-        <li><strong>标签筛选：</strong>支持按标签快速筛选</li>
-        <li><strong>日期筛选：</strong>支持按上传日期范围筛选</li>
-        <li><strong>来源筛选：</strong>支持按自动/手动来源筛选</li>
-        <li><strong>搜索功能：</strong>支持按名称关键词搜索</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">🔍 筛选规则</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div>• 支持多条件组合筛选</div>
+        <div>• 支持按标签快速筛选</div>
+        <div>• 支持按上传日期范围筛选</div>
+        <div>• 支持按名称关键词搜索</div>
+      </div>
     </div>
     
-    <div class="info-card">
-      <h3>⚙️ 使用规则</h3>
-      <ul>
-        <li><strong>原料选择：</strong>生产时必须从原料库选择</li>
-        <li><strong>类型匹配：</strong>前贴只能选前贴类型原料</li>
-        <li><strong>数量限制：</strong>前贴和尾帧只能选1个</li>
-        <li><strong>中段多选：</strong>中段可选择多个并分槽位</li>
-        <li><strong>保存为原料：</strong>生产中可勾选保存为原料</li>
-      </ul>
+    <div style="background:var(--bg-page);border-radius:var(--radius);padding:20px;border:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;color:var(--primary);margin-bottom:12px">⚙️ 使用规则</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <div>• 生产时必须从原料库选择原料</div>
+        <div>• 前贴槽位只能选择前贴类型原料</div>
+        <div>• 尾帧槽位只能选择尾帧类型原料</div>
+        <div>• 中段槽位可选择中段或中后段类型原料</div>
+      </div>
     </div>
   </div>
 </div>
@@ -341,8 +253,8 @@ mermaid.initialize({
     useMaxWidth: true,
     htmlLabels: true,
     curve: 'linear',
-    rankSpacing: 50,
-    nodeSpacing: 50
+    rankSpacing: 60,
+    nodeSpacing: 40
   }
 });
 </script>
