@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v20260630-1017: fix getFilteredData null safety + hide top-bar -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -8,6 +9,7 @@
 *,*:before,*:after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --primary:#1664ff;--primary-light:#e8f1ff;--primary-dark:#0952d9;
+  --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
   --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
   --bg-page:#f0f2f5;--bg-card:#fff;--bg-hover:#f7f8fa;
   --border:#e8e8e8;--border-light:#f0f0f0;
@@ -16,555 +18,451 @@
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 }
 html{font-size:14px}
-body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;margin:0;padding:0}
-.app-header{height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;box-shadow:var(--shadow-s);position:sticky;top:0;z-index:100;flex-shrink:0;}
-.app-header .back-link{color:var(--primary);text-decoration:none;font-size:13px;margin-right:16px;display:flex;align-items:center;gap:4px}
-.app-header .back-link:hover{text-decoration:underline}
-.app-header .page-title{font-size:15px;font-weight:600;color:var(--text-1)}
-.main-content{flex:1;display:flex;flex-direction:column;padding:16px 20px;gap:12px;min-height:0;overflow:auto}
-.ms-filter-card{background:var(--bg-card);border-radius:var(--radius-l);padding:12px 14px;box-shadow:var(--shadow-s);flex-shrink:0;}
-.ms-filter-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none};.ms-filter-header:hover .ms-filter-toggle{color:var(--primary)}
-
-.ms-filter-header:hover 
+body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;margin:0;padding:0}
+.ms-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:32px;padding:0 14px;border-radius:var(--radius-s);font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.ms-btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.ms-btn-primary:hover{background:var(--primary-dark)}
+.content{flex:1;padding:20px 24px;overflow-y:auto}
+.ms-filter-card{margin-bottom:20px;flex-shrink:0}
+.ms-filter-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none}
+.ms-filter-header:hover .ms-filter-toggle{color:var(--primary)}
 .ms-filter-title{font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px}
 .ms-filter-toggle{font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block}
 .ms-filter-toggle.collapsed{transform:rotate(-90deg)}
+.ms-filter-body{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;overflow:hidden;transition:max-height .3s,opacity .2s;max-height:200px;opacity:1;padding-bottom:4px}
+.filter-bar.collapsed{max-height:0;opacity:0;margin:0;padding:0}
+.ms-filter-item{display:flex;align-items:center;gap:6px}
+.ms-filter-item label{font-size:12px;color:var(--text-3);font-weight:500;white-space:nowrap}
 .tag-filter-wrap{margin-top:6px}
 .tag-filter-body{overflow:hidden;transition:max-height .3s,opacity .2s;max-height:600px;opacity:1;padding-top:8px}
 .tag-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
 .tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .tag-filter-row .ms-filter-item{margin-bottom:0}
 .tag-filter-row .ms-filter-item label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
+.ms-filter-item select,.ms-filter-item input[type="date"],.ms-filter-item input[type="text"]{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;}
+.ms-filter-item select:focus,.ms-filter-item input:focus{border-color:var(--primary)}
+.ms-filter-item .date-sep{font-size:11px;color:#999}
 
-.ms-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
-.ms-filter-item{display:flex;flex-direction:column;gap:3px;min-width:0}
-.ms-filter-item label{font-size:11px;color:var(--text-3);font-weight:500;padding-left:1px}
-.ms-filter-item select,.ms-filter-item input[type="date"]{height:30px;padding:0 8px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;background:#fff;transition:border .2s;min-width:110px;}
-.ms-filter-item select:focus,.ms-filter-item input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,100,255,.12)}
-.ms-filter-item .date-sep{font-size:11px;color:var(--text-3);white-space:nowrap;flex-shrink:0;line-height:30px}
+/* 标签筛选区样式 */
+.tag-filter-wrap{margin-top:4px}
+.tag-filter-body{overflow:hidden;transition:max-height .3s,opacity .2s;max-height:500px;opacity:1}
+.tag-filter-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
+.tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.tag-filter-row .ms-filter-item{margin-bottom:0}
+.tag-filter-row .ms-filter-item label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap}
+.ms-filter-item label{font-size:12px;color:var(--text-3);font-weight:500;white-space:nowrap}
+.ms-filter-item select,.ms-filter-item input[type="date"],.ms-filter-item input[type="text"]{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;}
+.ms-filter-item select:focus,.ms-filter-item input:focus{border-color:var(--primary)}
+.ms-filter-item .date-sep{font-size:11px;color:#999}
 
-.ms-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:30px;padding:0 12px;border:none;border-radius:var(--radius-s);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;user-select:none;white-space:nowrap;}
-.ms-btn-primary{background:var(--primary);color:#fff}
-.ms-btn-primary:hover{background:var(--primary-dark)}
-.ms-btn-outline{background:#fff;color:var(--text-2);border:1px solid var(--border)}
-.ms-btn-outline:hover{background:var(--bg-hover);color:var(--text-1)}
+/* 搜索下拉框样式 */
+.search-select{position:relative;display:inline-block;min-width:140px;}
+.search-select select{width:100%;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;color:var(--text-1);background:#fff;outline:none;appearance:none;-webkit-appearance:none;padding-right:24px;}
+.search-select select:focus{border-color:var(--primary)}
+.search-select .select-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-3);font-size:10px;}
+.search-select-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--primary);border-radius:var(--radius-s);box-shadow:0 4px 12px rgba(0,0,0,.15);max-height:200px;overflow-y:auto;z-index:1000;display:none;margin-top:2px;}
+.search-select-dropdown.show{display:block}
+.search-select-dropdown .search-input{width:100%;padding:6px 8px;border:none;border-bottom:1px solid var(--border-light);outline:none;font-size:12px;}
+.search-select-dropdown .option-item{padding:6px 10px;cursor:pointer;font-size:12px;transition:background .15s;}
+.search-select-dropdown .option-item:hover{background:var(--primary-light);color:var(--primary)}
+.search-select-dropdown .option-item.selected{background:var(--primary-light);color:var(--primary);font-weight:500;}
 
-
-.ms-list-area{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-s);flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
-.ms-list-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
-.ms-list-header .title{font-size:13px;font-weight:600;color:var(--text-1)}
-.ms-list-header .count{font-size:12px;color:var(--text-3)}
-.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;padding:12px;overflow-y:auto;flex:1;}
+.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
 .ms-card{background:var(--bg-card);border-radius:var(--radius-l);overflow:hidden;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:transform .2s,box-shadow .2s;cursor:pointer;position:relative;}
 .ms-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-m)}
-.ms-card .thumb{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden;}
+.ms-card .thumb{width:100%;aspect-ratio:16/9;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:48px;color:#ccc;position:relative;overflow:hidden;}
 .ms-card .thumb .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
 .ms-card:hover .thumb .play-overlay{opacity:1}
-.ms-card .thumb .play-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.ms-card .info{padding:10px 12px}
-.ms-card .info .name{font-size:13px;font-weight:500;color:var(--text-1);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-card .thumb .play-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.ms-card .info{padding:12px 14px}
+.ms-card .info .name{font-size:13px;font-weight:500;color:var(--text-1);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ms-card .info .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.ms-card .info .meta-detail{font-size:11px;color:var(--text-3);margin-top:3px}
-.type-qiantie{background:#e6f7ff;color:#1890ff}
-.type-zhongduan{background:#f6ffed;color:#52c41a}
-.type-weiqiang{background:#fff7e6;color:#fa8c16}
-.type-zhonghouduan{background:#f0e6ff;color:#7b61ff}
-.ms-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-3)}
-.ms-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
-.ms-modal-overlay.show{opacity:1;pointer-events:auto}
-.ms-modal{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-l);width:540px;max-height:85vh;display:flex;flex-direction:column;transform:translateY(20px);transition:transform .25s;}
-.ms-modal-overlay.show .ms-modal{transform:translateY(0)}
-.ms-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
+.ms-card .badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
+.type-qiantie{background:#e3f2fd;color:#1976d2}
+.type-zhongduan{background:#e8f5e9;color:#388e3c}
+.type-weiqiang{background:#f3e5f5;color:#7b1fa2}
+.type-zhonghouduan{background:#fff8e1;color:#f57f17}
+.tag-pill{font-size:10px;padding:2px 6px;border-radius:12px;background:#f0f2f5;color:var(--text-2);border:1px solid var(--border-light);margin-right:3px;margin-top:3px;display:inline-block}
+.ms-empty{text-align:center;padding:80px 20px;color:var(--text-3);grid-column:1/-1;}
+.ms-empty .icon{font-size:64px;margin-bottom:16px;display:block}
+
+/* 预览弹窗样式 */
+.ms-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:40px;animation:fadeIn .2s;}
+.ms-modal-overlay.active{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.ms-modal{background:#fff;border-radius:var(--radius-l);width:900px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-m);animation:slideUp .25s;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.ms-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
 .ms-modal-hd h3{font-size:15px;font-weight:600}
-.ms-modal-hd .close-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;border-radius:var(--radius-s);color:var(--text-3);font-size:18px;transition:all .2s;}
-.ms-modal-hd .close-btn:hover{background:var(--bg-hover);color:var(--text-1)}
-.ms-modal-bd{padding:16px 20px;overflow-y:auto;flex:1}
-.ms-modal-ft{display:flex;justify-content:flex-end;gap:10px;padding:12px 20px;border-top:1px solid var(--border-light);flex-shrink:0;}
-.ms-fm-group{margin-bottom:14px}
-.ms-fm-group label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
-.ms-fm-group label .req{color:var(--danger);margin-left:2px}
-.ms-fm-group input,.ms-fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
-.ms-fm-group input:focus,.ms-fm-group select:focus{border-color:var(--primary)}
-.ms-fm-group .sub-label{font-size:11px;color:var(--text-3);margin:8px 0 4px;display:block}
-.ms-fm-group .tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.ms-fm-group .tag-pill{font-size:11px;padding:3px 8px;border-radius:12px;background:#f0f2f5;color:var(--text-2);border:1px solid var(--border-light)}
-.ms-file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-3);font-size:13px;}
-.ms-file-drop:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.ms-file-drop.dragover{border-color:var(--primary);background:var(--primary-light)}
-.ms-file-info{font-size:12px;color:var(--text-2);margin-top:8px;padding:8px 12px;background:var(--bg-page);border-radius:var(--radius-s);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.toast-container{position:fixed;top:64px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast{padding:10px 16px;border-radius:var(--radius);font-size:13px;box-shadow:var(--shadow-m);display:flex;align-items:center;gap:8px;animation:toastIn .3s ease;max-width:320px;}
-.toast-success{background:#f6ffed;border:1px solid #b7eb8f;color:var(--success)}
-.toast-warning{background:#fffbe6;border:1px solid #ffe58f;color:var(--warning)}
-@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.ms-modal-hd .ms-close-btn{width:32px;height:32px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-3);transition:background .15s;}
+.ms-modal-hd .ms-close-btn:hover{background:var(--bg-page)}
+.ms-modal-bd{display:flex;overflow:hidden}
+.ms-modal-preview{flex:1;background:#1a1a1a;display:flex;align-items:center;justify-content:center;min-height:400px;position:relative;}
+.ms-modal-preview .preview-placeholder{text-align:center;color:rgba(255,255,255,.5)}
+.ms-modal-preview .preview-placeholder .play-icon{font-size:80px;display:block;margin-bottom:16px}
+.ms-modal-sidebar{width:280px;border-left:1px solid var(--border-light);padding:20px;overflow-y:auto;flex-shrink:0;}
+.ms-modal-sidebar .detail-row{margin-bottom:16px}
+.ms-modal-sidebar .detail-label{font-size:11px;color:var(--text-3);font-weight:500;margin-bottom:4px}
+.ms-modal-sidebar .detail-value{font-size:13px;color:var(--text-1)}
+
+/* 上传弹窗样式 */
+.ms-ms-upload-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s;}
+.ms-ms-upload-overlay.active{display:flex}
+.ms-ms-ms-upload-modal{background:#fff;border-radius:var(--radius-l);width:560px;max-width:95vw;max-height:90vh;box-shadow:var(--shadow-m);animation:slideUp .25s;display:flex;flex-direction:column;}
+.ms-ms-ms-upload-modal .ms-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
+.ms-ms-ms-upload-modal .ms-modal-hd h3{font-size:15px;font-weight:600}
+.ms-ms-ms-upload-modal .ms-modal-hd .ms-close-btn{width:32px;height:32px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-3);transition:background .15s;}
+.ms-ms-ms-upload-modal .ms-modal-hd .ms-close-btn:hover{background:var(--bg-page)}
+.ms-upload-body{padding:16px 24px;overflow-y:auto;flex:1}
+.ms-upload-body .file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-3);font-size:13px;margin-bottom:16px;}
+.ms-upload-body .file-drop:hover,.ms-upload-body .file-drop.drag-over{border-color:var(--primary);background:var(--primary-light)}
+.ms-upload-body .file-list{font-size:12px;color:var(--text-2);margin-top:8px;padding:8px 12px;background:var(--bg-page);border-radius:var(--radius-s);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ms-upload-body .fm-group{margin-bottom:14px}
+.ms-upload-body .fm-group label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
+.ms-upload-body .fm-group label .req{color:var(--danger);margin-left:2px}
+.ms-upload-body .fm-group input,.ms-upload-body .fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
+.ms-upload-body .fm-group input:focus,.ms-upload-body .fm-group select:focus{border-color:var(--primary)}
+.ms-upload-actions{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--border-light);flex-shrink:0;}
 </style>
 </head>
 <body>
 
-<main class="main-content">
-  <div class="ms-filter-card">
-    <!-- 基础筛选（可折叠） -->
-    <div class="ms-filter-header" onclick="toggleMsFilter()" style="cursor:pointer;user-select:none">
-      <div class="ms-filter-title">🔍 基础筛选 <span class="ms-filter-toggle" id="msFilterToggle">▼</span></div>
+<div class="content">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h1 style="font-size:17px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:8px">📦 原料库 <span style="font-size:11px;color:var(--text-3);font-weight:400" id="msCount">共 0 个</span></h1>
+    <button class="ms-btn ms-btn-primary" onclick="openUploadModal()">↑ 上传素材</button>
+  </div>
+  <div class="filter-bar-wrap">
+    <!-- 基础筛选（默认展开） -->
+    <div class="filter-bar-header" onclick="toggleMsFilter()">
+      <div class="filter-bar-title">🔍 基础筛选 <span class="filter-bar-toggle" id="msFilterToggle">▼</span></div>
     </div>
-    <div class="ms-filter-body" id="msFilterBody">
-      <div class="ms-filter-item">
+    <div class="filter-bar" id="msFilterBody">
+      <div class="filter-group">
+        <label>名称搜索</label>
+        <input type="text"  placeholder="搜索素材名称..." oninput="applyMsFilter()">
+      </div>
+      <div class="filter-group">
         <label>类型</label>
         <select id="filterType" onchange="applyMsFilter()">
-          <option value="">全部</option>
+          <option>全部</option>
           <option>前贴</option>
           <option>中段</option>
           <option>尾帧</option>
           <option>中后段</option>
         </select>
       </div>
-      <div class="ms-filter-item">
-        <label>业务</label>
-        <select id="filterBiz" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>存量</option>
-          <option>权益</option>
+      <div class="filter-group">
+        <label>来源</label>
+        <select  onchange="applyMsFilter()">
+          
+          
+          
         </select>
       </div>
-      <div class="ms-filter-item">
-        <label>渠道</label>
-        <select id="filterChannel" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>广点通</option>
-          <option>头条</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
+      <div class="filter-group">
         <label>优化师</label>
-        <select id="filterOptimizer" onchange="applyMsFilter()">
-          <option value="">全部</option>
-          <option>崔志恒</option>
-          <option>黄佩贤</option>
-          <option>黎舒晴</option>
-          <option>李雨航</option>
-          <option>谭嘉颖</option>
-          <option>林金维</option>
-          <option>陈羽思</option>
-          <option>叶首龙</option>
-          <option>赖嘉俊</option>
-          <option>戚嘉豪</option>
-          <option>黄雄伟</option>
-          <option>姚丰育</option>
-          <option>卢俭聪</option>
-        </select>
-      </div>
-      <div class="ms-filter-item">
-        <label>上传日期</label>
-        <div style="display:flex;align-items:center;gap:4px">
-          <input type="date" id="filterDateStart" onchange="applyMsFilter()">
-          <span class="date-sep">~</span>
-          <input type="date" id="filterDateEnd" onchange="applyMsFilter()">
         </div>
       </div>
-      <div class="ms-filter-actions">
-        <button class="ms-btn ms-btn-outline" onclick="resetMsFilter()">重置</button>
+      <div class="filter-group">
+        <label>上传日期</label>
+        <input type="date" id="filterDateStart" value="2026-06-01" onchange="applyMsFilter()">
+        <span class="date-sep">~</span>
+        <input type="date" id="filterDateEnd" value="2026-06-24" onchange="applyMsFilter()">
+      </div>
+      <div class="filter-group" style="margin-left:auto">
+        <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="resetMsFilter()">重置</button>
       </div>
     </div>
 
-    <!-- 标签筛选（可折叠） -->
-    <div class="tag-filter-wrap" onclick="toggleMsTagFilter()" style="cursor:pointer;user-select:none;margin-top:4px;padding-top:8px;border-top:1px solid var(--border-light)">
-      <div class="ms-filter-title">🏷️ 标签筛选 <span id="msTagFilterToggle" style="font-size:12px;color:var(--text-3);transition:transform .2s;display:inline-block;margin-left:6px">▶</span></div>
+    <!-- 标签筛选（默认折叠） -->
+    <div class="filter-bar-header tag-filter-wrap" onclick="toggleMsTagFilter()">
+      <div class="filter-bar-title">🏷️ 标签筛选 <span class="filter-bar-toggle collapsed" id="msTagFilterToggle">▶</span></div>
     </div>
-    <div class="tag-filter-body collapsed" id="msTagFilterBody">
+    <div class="filter-bar tag-filter-body collapsed" id="msTagFilterBar">
+      <!-- 用户标签行：地区、年龄、性别 -->
       <div class="tag-filter-row">
-        <div class="ms-filter-item">
+        <div class="filter-group">
           <label>地区</label>
-          <select id="filterMsUserRegion" onchange="applyMsFilter()"><option value="">全部</option></select>
+          <select id="filterUserRegion" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
         </div>
-        <div class="ms-filter-item">
+        <div class="filter-group">
           <label>年龄</label>
-          <select id="filterMsUserAge" onchange="applyMsFilter()"><option value="">全部</option></select>
+          <select id="filterUserAge" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
         </div>
-        <div class="ms-filter-item">
+        <div class="filter-group">
           <label>性别</label>
-          <select id="filterMsUserGender" onchange="applyMsFilter()"><option value="">全部</option></select>
+          <select id="filterUserGender" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
         </div>
       </div>
+      <!-- 产品标签行 -->
       <div class="tag-filter-row">
-        <div class="ms-filter-item">
+        <div class="filter-group">
           <label>产品标签</label>
-          <select id="filterMsProductTag" onchange="applyMsFilter()">
+          <select id="filterProductTag" onchange="applyMsFilter()">
             <option value="">全部</option>
             <option>39元</option>
             <option>59元</option>
           </select>
         </div>
       </div>
+      <!-- 内容标签行：文案、宣传卖点、场景、对话、口播 -->
       <div class="tag-filter-row">
-        <div class="ms-filter-item"><label>文案</label><select id="filterMsContentWenan" onchange="applyMsFilter()"><option value="">全部</option></select></div>
-        <div class="ms-filter-item"><label>宣传卖点</label><select id="filterMsContentMaidian" onchange="applyMsFilter()"><option value="">全部</option></select></div>
-        <div class="ms-filter-item"><label>场景</label><select id="filterMsContentChangjing" onchange="applyMsFilter()"><option value="">全部</option></select></div>
-        <div class="ms-filter-item"><label>对话</label><select id="filterMsContentDuihua" onchange="applyMsFilter()"><option value="">全部</option></select></div>
-        <div class="ms-filter-item"><label>口播</label><select id="filterMsContentKoubo" onchange="applyMsFilter()"><option value="">全部</option></select></div>
-      </div>
-      <div style="margin-top:8px"><button class="ms-btn ms-btn-outline" onclick="resetMsFilter()" style="height:28px;padding:0 10px;font-size:11px">重置筛选</button></div>
-    </div>
-  </div>
-
-<div class="ms-list-area">
-    <div class="ms-list-header">
-      <span class="title">全部原料</span>
-      <span class="count" id="msCount">共 0 个</span>
-      <button class="ms-btn ms-btn-primary" onclick="openUploadModal()" style="height:28px;padding:0 12px;font-size:12px;margin-left:auto">↑ 上传原料</button>
-    </div>
-    <div class="ms-grid" id="msGrid"></div>
-  </div>
-  </div>
-</main>
-
-<div class="ms-modal-overlay" id="msUploadOverlay" onclick="closeUploadModal(event)">
-  <div class="ms-modal" onclick="event.stopPropagation()">
-    <div class="ms-modal-hd">
-      <h3>上传原料</h3>
-      <button class="close-btn" onclick="closeUploadModal()">×</button>
-    </div>
-    <div class="ms-modal-bd">
-      <div class="ms-fm-group">
-        <label>原料文件 <span class="req">*</span></label>
-        <div class="ms-file-drop" id="msFileDrop" onclick="document.getElementById('msFileInput').click()">
-          📁<br>
-          <div>点击选择或拖拽文件到此处</div>
-          <div style="font-size:11px;margin-top:4px;opacity:.6">支持 MP4 / MOV 格式，支持多选</div>
+        <div class="filter-group">
+          <label>文案</label>
+          <select id="filterContentWenan" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
         </div>
-        <input type="file" id="msFileInput" accept="video/*,image/*" multiple style="display:none" onchange="handleMaterialFileSelect(event)">
-        <div id="msUploadFileInfo" class="ms-file-info" style="display:none"></div>
+        <div class="filter-group">
+          <label>宣传卖点</label>
+          <select id="filterContentMaidian" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>场景</label>
+          <select id="filterContentChangjing" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>对话</label>
+          <select id="filterContentDuihua" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>口播</label>
+          <select id="filterContentKoubo" onchange="applyMsFilter()">
+            <option value="">全部</option>
+          </select>
+        </div>
       </div>
-      <div class="ms-fm-group">
-        <label>原料类型 <span class="req">*</span></label>
-        <select id="msUploadType" onchange="renderContentTagFields();">
+    </div>
+  </div>
+  <div class="ms-grid" id="msGrid"></div>
+</div>
+
+<!-- 预览弹窗 -->
+<div class="ms-modal-overlay" id="previewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="previewTitle">素材预览</h3>
+      <button class="close-btn" onclick="closeMsPreview()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-preview" id="previewArea">
+        <div class="preview-video-wrap" id="previewVideoWrap" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;position:relative;">
+          <div class="fake-player" style="width:85%;max-width:680px;aspect-ratio:16/9;background:#111;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.5)">
+            <div class="fake-progress" style="position:absolute;bottom:0;left:0;right:0;height:4px;background:#333">
+              <div style="width:35%;height:100%;background:var(--primary);border-radius:0 2px 2px 0"></div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:16px;right:16px;display:flex;align-items:center;gap:12px">
+              <span style="color:#fff;font-size:12px">▶</span>
+              <div style="flex:1;height:3px;background:#555;border-radius:2px">
+                <div style="width:35%;height:100%;background:var(--primary);border-radius:2px"></div>
+              </div>
+              <span style="color:#999;font-size:11px">01:23 / 03:45</span>
+              <span style="color:#fff;font-size:12px">⛶</span>
+            </div>
+            <div style="color:rgba(255,255,255,.6);font-size:48px">▶</div>
+            <div style="color:rgba(255,255,255,.35);font-size:13px;margin-top:12px">点击播放 · 原型模拟</div>
+          </div>
+        </div>
+        <div class="preview-image-wrap" id="previewImageWrap" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:#1a1a1a;padding:32px">
+          <div style="max-width:90%;max-height:90%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a2a3e,#1a2a2e);border-radius:12px;padding:48px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+            <div style="text-align:center;color:rgba(255,255,255,.5)">
+              <div style="font-size:64px;margin-bottom:16px">🖼️</div>
+              <div style="font-size:14px;color:rgba(255,255,255,.4)">图片素材预览区域</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.25);margin-top:8px">实际将展示真实图片内容</div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-placeholder" id="previewPlaceholder">
+          <div class="play-icon" id="previewIcon">▶</div>
+          <div class="tip" id="previewTip">此为原型预览，实际将展示真实素材内容</div>
+        </div>
+      </div>
+      <div class="modal-sidebar">
+        <div class="detail-row">
+          <div class="detail-label">素材名称</div>
+          <div class="detail-value" id="detailName">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">素材类型</div>
+          <div class="detail-value" id="detailType">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">业务归属</div>
+          <div class="detail-value" id="detailBiz">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">渠道</div>
+          <div class="detail-value" id="detailChannel">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">优化师</div>
+          <div class="detail-value" id="detailOptimizer">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">上传日期</div>
+          <div class="detail-value" id="detailDate">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">数据来源</div>
+          <div class="detail-value" id="detailSource">-</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">标签</div>
+          <div class="detail-value" id="detailTags" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 上传弹窗 -->
+<div class="ms-ms-upload-overlay" id="uploadOverlay">
+  <div class="ms-ms-ms-upload-modal">
+    <div class="modal-header">
+      <h3>↑ 上传素材</h3>
+      <button class="close-btn" onclick="closeUploadModal()">✕</button>
+    </div>
+    <div class="ms-upload-body">
+      <div class="file-drop" id="uploadFileDrop" onclick="document.getElementById('uploadFileInput').click()">
+        <div style="font-size:48px;margin-bottom:12px">📁</div>
+        <div style="font-weight:500;color:var(--text-2)">点击选择文件，或拖拽文件到此处</div>
+        <div style="font-size:11px;margin-top:4px;opacity:.6">支持 MP4 / MOV / JPG / PNG 格式，支持多选</div>
+      </div>
+      <input type="file" id="uploadFileInput" multiple accept="video/*,image/*" style="display:none" onchange="handleUploadFileSelect(event)">
+      <div id="uploadFileList" class="file-list" style="display:none"></div>
+      <div class="fm-group">
+        <label>素材类型 <span class="req">*</span></label>
+        <select id="uploadFileType">
           <option>前贴</option>
           <option>中段</option>
           <option>尾帧</option>
           <option>中后段</option>
         </select>
       </div>
-      <div class="ms-fm-group">
+      <div class="fm-group">
         <label>业务归属</label>
-        <select id="msUploadBiz">
+        <select id="uploadBiz">
           <option>存量</option>
           <option>权益</option>
         </select>
       </div>
-      <div class="ms-fm-group">
+      <div class="fm-group">
         <label>渠道</label>
-        <select id="msUploadChannel">
+        <select id="uploadChannel">
           <option>广点通</option>
           <option>头条</option>
         </select>
       </div>
-      <div class="ms-fm-group">
+      <div class="fm-group">
         <label>优化师</label>
-        <select id="msUploadOptimizer">
-          <option value="">请选择</option>
-          <option>崔志恒</option>
-          <option>黄佩贤</option>
-          <option>黎舒晴</option>
-          <option>李雨航</option>
-          <option>谭嘉颖</option>
-          <option>林金维</option>
-          <option>陈羽思</option>
-          <option>叶首龙</option>
-          <option>赖嘉俊</option>
-          <option>戚嘉豪</option>
-          <option>黄雄伟</option>
-          <option>姚丰育</option>
-          <option>卢俭聪</option>
-        </select>
+        <div class="search-select" id="uploadOptimizerWrap">
+          <select id="uploadOptimizer">
+            <option value="">请选择</option>
+            <option>崔志恒</option>
+            <option>黄佩贤</option>
+            <option>黎舒晴</option>
+            <option>李雨航</option>
+            <option>谭嘉颖</option>
+            <option>林金维</option>
+            <option>陈羽思</option>
+            <option>叶首龙</option>
+            <option>赖嘉俊</option>
+            <option>戚嘉豪</option>
+            <option>黄雄伟</option>
+            <option>姚丰育</option>
+            <option>卢俭聪</option>
+          </select>
+          <div class="select-arrow">▼</div>
+          <div class="search-select-dropdown" id="uploadOptimizerDropdown">
+            <input type="text" class="search-input" placeholder="搜索优化师..." oninput="filterOptimizerOptions(this.value, 'uploadOptimizer', 'uploadOptimizerDropdown')">
+          </div>
+        </div>
       </div>
-      <div style="border-top:1px solid var(--border-light);margin:14px 0;padding-top:6px">
+      <div style="border-top:1px solid var(--border-light);margin-top:12px;padding-top:10px">
         <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px">🏷️ 标签配置 <span style="font-size:11px;color:var(--danger);font-weight:400">* 全部必填</span></div>
-        <div class="ms-fm-group">
+        <div class="fm-group">
           <label>用户标签 <span class="req">*</span></label>
           <div style="display:flex;gap:8px">
-            <select id="msUserTag1" onchange="onUserTag1Change()" style="flex:1">
+            <select id="uploadUserTag1" onchange="onUploadUserTag1Change()" style="flex:1">
               <option value="">请选择</option>
               <option>地区</option>
               <option>年龄</option>
               <option>性别</option>
             </select>
-            <select id="msUserTag2" style="flex:1">
+            <select id="uploadUserTag2" style="flex:1">
               <option value="">请选择</option>
             </select>
           </div>
         </div>
-        <div class="ms-fm-group">
+        <div class="fm-group">
           <label>产品标签 <span class="req">*</span></label>
-          <select id="msProductTag">
+          <select id="uploadProductTag">
             <option value="">请选择</option>
             <option>39元</option>
             <option>59元</option>
           </select>
         </div>
-        <div id="msContentTagsWrap"></div>
+        <div id="uploadContentTagsWrap"></div>
       </div>
     </div>
-    <div class="ms-modal-ft">
-      <button class="ms-btn ms-btn-outline" onclick="closeUploadModal()">取消</button>
+    <div class="ms-upload-actions">
+      <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="closeUploadModal()">取消</button>
       <button class="ms-btn ms-btn-primary" onclick="submitUpload()">确认上传</button>
     </div>
   </div>
 </div>
 
-<div class="ms-modal-overlay" id="msPreviewOverlay" onclick="closeMsPreview(event)">
-  <div class="ms-modal" onclick="event.stopPropagation()">
-    <div class="ms-modal-hd">
-      <h3 id="msPreviewName">原料预览</h3>
-      <button class="close-btn" onclick="closeMsPreview()">×</button>
-    </div>
-    <div class="ms-modal-bd">
-      <div style="background:#1a1a1a;border-radius:var(--radius);padding:40px;text-align:center;margin-bottom:16px">
-        <span id="msPreviewIcon" style="font-size:80px">🎬</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><span style="font-size:11px;color:var(--text-3)">原料名称</span><div id="msPVName" style="font-size:13px;font-weight:500;color:var(--text-1)"></div></div>
-        <div><span style="font-size:11px;color:var(--text-3)">原料类型</span><div id="msPVType" style="font-size:13px;font-weight:500;color:var(--text-1)"></div></div>
-        <div><span style="font-size:11px;color:var(--text-3)">业务归属</span><div id="msPVBiz" style="font-size:13px;color:var(--text-2)"></div></div>
-        <div><span style="font-size:11px;color:var(--text-3)">渠道</span><div id="msPVChannel" style="font-size:13px;color:var(--text-2)"></div></div>
-        <div><span style="font-size:11px;color:var(--text-3)">优化师</span><div id="msPVOptimizer" style="font-size:13px;color:var(--text-2)"></div></div>
-        <div><span style="font-size:11px;color:var(--text-3)">上传日期</span><div id="msPVDate" style="font-size:13px;color:var(--text-2)"></div></div>
-        <div><span style="font-size:11px;color:var(--text-3)">文件大小</span><div id="msPVSize" style="font-size:13px;color:var(--text-2)"></div></div>
-        <div style="grid-column:1/-1"><span style="font-size:11px;color:var(--text-3)">标签</span><div id="msPVTags" style="font-size:13px;color:var(--text-2);margin-top:4px" class="tag-row"></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast-container" id="toastContainer"></div>
-
 <script>
 var msMaterials = [
-  {id:1, name:"开场动画A", type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", size:"2.3MB"},
-  {id:2, name:"产品介绍B", type:"中段", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-19", size:"5.1MB"},
-  {id:3, name:"行动号召C", type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-18", size:"1.8MB"},
-  {id:4, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条", optimizer:"王五", date:"2026-06-17", size:"3.2MB"},
-  {id:5, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-16", size:"8.4MB"},
-  {id:6, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-15", size:"1.2MB"},
-  {id:7, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条", optimizer:"张三", date:"2026-06-14", size:"2.9MB"},
-  {id:8, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-13", size:"4.1MB"},
-  {id:9, name:"尾帧-立即行动", type:"尾帧", biz:"存量", channel:"头条", optimizer:"王五", date:"2026-06-12", size:"1.5MB"},
-  {id:10, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"张三", date:"2026-06-11", size:"2.7MB"},
-  {id:11, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"李四", date:"2026-06-10", size:"6.3MB"},
-  {id:12, name:"尾帧-关注引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"张三", date:"2026-06-09", size:"1.1MB"},
-  {id:13, name:"中后段-合成A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", size:"4.5MB"},
-  {id:14, name:"中后段-合成B", type:"中后段", biz:"权益", channel:"头条", optimizer:"李四", date:"2026-06-28", size:"3.2MB"},
+  {id:1, name:"夏日促销A版_前贴01_中段03_尾帧02.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"崔志恒", date:"2026-06-23", source:"自动入库", size:"15.2MB", tags:{userCategory:"地区",userValue:"一线城市", product:"39元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:2, name:"品牌宣传主视觉_v2.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"黄佩贤", date:"2026-06-22", source:"手动上传", size:"22.8MB", tags:{userCategory:"地区",userValue:"二线城市", product:"59元", content:{"文案":"系统通知","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
+  {id:3, name:"产品展示图_横版_1080p.png", type:"图片", biz:"存量", channel:"广点通", optimizer:"黎舒晴", date:"2026-06-22", source:"自动入库", size:"1.4MB", tags:{userCategory:"年龄",userValue:"25-34", product:"39元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年男人","口播":"口播男"}}},
+  {id:4, name:"节日活动_快剪版_30s.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"李雨航", date:"2026-06-21", source:"自动入库", size:"8.6MB", tags:{userCategory:"地区",userValue:"三四线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"街头","对话":"老年女人","口播":"口播女"}}},
+  {id:5, name:"Banner_首页轮播_750x300.jpg", type:"图片", biz:"存量", channel:"广点通", optimizer:"谭嘉颖", date:"2026-06-21", source:"手动上传", size:"320KB", tags:{userCategory:"地区",userValue:"农村", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:6, name:"新品上市_15s短版_尾帧变体02.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"林金维", date:"2026-06-20", source:"自动入库", size:"5.1MB", tags:{userCategory:"地区",userValue:"一线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
+  {id:7, name:"开场动画_科技感_前贴01.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"陈羽思", date:"2026-06-20", source:"自动入库", size:"12.8MB"},
+  {id:8, name:"产品特写_中段素材_正脸版.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"叶首龙", date:"2026-06-19", source:"自动入库", size:"18.3MB"},
+  {id:9, name:"行动号召_尾帧01_立即咨询.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"赖嘉俊", date:"2026-06-19", source:"手动上传", size:"3.2MB"},
+  {id:10, name:"竖版海报_9:16_权益介绍.png", type:"图片", biz:"权益", channel:"头条", optimizer:"戚嘉豪", date:"2026-06-18", source:"手动上传", size:"850KB"},
+  {id:11, name:"信息流大图_1200x628_夏日促销.jpg", type:"图片", biz:"存量", channel:"广点通", optimizer:"黄雄伟", date:"2026-06-18", source:"自动入库", size:"420KB"},
+  {id:12, name:"完整成片_存量套餐_前中尾_1080p.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"姚丰育", date:"2026-06-17", source:"自动入库", size:"28.5MB", tags:{userCategory:"地区",userValue:"二线城市", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
+  {id:13, name:"Logo动画_尾帧03_品牌曝光.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"卢俭聪", date:"2026-06-17", source:"自动入库", size:"4.7MB"},
+  {id:14, name:"方图_1:1_产品主视觉.png", type:"图片", biz:"存量", channel:"广点通", optimizer:"崔志恒", date:"2026-06-16", source:"手动上传", size:"680KB"},
+  {id:15, name:"快闪促销_前贴02_限时优惠.mp4", type:"视频", biz:"权益", channel:"头条", optimizer:"黄佩贤", date:"2026-06-16", source:"自动入库", size:"9.8MB"},
+  {id:16, name:"贴片中段_口播版_优化师A.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"黎舒晴", date:"2026-06-15", source:"自动入库", size:"21.1MB"},
+  {id:17, name:"落地页预览图_权益详情.jpg", type:"图片", biz:"权益", channel:"头条", optimizer:"李雨航", date:"2026-06-15", source:"手动上传", size:"280KB"},
+  {id:18, name:"品牌背书_中段素材_权威认证.mp4", type:"视频", biz:"存量", channel:"广点通", optimizer:"谭嘉颖", date:"2026-06-14", source:"自动入库", size:"16.4MB"},
+  {id:19, name:"动态Banner_富媒体_点击动画.gif", type:"图片", biz:"权益", channel:"头条", optimizer:"林金维", date:"2026-06-14", source:"手动上传", size:"1.8MB"},
+  {id:20, name:"成品合集_多尺寸输出_720p+1080p.zip", type:"视频", biz:"存量", channel:"广点通", optimizer:"陈羽思", date:"2026-06-13", source:"自动入库", size:"45.2MB"},
 ];
-var msSelectedFiles = [];
+var uploadSelectedFiles = [];
 
-var DEFAULT_USER_TAG2_MAP = {
+var USER_TAG_CATEGORIES = {
   "地区": ["一线城市", "二线城市", "三四线城市", "农村"],
   "年龄": ["18-24", "25-34", "35-44", "45+"],
   "性别": ["男", "女"]
 };
 
-var DEFAULT_CONTENT_TAG_CONFIG = {
-  "前贴": {
-    "文案": ["紧迫性", "系统通知"],
-    "内容": ["风景", "猛宠", "花鸟"]
-  },
-  "中段": {
-    "文案": ["紧迫性", "系统通知"],
-    "宣传卖点": ["话费", "流量"],
-    "场景": ["营业厅", "公园", "小区", "街头"],
-    "对话": ["老年男人", "老年女人"],
-    "口播": ["口播女", "口播男"]
-  },
-  "尾帧": {
-    "文案": ["紧迫性", "系统通知"],
-    "宣传卖点": ["话费", "流量"],
-    "场景": ["营业厅", "公园", "小区", "街头"],
-    "对话": ["老年男人", "老年女人"],
-    "口播": ["口播女", "口播男"]
-  },
-  "中后段": {
-    "文案": ["紧迫性", "系统通知"],
-    "宣传卖点": ["话费", "流量"],
-    "场景": ["营业厅", "公园", "小区", "街头"],
-    "对话": ["老年男人", "老年女人"],
-    "口播": ["口播女", "口播男"]
-  }
+var CONTENT_TAG_CONFIG_ZHONGHOU = {
+  "文案": ["紧迫性", "系统通知"],
+  "宣传卖点": ["话费", "流量"],
+  "场景": ["营业厅", "公园", "小区", "街头"],
+  "对话": ["老年男人", "老年女人"],
+  "口播": ["口播女", "口播男"]
 };
-
-var USER_TAG2_MAP = JSON.parse(JSON.stringify(DEFAULT_USER_TAG2_MAP));
-var CONTENT_TAG_CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONTENT_TAG_CONFIG));
-
-function toggleMsFilter() {
-  var body = document.getElementById("msFilterBody");
-  var toggle = document.getElementById("msFilterToggle");
-  if (!body || !toggle) return;
-  if (body.classList.contains("collapsed")) {
-    body.classList.remove("collapsed");
-    toggle.classList.remove("collapsed");
-  } else {
-    body.classList.add("collapsed");
-    toggle.classList.add("collapsed");
-  }
-}
-
-function toggleMsTagFilter() {
-  var body = document.getElementById("msTagFilterBody");
-  var toggle = document.getElementById("msTagFilterToggle");
-  if (body.classList.contains("collapsed")) {
-    body.classList.remove("collapsed");
-    toggle.classList.remove("collapsed");
-    toggle.textContent = "▼";
-  } else {
-    body.classList.add("collapsed");
-    toggle.classList.add("collapsed");
-    toggle.textContent = "▶";
-  }
-}
-
-function initMsTagFilters() {
-  // 用户标签 - 地区
-  var regionSel = document.getElementById("filterMsUserRegion");
-  if (regionSel) {
-    for (var i = 0; i < (USER_TAG2_MAP["地区"] || []).length; i++) {
-      regionSel.innerHTML += '<option>' + USER_TAG2_MAP["地区"][i] + '</option>';
-    }
-  }
-  // 用户标签 - 年龄
-  var ageSel = document.getElementById("filterMsUserAge");
-  if (ageSel) {
-    for (var i = 0; i < (USER_TAG2_MAP["年龄"] || []).length; i++) {
-      ageSel.innerHTML += '<option>' + USER_TAG2_MAP["年龄"][i] + '</option>';
-    }
-  }
-  // 用户标签 - 性别
-  var genderSel = document.getElementById("filterMsUserGender");
-  if (genderSel) {
-    for (var i = 0; i < (USER_TAG2_MAP["性别"] || []).length; i++) {
-      genderSel.innerHTML += '<option>' + USER_TAG2_MAP["性别"][i] + '</option>';
-    }
-  }
-  // 产品标签（已在HTML中初始化）
-  // 内容标签 - 按类型分拆（使用所有类型的标签配置）
-  var allContentTypes = ["文案", "宣传卖点", "场景", "对话", "口播"];
-  var contentIds = {
-    "文案": "filterMsContentWenan",
-    "宣传卖点": "filterMsContentMaidian",
-    "场景": "filterMsContentChangjing",
-    "对话": "filterMsContentDuihua",
-    "口播": "filterMsContentKoubo"
-  };
-  // 收集所有类型的内容标签值
-  var allContentValues = {};
-  for (var typeName in CONTENT_TAG_CONFIG) {
-    if (!CONTENT_TAG_CONFIG.hasOwnProperty(typeName)) continue;
-    var cfg = CONTENT_TAG_CONFIG[typeName];
-    for (var ck in cfg) {
-      if (!cfg.hasOwnProperty(ck)) continue;
-      if (!allContentValues[ck]) allContentValues[ck] = [];
-      for (var j = 0; j < cfg[ck].length; j++) {
-        if (allContentValues[ck].indexOf(cfg[ck][j]) === -1) {
-          allContentValues[ck].push(cfg[ck][j]);
-        }
-      }
-    }
-  }
-  // 初始化每个内容标签下拉
-  for (var t = 0; t < allContentTypes.length; t++) {
-    var typeName = allContentTypes[t];
-    var selId = contentIds[typeName];
-    var sel = document.getElementById(selId);
-    if (!sel || !allContentValues[typeName]) continue;
-    for (var j = 0; j < allContentValues[typeName].length; j++) {
-      sel.innerHTML += '<option>' + allContentValues[typeName][j] + '</option>';
-    }
-  }
-}
-
-function applyMsFilter() {
-  renderMsGrid();
-}
-
-function resetMsFilter() {
-  var s;
-  if (s = document.getElementById('filterType')) s.value = '';
-  if (s = document.getElementById('filterBiz')) s.value = '';
-  if (s = document.getElementById('filterChannel')) s.value = '';
-  if (s = document.getElementById('filterOptimizer')) s.value = '';
-  if (s = document.getElementById('filterDateStart')) s.value = '';
-  if (s = document.getElementById('filterDateEnd')) s.value = '';
-  if (s = document.getElementById('filterMsUserRegion')) s.value = '';
-  if (s = document.getElementById('filterMsUserAge')) s.value = '';
-  if (s = document.getElementById('filterMsUserGender')) s.value = '';
-  if (s = document.getElementById('filterMsProductTag')) s.value = '';
-  var ids = ['filterMsContentWenan','filterMsContentMaidian','filterMsContentChangjing','filterMsContentDuihua','filterMsContentKoubo'];
-  for (var i = 0; i < ids.length; i++) { if (s = document.getElementById(ids[i])) s.value = ''; }
-  renderMsGrid();
-}
-}
-
-function getFilteredMsMaterials() {
-  var typeVal = document.getElementById('filterType') ? document.getElementById('filterType').value : '';
-  var bizVal = document.getElementById('filterBiz') ? document.getElementById('filterBiz').value : '';
-  var channelVal = document.getElementById('filterChannel') ? document.getElementById('filterChannel').value : '';
-  var optimizerVal = document.getElementById('filterOptimizer') ? document.getElementById('filterOptimizer').value : '';
-  var dateStart = document.getElementById('filterDateStart') ? document.getElementById('filterDateStart').value : '';
-  var dateEnd = document.getElementById('filterDateEnd') ? document.getElementById('filterDateEnd').value : '';
-  var userRegionVal = document.getElementById('filterMsUserRegion') ? document.getElementById('filterMsUserRegion').value : '';
-  var userAgeVal = document.getElementById('filterMsUserAge') ? document.getElementById('filterMsUserAge').value : '';
-  var userGenderVal = document.getElementById('filterMsUserGender') ? document.getElementById('filterMsUserGender').value : '';
-  var productTagVal = document.getElementById('filterMsProductTag') ? document.getElementById('filterMsProductTag').value : '';
-  var contentFilterVals = {};
-  var contentIds = { '文案':'filterMsContentWenan','宣传卖点':'filterMsContentMaidian','场景':'filterMsContentChangjing','对话':'filterMsContentDuihua','口播':'filterMsContentKoubo' };
-  for (var k in contentIds) { if (contentIds.hasOwnProperty(k)) { var s = document.getElementById(contentIds[k]); if (s && s.value) contentFilterVals[k] = s.value; } }
-  var result = [];
-  for (var i = 0; i < msMaterials.length; i++) {
-    var m = msMaterials[i];
-    if (typeVal && m.type !== typeVal) continue;
-    if (bizVal && m.biz !== bizVal) continue;
-    if (channelVal && m.channel !== channelVal) continue;
-    if (optimizerVal && m.optimizer !== optimizerVal) continue;
-    if (dateStart && m.date < dateStart) continue;
-    if (dateEnd && m.date > dateEnd) continue;
-    if (m.tags) {
-      if (userRegionVal || userAgeVal || userGenderVal) {
-        var u = false;
-        if (userRegionVal && m.tags.userCategory === '地区' && m.tags.userValue === userRegionVal) u = true;
-        if (userAgeVal && m.tags.userCategory === '年龄' && m.tags.userValue === userAgeVal) u = true;
-        if (userGenderVal && m.tags.userCategory === '性别' && m.tags.userValue === userGenderVal) u = true;
-        if (!u) continue;
-      }
-      if (productTagVal && m.tags.product !== productTagVal) continue;
-      if (m.tags.content) {
-        var cp = true;
-        for (var ck in contentFilterVals) { if (contentFilterVals.hasOwnProperty(ck) && m.tags.content[ck] !== contentFilterVals[ck]) { cp = false; break; } }
-        if (!cp) continue;
-      } else if (Object.keys(contentFilterVals).length > 0) { continue; }
-    } else {
-      if (userRegionVal || userAgeVal || userGenderVal || productTagVal || Object.keys(contentFilterVals).length > 0) continue;
-    }
-    result.push(m);
-  }
-  return result;
-}
-
-
-
-
-
-function loadTagConfig() {
-  try {
-    var raw = localStorage.getItem("materialTags");
-    if (!raw) return;
-    var cfg = JSON.parse(raw);
-    if (cfg.user) USER_TAG2_MAP = cfg.user;
-    if (cfg.content) CONTENT_TAG_CONFIG = cfg.content;
-  } catch (e) {}
-}
-
-function updateMaterialTags(cfg) {
-  if (cfg.user) USER_TAG2_MAP = cfg.user;
-  if (cfg.content) CONTENT_TAG_CONFIG = cfg.content;
-}
-
-loadTagConfig();
 
 function extractTagValues(tags) {
   var values = [];
@@ -583,202 +481,483 @@ function extractTagValues(tags) {
   return values;
 }
 
-function renderMsGrid() {
-  var grid = document.getElementById("msGrid");
-  var data = getFilteredMsMaterials();
-  if (data.length === 0) {
-    grid.innerHTML = '<div class="ms-empty">暂无原料，请点击「上传原料」添加</div>';
-    document.getElementById("msCount").textContent = "共 0 个";
-    return;
-  }
-  var html = "";
-  var typeLabels = { "前贴":"前贴", "中段":"中段", "尾帧":"尾帧", "中后段":"中后段" };
-  var thumbColors = { "前贴":"linear-gradient(135deg,#e6f7ff,#bae7ff)", "中段":"linear-gradient(135deg,#f6ffed,#d9f7be)", "尾帧":"linear-gradient(135deg,#fff7e6,#ffe58f)", "中后段":"linear-gradient(135deg,#f0e6ff,#d3adf7)" };
-  var thumbIcons = { "前贴":"🎬", "中段":"🎥", "尾帧":"📺", "中后段":"🎞️" };
-  for (var i = 0; i < data.length; i++) {
-    var m = data[i];
-    var tagClass = "type-" + m.type;
-    var icon = thumbIcons[m.type] || "🎬";
-    var bg = thumbColors[m.type] || "#f5f5f5";
-    var tagPills = "";
-    var tagValues = extractTagValues(m.tags);
-    if (tagValues.length) {
-      for (var t = 0; t < tagValues.length; t++) {
-        tagPills += '<span class="tag-pill">' + tagValues[t] + '</span>';
-      }
+function collectAllContentTagValues() {
+  var values = [];
+  for (var k in CONTENT_TAG_CONFIG_ZHONGHOU) {
+    if (!CONTENT_TAG_CONFIG_ZHONGHOU.hasOwnProperty(k)) continue;
+    for (var i = 0; i < CONTENT_TAG_CONFIG_ZHONGHOU[k].length; i++) {
+      values.push(CONTENT_TAG_CONFIG_ZHONGHOU[k][i]);
     }
-    html += '<div class="ms-card" onclick="openMsPreview(' + m.id + ')">' +
-      '<div class="thumb" style="background:' + bg + '">' +
-        '<span style="font-size:40px">' + icon + '</span>' +
-        '<div class="play-overlay"><div class="play-btn">▶</div></div>' +
-      '</div>' +
-      '<div class="info">' +
-        '<div class="name">' + m.name + '</div>' +
-        '<div class="meta"><span class="type-tag ' + tagClass + '" style="font-size:10px;padding:1px 6px;border-radius:4px;font-weight:500">' + m.type + '</span></div>' +
-        '<div class="tag-row">' + tagPills + '</div>' +
-        '<div class="meta-detail">' + m.biz + ' · ' + m.channel + ' · ' + m.optimizer + '</div>' +
-        '<div class="meta-detail" style="font-size:10px">' + m.date + ' · ' + m.size + '</div>' +
-      '</div></div>';
   }
-  grid.innerHTML = html;
-  document.getElementById("msCount").textContent = "共 " + data.length + " 个";
+  return values;
 }
 
-function openUploadModal() {
-  document.getElementById("msUploadOverlay").classList.add("show");
-  msSelectedFiles = [];
-  document.getElementById("msUploadFileInfo").style.display = "none";
-  document.getElementById("msUserTag1").value = "";
-  onUserTag1Change();
-  document.getElementById("msProductTag").value = "";
-  renderContentTagFields();
+function collectAllUserTagValues() {
+  var values = [];
+  for (var k in USER_TAG_CATEGORIES) {
+    if (!USER_TAG_CATEGORIES.hasOwnProperty(k)) continue;
+    for (var i = 0; i < USER_TAG_CATEGORIES[k].length; i++) {
+      values.push(USER_TAG_CATEGORIES[k][i]);
+    }
+  }
+  return values;
 }
 
-function onUserTag1Change() {
-  var s1 = document.getElementById("msUserTag1").value;
-  var s2 = document.getElementById("msUserTag2");
+function toggleMsFilter() {
+  var bar = document.getElementById("msFilterBody");
+  var toggle = document.getElementById("msFilterToggle");
+  if (bar.classList.contains("collapsed")) {
+    bar.classList.remove("collapsed");
+    toggle.classList.remove("collapsed");
+  } else {
+    bar.classList.add("collapsed");
+    toggle.classList.add("collapsed");
+  }
+}
+
+function toggleMsTagFilter() {
+  var bar = document.getElementById("tagFilterBar");
+  var toggle = document.getElementById("tagFilterToggle");
+  if (bar.classList.contains("collapsed")) {
+    bar.classList.remove("collapsed");
+    toggle.classList.remove("collapsed");
+  } else {
+    bar.classList.add("collapsed");
+    toggle.classList.add("collapsed");
+  }
+}
+
+function initMsTagFilters() {
+  // 用户标签 - 地区
+  var regionSel = document.getElementById("filterUserRegion");
+  if (regionSel && USER_TAG_CATEGORIES["地区"]) {
+    for (var i = 0; i < USER_TAG_CATEGORIES["地区"].length; i++) {
+      regionSel.innerHTML += '<option>' + USER_TAG_CATEGORIES["地区"][i] + '</option>';
+    }
+  }
+  // 用户标签 - 年龄
+  var ageSel = document.getElementById("filterUserAge");
+  if (ageSel && USER_TAG_CATEGORIES["年龄"]) {
+    for (var i = 0; i < USER_TAG_CATEGORIES["年龄"].length; i++) {
+      ageSel.innerHTML += '<option>' + USER_TAG_CATEGORIES["年龄"][i] + '</option>';
+    }
+  }
+  // 用户标签 - 性别
+  var genderSel = document.getElementById("filterUserGender");
+  if (genderSel && USER_TAG_CATEGORIES["性别"]) {
+    for (var i = 0; i < USER_TAG_CATEGORIES["性别"].length; i++) {
+      genderSel.innerHTML += '<option>' + USER_TAG_CATEGORIES["性别"][i] + '</option>';
+    }
+  }
+  // 产品标签（固定值，已在HTML中）
+  // 内容标签 - 按类型分拆
+  var contentTypes = ["文案", "宣传卖点", "场景", "对话", "口播"];
+  var contentIds = {
+    "文案": "filterContentWenan",
+    "宣传卖点": "filterContentMaidian",
+    "场景": "filterContentChangjing",
+    "对话": "filterContentDuihua",
+    "口播": "filterContentKoubo"
+  };
+  for (var t = 0; t < contentTypes.length; t++) {
+    var typeName = contentTypes[t];
+    var selId = contentIds[typeName];
+    var sel = document.getElementById(selId);
+    if (!sel) continue;
+    var values = CONTENT_TAG_CONFIG_ZHONGHOU[typeName] || [];
+    for (var j = 0; j < values.length; j++) {
+      sel.innerHTML += '<option>' + values[j] + '</option>';
+    }
+  }
+}
+
+function onUploadUserTag1Change() {
+  var s1 = document.getElementById("uploadUserTag1").value;
+  var s2 = document.getElementById("uploadUserTag2");
   s2.innerHTML = '<option value="">请选择</option>';
-  if (s1 && USER_TAG2_MAP[s1]) {
-    for (var i = 0; i < USER_TAG2_MAP[s1].length; i++) {
-      s2.innerHTML += '<option>' + USER_TAG2_MAP[s1][i] + '</option>';
+  if (s1 && USER_TAG_CATEGORIES[s1]) {
+    for (var i = 0; i < USER_TAG_CATEGORIES[s1].length; i++) {
+      s2.innerHTML += '<option>' + USER_TAG_CATEGORIES[s1][i] + '</option>';
     }
   }
 }
 
-function renderContentTagFields() {
-  var type = document.getElementById("msUploadType").value;
-  var wrap = document.getElementById("msContentTagsWrap");
-  var cfg = CONTENT_TAG_CONFIG[type] || {};
-  var html = '<div class="ms-fm-group"><label>内容标签 <span class="req">*</span></label></div>';
-  for (var k in cfg) {
-    if (!cfg.hasOwnProperty(k)) continue;
-    html += '<div class="ms-fm-group">' +
-      '<div class="sub-label">' + k + '</div>' +
-      '<select class="ms-content-tag" data-type="' + k + '">' +
+function renderUploadContentTagFields() {
+  var wrap = document.getElementById("uploadContentTagsWrap");
+  var html = '<div class="fm-group"><label>内容标签 <span class="req">*</span></label></div>';
+  for (var k in CONTENT_TAG_CONFIG_ZHONGHOU) {
+    if (!CONTENT_TAG_CONFIG_ZHONGHOU.hasOwnProperty(k)) continue;
+    html += '<div class="fm-group">' +
+      '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px">' + k + '</div>' +
+      '<select class="upload-content-tag" data-type="' + k + '">' +
         '<option value="">请选择</option>';
-    for (var i = 0; i < cfg[k].length; i++) {
-      html += '<option>' + cfg[k][i] + '</option>';
+    for (var i = 0; i < CONTENT_TAG_CONFIG_ZHONGHOU[k].length; i++) {
+      html += '<option>' + CONTENT_TAG_CONFIG_ZHONGHOU[k][i] + '</option>';
     }
     html += '</select></div>';
   }
   wrap.innerHTML = html;
 }
 
-function closeUploadModal(e) {
-  if (e && e.target !== document.getElementById("msUploadOverlay")) return;
-  document.getElementById("msUploadOverlay").classList.remove("show");
+/* ========== 优化师下拉搜索功能 ========== */
+function initSearchSelect(selectId, dropdownId) {
+  var select = document.getElementById(selectId);
+  var dropdown = document.getElementById(dropdownId);
+  
+  // 点击 select 时显示下拉
+  select.addEventListener('click', function(e) {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+    if (dropdown.classList.contains('show')) {
+      var input = dropdown.querySelector('.search-input');
+      input.focus();
+      filterOptimizerOptions(input.value, selectId, dropdownId);
+    }
+  });
+  
+  // 点击页面其他区域时关闭下拉
+  document.addEventListener('click', function() {
+    dropdown.classList.remove('show');
+  });
+  
+  dropdown.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
 }
 
-function handleMaterialFileSelect(e) {
+function filterOptimizerOptions(keyword, selectId, dropdownId) {
+  var select = document.getElementById(selectId);
+  var dropdown = document.getElementById(dropdownId);
+  var input = dropdown.querySelector('.search-input');
+  var keyword = input.value.toLowerCase();
+  
+  // 清空下拉选项
+  var existingOptions = dropdown.querySelectorAll('.option-item');
+  existingOptions.forEach(function(item) { item.remove(); });
+  
+  // 获取 select 中的所有选项
+  var options = select.options;
+  var hasMatch = false;
+  
+  for (var i = 0; i < options.length; i++) {
+    var text = options[i].text;
+    if (text.toLowerCase().indexOf(keyword) !== -1 || options[i].value === "") {
+      var item = document.createElement('div');
+      item.className = 'option-item';
+      if (options[i].selected) item.classList.add('selected');
+      item.textContent = text;
+      item.setAttribute('data-value', options[i].value);
+      item.onclick = (function(idx) {
+        return function() {
+          select.selectedIndex = idx;
+          dropdown.classList.remove('show');
+          if (selectId === 'optimizerFilter') applyMsFilter();
+        };
+      })(i);
+      dropdown.appendChild(item);
+      if (text.toLowerCase().indexOf(keyword) !== -1) hasMatch = true;
+    }
+  }
+}
+
+// 初始化所有搜索下拉框
+initSearchSelect('optimizerFilter', 'optimizerFilterDropdown');
+initSearchSelect('uploadOptimizer', 'uploadOptimizerDropdown');
+
+/* ========== 筛选和渲染 ========== */
+function applyMsFilter() {
+  renderMsGrid();
+}
+
+function resetMsFilter() {
+  var el;
+  el = document.getElementById("nameFilter"); if (el) el.value = "";
+  el = document.getElementById("filterType"); if (el) el.value = "全部";
+  el = document.getElementById("filterSource"); if (el) el.value = "全部来源";
+  el = document.getElementById("filterOptimizer"); if (el) el.value = "";
+  el = document.getElementById("dateStart"); if (el) el.value = "";
+  el = document.getElementById("dateEnd"); if (el) el.value = "";
+  el = document.getElementById("filterUserRegion"); if (el) el.value = "";
+  el = document.getElementById("filterUserAge"); if (el) el.value = "";
+  el = document.getElementById("filterUserGender"); if (el) el.value = "";
+  el = document.getElementById("filterProductTag"); if (el) el.value = "";
+  el = document.getElementById("filterContentWenan"); if (el) el.value = "";
+  el = document.getElementById("filterContentMaidian"); if (el) el.value = "";
+  el = document.getElementById("filterContentChangjing"); if (el) el.value = "";
+  el = document.getElementById("filterContentDuihua"); if (el) el.value = "";
+  el = document.getElementById("filterContentKoubo"); if (el) el.value = "";
+  renderMsGrid();
+}
+
+function getFilteredMsMaterials() {
+  
+  var typeEl = document.getElementById("filterType");
+  var sourceEl = document.getElementById("filterSource");
+  var optEl = document.getElementById("filterOptimizer");
+  // 用户标签三个下拉
+  var userRegionVal = document.getElementById("filterUserRegion").value;
+  var userAgeVal = document.getElementById("filterUserAge").value;
+  var userGenderVal = document.getElementById("filterUserGender").value;
+  // 产品标签
+  var productTagVal = document.getElementById("filterProductTag").value;
+  // 内容标签按类型分拆
+  var contentFilterEls = {
+    "文案": document.getElementById("filterContentWenan"),
+    "宣传卖点": document.getElementById("filterContentMaidian"),
+    "场景": document.getElementById("filterContentChangjing"),
+    "对话": document.getElementById("filterContentDuihua"),
+    "口播": document.getElementById("filterContentKoubo")
+  };
+
+  var nameKw = (nameEl && nameEl.value || "").trim().toLowerCase();
+  var typeVal = (typeEl && typeEl.value) || "全部";
+  var bizVal = (bizEl && bizEl.value) || "";
+  var channelVal = (channelEl && channelEl.value) || "";
+  var optimizerVal = (optEl && optEl.value) || "";
+  // 收集内容标签筛选条件
+  var contentFilterVals = {};
+  for (var k in contentFilterEls) {
+    if (contentFilterEls.hasOwnProperty(k) && contentFilterEls[k]) {
+      var v = contentFilterEls[k].value;
+      if (v) contentFilterVals[k] = v;
+    }
+  }
+
+  var result = [];
+  for (var i = 0; i < msMaterials.length; i++) {
+    var m = msMaterials[i];
+    if (nameKw && m.name.toLowerCase().indexOf(nameKw) === -1) continue;
+    if (typeVal !== "全部" && m.type !== typeVal) continue;
+    if (bizVal && m.biz !== bizVal) continue;
+    if (channelVal && m.channel !== channelVal) continue;
+    if (optimizerVal && m.optimizer !== optimizerVal) continue;
+    // 标签筛选
+    var pass = true;
+    if (m.tags) {
+      // 用户标签筛选：按地区、年龄、性别分别筛选（OR关系）
+      if (userRegionVal || userAgeVal || userGenderVal) {
+        var userPass = false;
+        if (userRegionVal && m.tags.userCategory === "地区" && m.tags.userValue === userRegionVal) userPass = true;
+        if (userAgeVal && m.tags.userCategory === "年龄" && m.tags.userValue === userAgeVal) userPass = true;
+        if (userGenderVal && m.tags.userCategory === "性别" && m.tags.userValue === userGenderVal) userPass = true;
+        if (!userPass) { pass = false; }
+      }
+      // 产品标签筛选
+      if (productTagVal && m.tags.product !== productTagVal) continue;
+      // 内容标签按类型筛选
+      if (m.tags.content) {
+        for (var ck in contentFilterVals) {
+          if (contentFilterVals.hasOwnProperty(ck) && m.tags.content[ck] !== contentFilterVals[ck]) {
+            pass = false;
+            break;
+          }
+        }
+      } else if (Object.keys(contentFilterVals).length > 0) {
+        pass = false; // 有内容标签筛选但素材没有标签
+      }
+    } else {
+      // 素材没有tags，但有标签筛选条件
+      if (userRegionVal || userAgeVal || userGenderVal || productTagVal || Object.keys(contentFilterVals).length > 0) pass = false;
+    }
+    if (!pass) continue;
+    result.push(m);
+  }
+  return result;
+}
+
+function renderMsGrid() {
+  try {
+  var data = getFilteredMsMaterials();
+  var el = document.getElementById("msGrid");
+  if (!el) { console.error("gridView not found"); return; }
+  if (data.length === 0) {
+    el.innerHTML = '<div class="ms-empty"><div class="icon">📂</div><div class="title">暂无素材</div><div class="desc">试试调整筛选条件，或上传新素材</div></div>';
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    var bg = "linear-gradient(135deg,#1a1a2e,#16213e)";
+    if (m.type === "图片") bg = "linear-gradient(135deg,#f093fb,#f5576c)";
+    var badgeCls = m.type === "视频" ? "type-qiantie" : "type-zhongduan";
+    var sourceCls = m.source === "自动入库" ? "type-weiqiang" : "type-zhonghouduan";
+    var tagValues = extractTagValues(m.tags);
+    var tagPills = "";
+    for (var t = 0; t < Math.min(tagValues.length, 5); t++) {
+      tagPills += '<span class="tag-pill">' + tagValues[t] + '</span>';
+    }
+    if (tagValues.length > 5) tagPills += '<span class="tag-pill">+' + (tagValues.length - 5) + '</span>';
+    html += '<div class="ms-card" onclick="openMsPreview(' + m.id + ')">' +
+      '<div class="thumb" style="background:' + bg + '">' +
+        '<div style="color:rgba(255,255,255,.3);font-size:36px">' + (m.type === "视频" ? "🎬" : "🖼️") + '</div>' +
+        '<div class="play-overlay"><div class="play-btn">▶</div></div>' +
+      '</div>' +
+      '<div class="info">' +
+        '<div class="name">' + m.name + '</div>' +
+        '<div class="meta"><span class="badge ' + badgeCls + '">' + m.type + '</span>' +
+        '<span class="badge ' + sourceCls + '">' + m.source + '</span></div>' +
+        '<div style="margin-top:6px">' + tagPills + '</div>' +
+      '</div></div>';
+  }
+  el.innerHTML = html;
+  var countEl = document.getElementById("msCount");
+  if (countEl) countEl.textContent = "共 " + data.length + " 个";
+  } catch(e) {
+    console.error("renderGrid error:", e);
+    var el2 = document.getElementById("msGrid");
+    if (el2) el2.innerHTML = '<div class="ms-empty"><div class="icon">⚠️</div><div class="title">渲染出错</div><div class="desc">' + e.message + '</div></div>';
+  }
+}
+
+function openMsPreview(id) {
+  var m = null;
+  for (var i = 0; i < msMaterials.length; i++) {
+    if (msMaterials[i].id === id) { m = msMaterials[i]; break; }
+  }
+  if (!m) return;
+  document.getElementById("previewTitle").textContent = "预览：" + m.name;
+  document.getElementById("detailName").textContent = m.name;
+  document.getElementById("detailType").textContent = m.type;
+  document.getElementById("detailBiz").textContent = m.biz;
+  document.getElementById("detailChannel").textContent = m.channel;
+  document.getElementById("detailOptimizer").textContent = m.optimizer;
+  document.getElementById("detailDate").textContent = m.date;
+  document.getElementById("detailSource").textContent = m.source;
+  var tagHtml = "";
+  var tagValues = extractTagValues(m.tags);
+  if (tagValues.length) {
+    for (var t = 0; t < tagValues.length; t++) {
+      tagHtml += '<span class="tag-pill">' + tagValues[t] + '</span>';
+    }
+  } else {
+    tagHtml = '<span style="color:var(--text-3);font-size:12px">无</span>';
+  }
+  document.getElementById("detailTags").innerHTML = tagHtml;
+  
+  var placeholder = document.getElementById("previewPlaceholder");
+  var videoWrap = document.getElementById("previewVideoWrap");
+  var imageWrap = document.getElementById("previewImageWrap");
+  placeholder.style.display = "none";
+  videoWrap.style.display = "none";
+  imageWrap.style.display = "none";
+  
+  if (m.type === "视频") {
+    videoWrap.style.display = "flex";
+  } else {
+    imageWrap.style.display = "flex";
+  }
+  
+  document.getElementById("msPreviewOverlay").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+function closeMsPreview() {
+  document.getElementById("msPreviewOverlay").classList.remove("active");
+  document.body.style.overflow = "";
+}
+
+function openUploadModal() {
+  document.getElementById("msUploadOverlay").classList.add("active");
+  document.body.style.overflow = "hidden";
+  uploadSelectedFiles = [];
+  document.getElementById("uploadFileList").style.display = "none";
+  document.getElementById("uploadFileList").innerHTML = "";
+  document.getElementById("uploadUserTag1").value = "";
+  onUploadUserTag1Change();
+  document.getElementById("uploadProductTag").value = "";
+  renderUploadContentTagFields();
+}
+
+function closeUploadModal() {
+  document.getElementById("msUploadOverlay").classList.remove("active");
+  document.body.style.overflow = "";
+}
+
+function handleUploadFileSelect(e) {
   var files = Array.from(e.target.files);
-  msSelectedFiles = msSelectedFiles.concat(files);
-  renderUploadFileInfo();
+  uploadSelectedFiles = uploadSelectedFiles.concat(files);
+  renderUploadFileList();
 }
 
-function renderUploadFileInfo() {
-  var el = document.getElementById("msUploadFileInfo");
-  if (msSelectedFiles.length === 0) { el.style.display = "none"; return; }
+function renderUploadFileList() {
+  var el = document.getElementById("uploadFileList");
+  if (uploadSelectedFiles.length === 0) { el.style.display = "none"; return; }
   el.style.display = "flex";
   var tags = "";
-  for (var i = 0; i < msSelectedFiles.length; i++) {
-    tags += '<span style="background:#e8f1ff;padding:2px 6px;border-radius:4px;font-size:11px">' + msSelectedFiles[i].name + '</span>';
+  for (var i = 0; i < uploadSelectedFiles.length; i++) {
+    tags += '<span style="background:#e8f1ff;padding:2px 6px;border-radius:4px;font-size:11px">' + uploadSelectedFiles[i].name + '</span>';
   }
-  el.innerHTML = "📎 已选 " + msSelectedFiles.length + " 个文件：" + tags;
+  el.innerHTML = "📎 已选 " + uploadSelectedFiles.length + " 个文件：" + tags;
 }
 
 function submitUpload() {
-  if (msSelectedFiles.length === 0) { showToast("请先选择原料文件", "warning"); return; }
-  var type = document.getElementById("msUploadType").value;
-  var biz = document.getElementById("msUploadBiz").value;
-  var channel = document.getElementById("msUploadChannel").value;
-  var optimizer = document.getElementById("msUploadOptimizer").value || "未设置";
-  var userTag1 = document.getElementById("msUserTag1").value;
-  var userTag2 = document.getElementById("msUserTag2").value;
-  var productTag = document.getElementById("msProductTag").value;
-  if (!userTag1 || !userTag2) { showToast("请选择用户标签", "warning"); return; }
-  if (!productTag) { showToast("请选择产品标签", "warning"); return; }
+  if (uploadSelectedFiles.length === 0) { alert("请先选择素材文件"); return; }
+  var fileType = document.getElementById("uploadFileType").value;
+  var biz = document.getElementById("uploadBiz").value;
+  var channel = document.getElementById("uploadChannel").value;
+  var optimizer = document.getElementById("uploadOptimizer").value || "未设置";
+  var userTag1 = document.getElementById("uploadUserTag1").value;
+  var userTag2 = document.getElementById("uploadUserTag2").value;
+  var productTag = document.getElementById("uploadProductTag").value;
+  if (!userTag1 || !userTag2) { alert("请选择用户标签"); return; }
+  if (!productTag) { alert("请选择产品标签"); return; }
   var contentTags = {};
-  var ctgSelects = document.querySelectorAll(".ms-content-tag");
+  var ctgSelects = document.querySelectorAll(".upload-content-tag");
   for (var i = 0; i < ctgSelects.length; i++) {
     var s = ctgSelects[i];
     var k = s.getAttribute("data-type");
     var v = s.value;
-    if (!v) { showToast("请填写完整的内容标签", "warning"); return; }
+    if (!v) { alert("请填写完整的内容标签"); return; }
     contentTags[k] = v;
   }
-  var tags = {
-    userCategory: userTag1,
-    userValue: userTag2,
-    product: productTag,
-    content: contentTags
-  };
-  for (var i = 0; i < msSelectedFiles.length; i++) {
-    var file = msSelectedFiles[i];
-    msMaterials.push({
+  var tags = { userCategory: userTag1, userValue: userTag2, product: productTag, content: contentTags };
+  for (var i = 0; i < uploadSelectedFiles.length; i++) {
+    var file = uploadSelectedFiles[i];
+    materialData.push({
       id: Date.now() + Math.random(),
-      name: file.name.replace(/\.[^.]+$/, ""),
-      type: type,
+      name: file.name,
+      type: fileType,
       biz: biz,
       channel: channel,
       optimizer: optimizer,
       date: new Date().toISOString().slice(0,10),
+      source: "手动上传",
       size: (file.size/1024/1024).toFixed(1) + "MB",
       tags: tags
     });
   }
   renderMsGrid();
   closeUploadModal();
-  showToast("成功上传 " + msSelectedFiles.length + " 个原料", "success");
-  msSelectedFiles = [];
+  alert("成功上传 " + uploadSelectedFiles.length + " 个素材");
+  uploadSelectedFiles = [];
 }
 
-function openMsPreview(id) {
-  for (var i = 0; i < msMaterials.length; i++) {
-    if (msMaterials[i].id === id) {
-      var m = msMaterials[i];
-      document.getElementById("msPreviewName").textContent = m.name;
-      document.getElementById("msPVName").textContent = m.name;
-      document.getElementById("msPVType").textContent = m.type;
-      document.getElementById("msPVBiz").textContent = m.biz;
-      document.getElementById("msPVChannel").textContent = m.channel;
-      document.getElementById("msPVOptimizer").textContent = m.optimizer;
-      document.getElementById("msPVDate").textContent = m.date;
-      document.getElementById("msPVSize").textContent = m.size;
-      var tagHtml = "";
-      var tagValues = extractTagValues(m.tags);
-      if (tagValues.length) {
-        for (var t = 0; t < tagValues.length; t++) {
-          tagHtml += '<span class="tag-pill">' + tagValues[t] + '</span>';
-        }
-      } else {
-        tagHtml = '<span style="color:var(--text-3)">无</span>';
-      }
-      document.getElementById("msPVTags").innerHTML = tagHtml;
-      var icons = {"前贴":"🎬","中段":"🎥","尾帧":"📺","中后段":"🎞️"};
-      document.getElementById("msPreviewIcon").textContent = icons[m.type] || "🎬";
-      break;
-    }
-  }
-  document.getElementById("msPreviewOverlay").classList.add("show");
-}
-function closeMsPreview(e) {
-  if (e && e.target !== document.getElementById("msPreviewOverlay")) return;
-  document.getElementById("msPreviewOverlay").classList.remove("show");
+/* 拖拽上传 */
+var dropArea = document.getElementById("uploadFileDrop");
+if (dropArea) {
+  dropArea.addEventListener("dragover", function(e) { e.preventDefault(); dropArea.classList.add("drag-over"); });
+  dropArea.addEventListener("dragleave", function(e) { e.preventDefault(); dropArea.classList.remove("drag-over"); });
+  dropArea.addEventListener("drop", function(e) {
+    e.preventDefault();
+    dropArea.classList.remove("drag-over");
+    var files = Array.from(e.dataTransfer.files);
+    uploadSelectedFiles = uploadSelectedFiles.concat(files);
+    renderUploadFileList();
+  });
 }
 
-function showToast(msg, type) {
-  type = type || "info";
-  var container = document.getElementById("toastContainer");
-  var el = document.createElement("div");
-  el.className = "toast toast-" + type;
-  el.textContent = msg;
-  container.appendChild(el);
-  setTimeout(function() { el.remove(); }, 2500);
-}
+/* 点击弹窗外部关闭 */
+document.getElementById("msPreviewOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeMsPreview();
+});
+document.getElementById("msUploadOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeUploadModal();
+});
 
-loadTagConfig();
-initMsTagFilters();
-renderMsGrid();
+/* 初始渲染 */
+try { initMsTagFilters(); } catch(e) { console.error("initTagFilters failed:", e); }
+try { renderUploadContentTagFields(); } catch(e) { console.error("renderUploadContentTagFields failed:", e); }
+try { renderMsGrid(); } catch(e) { console.error("renderGrid init failed:", e); }
 </script>
 </body>
 </html>
