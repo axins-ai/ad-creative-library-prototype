@@ -108,13 +108,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <!-- 内容标签 -->
     <div class="tag-section" id="sec-content">
       <div class="tag-toolbar">
-        <div><div class="title">内容标签</div><div class="desc">按原料类型配置标签类型与具体选项</div></div>
+        <div><div class="title">内容标签</div><div class="desc">按原料类型配置标签类型与具体选项（中段/中后段/尾帧共用同一套标签）</div></div>
         <div style="display:flex;gap:8px;align-items:center">
           <select id="contentMatType" onchange="renderContentTable()" style="height:30px;padding:0 8px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px">
-            <option>前贴</option>
-            <option>中段</option>
-            <option>尾帧</option>
-            <option>中后段</option>
+            <option value="前贴">前贴</option>
+            <option value="中段_共用">中段、尾帧、中后段（共用）</option>
           </select>
           <button class="ms-btn ms-btn-primary" onclick="openContentTypeModal()">+ 新增标签类型</button>
         </div>
@@ -194,21 +192,7 @@ var DEFAULT_TAGS = {
       "文案": ["紧迫性", "系统通知"],
       "内容": ["风景", "猛宠", "花鸟"]
     },
-    "中段": {
-      "文案": ["紧迫性", "系统通知"],
-      "宣传卖点": ["话费", "流量"],
-      "场景": ["营业厅", "公园", "小区", "街头"],
-      "对话": ["老年男人", "老年女人"],
-      "口播": ["口播女", "口播男"]
-    },
-    "尾帧": {
-      "文案": ["紧迫性", "系统通知"],
-      "宣传卖点": ["话费", "流量"],
-      "场景": ["营业厅", "公园", "小区", "街头"],
-      "对话": ["老年男人", "老年女人"],
-      "口播": ["口播女", "口播男"]
-    },
-    "中后段": {
+    "中段_共用": {
       "文案": ["紧迫性", "系统通知"],
       "宣传卖点": ["话费", "流量"],
       "场景": ["营业厅", "公园", "小区", "街头"],
@@ -221,7 +205,20 @@ var DEFAULT_TAGS = {
 function loadTags() {
   try {
     var raw = localStorage.getItem("materialTags");
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      var tags = JSON.parse(raw);
+      // 数据迁移：中段/尾帧/中后段 合并为共用配置
+      if (tags.content) {
+        if (tags.content["中段"] && !tags.content["中段_共用"]) {
+          tags.content["中段_共用"] = tags.content["中段"];
+        }
+        delete tags.content["中段"];
+        delete tags.content["尾帧"];
+        delete tags.content["中后段"];
+        localStorage.setItem("materialTags", JSON.stringify(tags));
+      }
+      return tags;
+    }
   } catch (e) {}
   return JSON.parse(JSON.stringify(DEFAULT_TAGS));
 }
@@ -293,25 +290,33 @@ function renderProductTable() {
 
 function renderContentTable() {
   var matType = document.getElementById('contentMatType').value;
+  var contentKey = matType;  // "前贴" or "中段_共用"
   var wrap = document.getElementById('contentTableWrap');
-  var cfg = TAGS.content[matType] || {};
-  var html = '<table class="tag-table"><thead><tr><th style="width:140px">标签类型</th><th>选项</th><th style="width:180px">操作</th></tr></thead><tbody>';
+
+  var sharedNote = '';
+  if (matType === '中段_共用') {
+    sharedNote = '<div style="padding:8px 12px;margin-bottom:10px;background:#e8f1ff;border-radius:var(--radius-s);font-size:12px;color:var(--primary-dark)">当前编辑的是「中段、尾帧、中后段」共用的标签配置，修改将同步影响这三个原料类型。</div>';
+  }
+
+  var cfg = TAGS.content[contentKey] || {};
+  var html = sharedNote;
+  html += '<table class="tag-table"><thead><tr><th style="width:140px">标签类型</th><th>选项</th><th style="width:180px">操作</th></tr></thead><tbody>';
   var has = false;
   for (var k in cfg) {
     if (!cfg.hasOwnProperty(k)) continue;
     has = true;
-    var opts = cfg[k].map(function(o, idx){ return '<span class="tag-pill">' + o + ' <a href="javascript:void(0)" onclick="deleteContentValue(\'' + k + '\',' + idx + ')" style="color:var(--danger);margin-left:2px;text-decoration:none">×</a></span>'; }).join('');
+    var opts = cfg[k].map(function(o, idx){ return '<span class="tag-pill">' + o + ' <a href="javascript:void(0)" onclick="deleteContentValue(\'' + contentKey + '\',\'' + k + '\',' + idx + ')" style="color:var(--danger);margin-left:2px;text-decoration:none">×</a></span>'; }).join('');
     html += '<tr>' +
       '<td><strong>' + k + '</strong></td>' +
-      '<td>' + opts + ' <button class="ms-btn ms-btn-outline" style="height:22px;padding:0 6px;font-size:11px" onclick="openContentValueModal(\'' + k + '\')">+</button></td>' +
+      '<td>' + opts + ' <button class="ms-btn ms-btn-outline" style="height:22px;padding:0 6px;font-size:11px" onclick="openContentValueModal(\'' + contentKey + '\',\'' + k + '\')">+</button></td>' +
       '<td>' +
-        '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editContentType(\'' + k + '\')">编辑</button>' +
-        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px;margin-left:6px" onclick="deleteContentType(\'' + k + '\')">删除</button>' +
+        '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editContentType(\'' + contentKey + '\',\'' + k + '\')">编辑</button>' +
+        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px;margin-left:6px" onclick="deleteContentType(\'' + contentKey + '\',\'' + k + '\')">删除</button>' +
       '</td>' +
       '</tr>';
   }
   html += '</tbody></table>';
-  if (!has) html = '<div class="tag-empty">该原料类型暂无内容标签，请点击右上角新增</div>';
+  if (!has) html = sharedNote + '<div class="tag-empty">该原料类型暂无内容标签，请点击右上角新增</div>';
   wrap.innerHTML = html;
 }
 
@@ -396,39 +401,38 @@ function closeContentTypeModal(e) {
 }
 function addContentType() {
   var matType = document.getElementById('contentMatType').value;
+  var contentKey = getContentKey(matType);
   var val = document.getElementById('contentTypeInput').value.trim();
   if (!val) { showToast('请输入标签类型', 'warning'); return; }
-  if (!TAGS.content[matType]) TAGS.content[matType] = {};
-  if (TAGS.content[matType][val]) { showToast('该标签类型已存在', 'warning'); return; }
-  TAGS.content[matType][val] = [];
+  if (!TAGS.content[contentKey]) TAGS.content[contentKey] = {};
+  if (TAGS.content[contentKey][val]) { showToast('该标签类型已存在', 'warning'); return; }
+  TAGS.content[contentKey][val] = [];
   saveTags();
   closeContentTypeModal();
   renderContentTable();
   showToast('新增成功', 'success');
 }
-function editContentType(oldType) {
-  var matType = document.getElementById('contentMatType').value;
+function editContentType(contentKey, oldType) {
   var val = prompt('修改标签类型', oldType);
   if (val === null) return;
   val = val.trim();
   if (!val) { showToast('标签类型不能为空', 'warning'); return; }
-  if (val !== oldType && TAGS.content[matType][val]) { showToast('该标签类型已存在', 'warning'); return; }
-  TAGS.content[matType][val] = TAGS.content[matType][oldType];
-  delete TAGS.content[matType][oldType];
+  if (val !== oldType && TAGS.content[contentKey][val]) { showToast('该标签类型已存在', 'warning'); return; }
+  TAGS.content[contentKey][val] = TAGS.content[contentKey][oldType];
+  delete TAGS.content[contentKey][oldType];
   saveTags();
   renderContentTable();
   showToast('保存成功', 'success');
 }
-function deleteContentType(typeName) {
-  var matType = document.getElementById('contentMatType').value;
+function deleteContentType(contentKey, typeName) {
   if (!confirm('确定删除「' + typeName + '」及其所有选项？')) return;
-  delete TAGS.content[matType][typeName];
+  delete TAGS.content[contentKey][typeName];
   saveTags();
   renderContentTable();
   showToast('删除成功', 'success');
 }
-function openContentValueModal(typeName) {
-  contentEditingMatType = document.getElementById('contentMatType').value;
+function openContentValueModal(contentKey, typeName) {
+  contentEditingMatType = contentKey;
   contentEditingType = typeName;
   contentEditingValueIdx = -1;
   document.getElementById('contentValueModalTitle').textContent = '新增「' + typeName + '」选项';
@@ -450,10 +454,9 @@ function saveContentValue() {
   renderContentTable();
   showToast('新增成功', 'success');
 }
-function deleteContentValue(typeName, idx) {
-  var matType = document.getElementById('contentMatType').value;
+function deleteContentValue(contentKey, typeName, idx) {
   if (!confirm('确定删除该选项？')) return;
-  TAGS.content[matType][typeName].splice(idx, 1);
+  TAGS.content[contentKey][typeName].splice(idx, 1);
   saveTags();
   renderContentTable();
   showToast('删除成功', 'success');
