@@ -119,14 +119,27 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <label>标签类型</label>
         <input type="text" id="userModalName" placeholder="例如：地区">
       </div>
-      <div class="ms-fm-group">
-        <label>选项（多个用逗号分隔）</label>
-        <input type="text" id="userModalOptions" placeholder="例如：一线城市,二线城市,三四线城市,农村">
-      </div>
     </div>
     <div class="ms-modal-ft">
       <button class="ms-btn ms-btn-outline" onclick="closeUserModal()">取消</button>
       <button class="ms-btn ms-btn-primary" onclick="saveUserTag()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 用户标签选项弹窗 -->
+<div class="ms-modal-overlay" id="userOptionModalOverlay" onclick="closeUserOptionModal(event)">
+  <div class="ms-modal" onclick="event.stopPropagation()">
+    <div class="ms-modal-hd"><h3 id="userOptionModalTitle">新增选项</h3><button class="close-btn" onclick="closeUserOptionModal()">×</button></div>
+    <div class="ms-modal-bd">
+      <div class="ms-fm-group">
+        <label>选项名称</label>
+        <input type="text" id="userOptionInput" placeholder="例如：一线城市">
+      </div>
+    </div>
+    <div class="ms-modal-ft">
+      <button class="ms-btn ms-btn-outline" onclick="closeUserOptionModal()">取消</button>
+      <button class="ms-btn ms-btn-primary" onclick="saveUserOption()">保存</button>
     </div>
   </div>
 </div>
@@ -151,7 +164,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <!-- 内容标签类型弹窗 -->
 <div class="ms-modal-overlay" id="contentTypeModalOverlay" onclick="closeContentTypeModal(event)">
   <div class="ms-modal" onclick="event.stopPropagation()">
-    <div class="ms-modal-hd"><h3>新增内容标签类型</h3><button class="close-btn" onclick="closeContentTypeModal()">×</button></div>
+    <div class="ms-modal-hd"><h3 id="contentTypeModalTitle">新增标签类型</h3><button class="close-btn" onclick="closeContentTypeModal()">×</button></div>
     <div class="ms-modal-bd">
       <div class="ms-fm-group">
         <label>标签类型</label>
@@ -160,7 +173,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     </div>
     <div class="ms-modal-ft">
       <button class="ms-btn ms-btn-outline" onclick="closeContentTypeModal()">取消</button>
-      <button class="ms-btn ms-btn-primary" onclick="addContentType()">保存</button>
+      <button class="ms-btn ms-btn-primary" onclick="saveContentType()">保存</button>
     </div>
   </div>
 </div>
@@ -248,6 +261,7 @@ function saveTags() {
 
 var TAGS = loadTags();
 var userEditingKey = null;
+var userEditingOptionIdx = -1;
 var productEditingIdx = -1;
 var contentEditingMatType = null;
 var contentEditingType = null;
@@ -273,10 +287,10 @@ function renderUserTable() {
   for (var k in TAGS.user) {
     if (!TAGS.user.hasOwnProperty(k)) continue;
     has = true;
-    var opts = TAGS.user[k].map(function(o){ return '<span class="tag-pill">' + o + '</span>'; }).join('');
+    var opts = TAGS.user[k].map(function(o, idx){ return '<span class="tag-pill">' + o + ' <a href="javascript:void(0)" onclick="deleteUserOption(\'' + k + '\',' + idx + ')" style="color:var(--danger);margin-left:2px;text-decoration:none">×</a></span>'; }).join('');
     html += '<tr>' +
       '<td><strong>' + k + '</strong></td>' +
-      '<td>' + opts + '</td>' +
+      '<td>' + opts + ' <button class="ms-btn ms-btn-outline" style="height:22px;padding:0 6px;font-size:11px" onclick="openUserOptionModal(\'' + k + '\')">+</button></td>' +
       '<td>' +
         '<div style="display:flex;gap:6px">' +
         '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editUserTag(\'' + k + '\')">编辑</button>' +
@@ -288,6 +302,36 @@ function renderUserTable() {
   html += '</tbody></table>';
   if (!has) html = '<div class="tag-empty">暂无用户标签，请点击右上角新增</div>';
   wrap.innerHTML = html;
+}
+
+function openUserOptionModal(tagType) {
+  userEditingKey = tagType;
+  userEditingOptionIdx = -1;
+  document.getElementById('userOptionModalTitle').textContent = '新增「' + tagType + '」选项';
+  document.getElementById('userOptionInput').value = '';
+  document.getElementById('userOptionModalOverlay').classList.add('show');
+}
+function closeUserOptionModal(e) {
+  if (e && e.target !== document.getElementById('userOptionModalOverlay')) return;
+  document.getElementById('userOptionModalOverlay').classList.remove('show');
+}
+function saveUserOption() {
+  var val = document.getElementById('userOptionInput').value.trim();
+  if (!val) { showToast('请输入选项名称', 'warning'); return; }
+  var arr = TAGS.user[userEditingKey];
+  if (arr.indexOf(val) > -1) { showToast('该选项已存在', 'warning'); return; }
+  arr.push(val);
+  saveTags();
+  closeUserOptionModal();
+  renderUserTable();
+  showToast('新增成功', 'success');
+}
+function deleteUserOption(tagType, idx) {
+  if (!confirm('确定删除该选项？')) return;
+  TAGS.user[tagType].splice(idx, 1);
+  saveTags();
+  renderUserTable();
+  showToast('删除成功', 'success');
 }
 
 function openUserModal() {
@@ -305,16 +349,19 @@ function editUserTag(key) {
   userEditingKey = key;
   document.getElementById('userModalTitle').textContent = '编辑标签类型';
   document.getElementById('userModalName').value = key;
-  document.getElementById('userModalOptions').value = TAGS.user[key].join('，');
   document.getElementById('userModalOverlay').classList.add('show');
 }
 function saveUserTag() {
   var name = document.getElementById('userModalName').value.trim();
-  var opts = document.getElementById('userModalOptions').value.trim().split(/[,，]/).map(function(s){ return s.trim(); }).filter(function(s){ return s; });
   if (!name) { showToast('请输入标签类型', 'warning'); return; }
-  if (opts.length === 0) { showToast('请至少输入一个选项', 'warning'); return; }
-  if (userEditingKey && userEditingKey !== name) delete TAGS.user[userEditingKey];
-  TAGS.user[name] = opts;
+  if (userEditingKey && userEditingKey !== name) {
+    // 重命名：保留原来的选项
+    TAGS.user[name] = TAGS.user[userEditingKey];
+    delete TAGS.user[userEditingKey];
+  } else if (!TAGS.user[name]) {
+    // 新增
+    TAGS.user[name] = [];
+  }
   saveTags();
   closeUserModal();
   renderUserTable();
@@ -431,6 +478,8 @@ function renderContentTable() {
 }
 
 function openContentTypeModal() {
+  contentEditingType = null;
+  document.getElementById('contentTypeModalTitle').textContent = '新增标签类型';
   document.getElementById('contentTypeInput').value = '';
   document.getElementById('contentTypeModalOverlay').classList.add('show');
 }
@@ -438,30 +487,32 @@ function closeContentTypeModal(e) {
   if (e && e.target !== document.getElementById('contentTypeModalOverlay')) return;
   document.getElementById('contentTypeModalOverlay').classList.remove('show');
 }
-function addContentType() {
+function saveContentType() {
   var matType = document.getElementById('contentMatType').value;
   var contentKey = matType;
   var val = document.getElementById('contentTypeInput').value.trim();
   if (!val) { showToast('请输入标签类型', 'warning'); return; }
   if (!TAGS.content[contentKey]) TAGS.content[contentKey] = {};
-  if (TAGS.content[contentKey][val]) { showToast('该标签类型已存在', 'warning'); return; }
-  TAGS.content[contentKey][val] = [];
+  if (contentEditingType) {
+    // 编辑：重命名
+    if (val !== contentEditingType && TAGS.content[contentKey][val]) { showToast('该标签类型已存在', 'warning'); return; }
+    TAGS.content[contentKey][val] = TAGS.content[contentKey][contentEditingType];
+    delete TAGS.content[contentKey][contentEditingType];
+  } else {
+    // 新增
+    if (TAGS.content[contentKey][val]) { showToast('该标签类型已存在', 'warning'); return; }
+    TAGS.content[contentKey][val] = [];
+  }
   saveTags();
   closeContentTypeModal();
   renderContentTable();
-  showToast('新增成功', 'success');
+  showToast('保存成功', 'success');
 }
 function editContentType(contentKey, oldType) {
-  var val = prompt('修改标签类型', oldType);
-  if (val === null) return;
-  val = val.trim();
-  if (!val) { showToast('标签类型不能为空', 'warning'); return; }
-  if (val !== oldType && TAGS.content[contentKey][val]) { showToast('该标签类型已存在', 'warning'); return; }
-  TAGS.content[contentKey][val] = TAGS.content[contentKey][oldType];
-  delete TAGS.content[contentKey][oldType];
-  saveTags();
-  renderContentTable();
-  showToast('保存成功', 'success');
+  contentEditingType = oldType;
+  document.getElementById('contentTypeModalTitle').textContent = '编辑标签类型';
+  document.getElementById('contentTypeInput').value = oldType;
+  document.getElementById('contentTypeModalOverlay').classList.add('show');
 }
 function deleteContentType(contentKey, typeName) {
   if (!confirm('确定删除「' + typeName + '」及其所有选项？')) return;
