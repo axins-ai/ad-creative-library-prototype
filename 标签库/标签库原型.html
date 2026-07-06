@@ -43,12 +43,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .tag-pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:12px;background:#f0f2f5;color:var(--text-2);border:1px solid var(--border-light);margin-right:4px}
 .tag-empty{text-align:center;padding:40px 20px;color:var(--text-3);font-size:13px}
 
-.tag-form{display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;padding:12px;background:var(--bg-hover);border-radius:var(--radius);flex-wrap:wrap}
-.tag-form-item{display:flex;flex-direction:column;gap:3px;min-width:120px;flex:1}
-.tag-form-item label{font-size:11px;color:var(--text-3);font-weight:500}
-.tag-form-item input,.tag-form-item select{height:30px;padding:0 8px;font-size:12px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;background:#fff;transition:border .2s;font-family:var(--font)}
-.tag-form-item input:focus,.tag-form-item select:focus{border-color:var(--primary)}
-
 .ms-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
 .ms-modal-overlay.show{opacity:1;pointer-events:auto}
 .ms-modal{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-m);width:420px;max-height:85vh;display:flex;flex-direction:column;transform:translateY(20px);transition:transform .25s;}
@@ -84,8 +78,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <!-- 用户标签 -->
     <div class="tag-section active" id="sec-user">
       <div class="tag-toolbar">
-        <div><div class="title">用户标签</div><div class="desc">配置地区/年龄/性别及其具体选项</div></div>
-        <button class="ms-btn ms-btn-primary" onclick="openUserModal()">+ 新增一级标签</button>
+        <div><div class="title">用户标签</div><div class="desc">配置用户标签类型与具体选项</div></div>
+        <button class="ms-btn ms-btn-primary" onclick="openUserModal()">+ 新增标签类型</button>
       </div>
       <div id="userTableWrap"></div>
     </div>
@@ -93,14 +87,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <!-- 产品标签 -->
     <div class="tag-section" id="sec-product">
       <div class="tag-toolbar">
-        <div><div class="title">产品标签</div><div class="desc">配置产品价位选项</div></div>
-        <div class="tag-form" style="margin:0;padding:0;background:transparent">
-          <div class="tag-form-item">
-            <label>新增产品标签</label>
-            <input type="text" id="productInput" placeholder="例如：39元">
-          </div>
-          <button class="ms-btn ms-btn-primary" onclick="addProductTag()">新增</button>
-        </div>
+        <div><div class="title">产品标签</div></div>
+        <button class="ms-btn ms-btn-primary" onclick="openProductModal()">+ 新增选项</button>
       </div>
       <div id="productTableWrap"></div>
     </div>
@@ -125,20 +113,37 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <!-- 用户标签弹窗 -->
 <div class="ms-modal-overlay" id="userModalOverlay" onclick="closeUserModal(event)">
   <div class="ms-modal" onclick="event.stopPropagation()">
-    <div class="ms-modal-hd"><h3 id="userModalTitle">新增用户标签</h3><button class="close-btn" onclick="closeUserModal()">×</button></div>
+    <div class="ms-modal-hd"><h3 id="userModalTitle">新增标签类型</h3><button class="close-btn" onclick="closeUserModal()">×</button></div>
     <div class="ms-modal-bd">
       <div class="ms-fm-group">
-        <label>一级标签</label>
+        <label>标签类型</label>
         <input type="text" id="userModalName" placeholder="例如：地区">
       </div>
       <div class="ms-fm-group">
-        <label>二级选项（多个用逗号分隔）</label>
+        <label>选项（多个用逗号分隔）</label>
         <input type="text" id="userModalOptions" placeholder="例如：一线城市,二线城市,三四线城市,农村">
       </div>
     </div>
     <div class="ms-modal-ft">
       <button class="ms-btn ms-btn-outline" onclick="closeUserModal()">取消</button>
       <button class="ms-btn ms-btn-primary" onclick="saveUserTag()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 产品标签弹窗 -->
+<div class="ms-modal-overlay" id="productModalOverlay" onclick="closeProductModal(event)">
+  <div class="ms-modal" onclick="event.stopPropagation()">
+    <div class="ms-modal-hd"><h3 id="productModalTitle">新增选项</h3><button class="close-btn" onclick="closeProductModal()">×</button></div>
+    <div class="ms-modal-bd">
+      <div class="ms-fm-group">
+        <label>选项名称</label>
+        <input type="text" id="productModalInput" placeholder="例如：39元">
+      </div>
+    </div>
+    <div class="ms-modal-ft">
+      <button class="ms-btn ms-btn-outline" onclick="closeProductModal()">取消</button>
+      <button class="ms-btn ms-btn-primary" onclick="saveProductOption()">保存</button>
     </div>
   </div>
 </div>
@@ -207,6 +212,19 @@ function loadTags() {
     var raw = localStorage.getItem("materialTags");
     if (raw) {
       var tags = JSON.parse(raw);
+      // 数据迁移：product 对象格式 → 数组格式（兼容旧版）
+      if (!Array.isArray(tags.product)) {
+        var oldProduct = tags.product;
+        tags.product = [];
+        for (var k in oldProduct) {
+          if (oldProduct.hasOwnProperty(k)) {
+            for (var i = 0; i < oldProduct[k].length; i++) {
+              tags.product.push(oldProduct[k][i]);
+            }
+          }
+        }
+        localStorage.setItem("materialTags", JSON.stringify(tags));
+      }
       // 数据迁移：中段/尾帧/中后段 合并为共用配置
       if (tags.content) {
         if (tags.content["中段"] && !tags.content["中段_共用"]) {
@@ -230,6 +248,7 @@ function saveTags() {
 
 var TAGS = loadTags();
 var userEditingKey = null;
+var productEditingIdx = -1;
 var contentEditingMatType = null;
 var contentEditingType = null;
 var contentEditingValueIdx = -1;
@@ -246,9 +265,10 @@ function switchTab(tab) {
   if (tab === 'content') renderContentTable();
 }
 
+/* ===== 用户标签 ===== */
 function renderUserTable() {
   var wrap = document.getElementById('userTableWrap');
-  var html = '<table class="tag-table"><thead><tr><th style="width:160px">一级标签</th><th>二级选项</th><th style="width:140px">操作</th></tr></thead><tbody>';
+  var html = '<table class="tag-table"><thead><tr><th style="width:160px">标签类型</th><th>选项</th><th style="width:140px">操作</th></tr></thead><tbody>';
   var has = false;
   for (var k in TAGS.user) {
     if (!TAGS.user.hasOwnProperty(k)) continue;
@@ -258,8 +278,10 @@ function renderUserTable() {
       '<td><strong>' + k + '</strong></td>' +
       '<td>' + opts + '</td>' +
       '<td>' +
+        '<div style="display:flex;gap:6px">' +
         '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editUserTag(\'' + k + '\')">编辑</button>' +
-        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px;margin-left:6px" onclick="deleteUserTag(\'' + k + '\')">删除</button>' +
+        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px" onclick="deleteUserTag(\'' + k + '\')">删除</button>' +
+        '</div>' +
       '</td>' +
       '</tr>';
   }
@@ -268,19 +290,60 @@ function renderUserTable() {
   wrap.innerHTML = html;
 }
 
+function openUserModal() {
+  userEditingKey = null;
+  document.getElementById('userModalTitle').textContent = '新增标签类型';
+  document.getElementById('userModalName').value = '';
+  document.getElementById('userModalOptions').value = '';
+  document.getElementById('userModalOverlay').classList.add('show');
+}
+function closeUserModal(e) {
+  if (e && e.target !== document.getElementById('userModalOverlay')) return;
+  document.getElementById('userModalOverlay').classList.remove('show');
+}
+function editUserTag(key) {
+  userEditingKey = key;
+  document.getElementById('userModalTitle').textContent = '编辑标签类型';
+  document.getElementById('userModalName').value = key;
+  document.getElementById('userModalOptions').value = TAGS.user[key].join('，');
+  document.getElementById('userModalOverlay').classList.add('show');
+}
+function saveUserTag() {
+  var name = document.getElementById('userModalName').value.trim();
+  var opts = document.getElementById('userModalOptions').value.trim().split(/[,，]/).map(function(s){ return s.trim(); }).filter(function(s){ return s; });
+  if (!name) { showToast('请输入标签类型', 'warning'); return; }
+  if (opts.length === 0) { showToast('请至少输入一个选项', 'warning'); return; }
+  if (userEditingKey && userEditingKey !== name) delete TAGS.user[userEditingKey];
+  TAGS.user[name] = opts;
+  saveTags();
+  closeUserModal();
+  renderUserTable();
+  showToast('保存成功', 'success');
+}
+function deleteUserTag(key) {
+  if (!confirm('确定删除「' + key + '」及其所有选项？')) return;
+  delete TAGS.user[key];
+  saveTags();
+  renderUserTable();
+  showToast('删除成功', 'success');
+}
+
+/* ===== 产品标签 ===== */
 function renderProductTable() {
   var wrap = document.getElementById('productTableWrap');
   if (TAGS.product.length === 0) {
-    wrap.innerHTML = '<div class="tag-empty">暂无产品标签</div>';
+    wrap.innerHTML = '<div class="tag-empty">暂无产品标签，请点击右上角新增</div>';
     return;
   }
-  var html = '<table class="tag-table"><thead><tr><th>标签名称</th><th style="width:120px">操作</th></tr></thead><tbody>';
+  var html = '<table class="tag-table"><thead><tr><th>选项</th><th style="width:100px">操作</th></tr></thead><tbody>';
   for (var i = 0; i < TAGS.product.length; i++) {
     html += '<tr>' +
       '<td><span class="tag-pill">' + TAGS.product[i] + '</span></td>' +
       '<td>' +
-        '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editProductTag(' + i + ')">编辑</button>' +
-        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px;margin-left:6px" onclick="deleteProductTag(' + i + ')">删除</button>' +
+        '<div style="display:flex;gap:6px">' +
+        '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editProductOption(' + i + ')">编辑</button>' +
+        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px" onclick="deleteProductOption(' + i + ')">删除</button>' +
+        '</div>' +
       '</td>' +
       '</tr>';
   }
@@ -288,9 +351,54 @@ function renderProductTable() {
   wrap.innerHTML = html;
 }
 
+function openProductModal(editIdx) {
+  productEditingIdx = editIdx !== undefined ? editIdx : -1;
+  if (productEditingIdx >= 0) {
+    document.getElementById('productModalTitle').textContent = '编辑选项';
+    document.getElementById('productModalInput').value = TAGS.product[productEditingIdx];
+  } else {
+    document.getElementById('productModalTitle').textContent = '新增选项';
+    document.getElementById('productModalInput').value = '';
+  }
+  document.getElementById('productModalOverlay').classList.add('show');
+}
+function closeProductModal(e) {
+  if (e && e.target !== document.getElementById('productModalOverlay')) return;
+  document.getElementById('productModalOverlay').classList.remove('show');
+}
+function saveProductOption() {
+  var val = document.getElementById('productModalInput').value.trim();
+  if (!val) { showToast('请输入选项名称', 'warning'); return; }
+  if (productEditingIdx >= 0) {
+    // 编辑
+    var old = TAGS.product[productEditingIdx];
+    if (val !== old && TAGS.product.indexOf(val) > -1) { showToast('该选项已存在', 'warning'); return; }
+    TAGS.product[productEditingIdx] = val;
+  } else {
+    // 新增
+    if (TAGS.product.indexOf(val) > -1) { showToast('该选项已存在', 'warning'); return; }
+    TAGS.product.push(val);
+  }
+  saveTags();
+  closeProductModal();
+  renderProductTable();
+  showToast('保存成功', 'success');
+}
+function editProductOption(idx) {
+  openProductModal(idx);
+}
+function deleteProductOption(idx) {
+  if (!confirm('确定删除「' + TAGS.product[idx] + '」？')) return;
+  TAGS.product.splice(idx, 1);
+  saveTags();
+  renderProductTable();
+  showToast('删除成功', 'success');
+}
+
+/* ===== 内容标签 ===== */
 function renderContentTable() {
   var matType = document.getElementById('contentMatType').value;
-  var contentKey = matType;  // "前贴" or "中段_共用"
+  var contentKey = matType;
   var wrap = document.getElementById('contentTableWrap');
 
   var sharedNote = '';
@@ -310,8 +418,10 @@ function renderContentTable() {
       '<td><strong>' + k + '</strong></td>' +
       '<td>' + opts + ' <button class="ms-btn ms-btn-outline" style="height:22px;padding:0 6px;font-size:11px" onclick="openContentValueModal(\'' + contentKey + '\',\'' + k + '\')">+</button></td>' +
       '<td>' +
+        '<div style="display:flex;gap:6px">' +
         '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editContentType(\'' + contentKey + '\',\'' + k + '\')">编辑</button>' +
-        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px;margin-left:6px" onclick="deleteContentType(\'' + contentKey + '\',\'' + k + '\')">删除</button>' +
+        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px" onclick="deleteContentType(\'' + contentKey + '\',\'' + k + '\')">删除</button>' +
+        '</div>' +
       '</td>' +
       '</tr>';
   }
@@ -320,77 +430,6 @@ function renderContentTable() {
   wrap.innerHTML = html;
 }
 
-/* ===== 用户标签操作 ===== */
-function openUserModal() {
-  userEditingKey = null;
-  document.getElementById('userModalTitle').textContent = '新增用户标签';
-  document.getElementById('userModalName').value = '';
-  document.getElementById('userModalOptions').value = '';
-  document.getElementById('userModalOverlay').classList.add('show');
-}
-function closeUserModal(e) {
-  if (e && e.target !== document.getElementById('userModalOverlay')) return;
-  document.getElementById('userModalOverlay').classList.remove('show');
-}
-function editUserTag(key) {
-  userEditingKey = key;
-  document.getElementById('userModalTitle').textContent = '编辑用户标签';
-  document.getElementById('userModalName').value = key;
-  document.getElementById('userModalOptions').value = TAGS.user[key].join('，');
-  document.getElementById('userModalOverlay').classList.add('show');
-}
-function saveUserTag() {
-  var name = document.getElementById('userModalName').value.trim();
-  var opts = document.getElementById('userModalOptions').value.trim().split(/[,，]/).map(function(s){ return s.trim(); }).filter(function(s){ return s; });
-  if (!name) { showToast('请输入一级标签名称', 'warning'); return; }
-  if (opts.length === 0) { showToast('请至少输入一个二级选项', 'warning'); return; }
-  if (userEditingKey && userEditingKey !== name) delete TAGS.user[userEditingKey];
-  TAGS.user[name] = opts;
-  saveTags();
-  closeUserModal();
-  renderUserTable();
-  showToast('保存成功', 'success');
-}
-function deleteUserTag(key) {
-  if (!confirm('确定删除「' + key + '」及其所有二级选项？')) return;
-  delete TAGS.user[key];
-  saveTags();
-  renderUserTable();
-  showToast('删除成功', 'success');
-}
-
-/* ===== 产品标签操作 ===== */
-function addProductTag() {
-  var val = document.getElementById('productInput').value.trim();
-  if (!val) { showToast('请输入产品标签', 'warning'); return; }
-  if (TAGS.product.indexOf(val) > -1) { showToast('该产品标签已存在', 'warning'); return; }
-  TAGS.product.push(val);
-  document.getElementById('productInput').value = '';
-  saveTags();
-  renderProductTable();
-  showToast('新增成功', 'success');
-}
-function editProductTag(idx) {
-  var old = TAGS.product[idx];
-  var val = prompt('修改产品标签', old);
-  if (val === null) return;
-  val = val.trim();
-  if (!val) { showToast('标签不能为空', 'warning'); return; }
-  if (val !== old && TAGS.product.indexOf(val) > -1) { showToast('该产品标签已存在', 'warning'); return; }
-  TAGS.product[idx] = val;
-  saveTags();
-  renderProductTable();
-  showToast('保存成功', 'success');
-}
-function deleteProductTag(idx) {
-  if (!confirm('确定删除「' + TAGS.product[idx] + '」？')) return;
-  TAGS.product.splice(idx, 1);
-  saveTags();
-  renderProductTable();
-  showToast('删除成功', 'success');
-}
-
-/* ===== 内容标签操作 ===== */
 function openContentTypeModal() {
   document.getElementById('contentTypeInput').value = '';
   document.getElementById('contentTypeModalOverlay').classList.add('show');
@@ -401,7 +440,7 @@ function closeContentTypeModal(e) {
 }
 function addContentType() {
   var matType = document.getElementById('contentMatType').value;
-  var contentKey = getContentKey(matType);
+  var contentKey = matType;
   var val = document.getElementById('contentTypeInput').value.trim();
   if (!val) { showToast('请输入标签类型', 'warning'); return; }
   if (!TAGS.content[contentKey]) TAGS.content[contentKey] = {};
