@@ -681,6 +681,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <option value="自动入库">自动入库</option>
         <option value="手动上传">手动上传</option>
       </select>
+      <select id="modalFolderFilter" onchange="renderModalList()" style="height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none">
+        <option value="">全部文件夹</option>
+      </select>
+      <button class="btn btn-default" onclick="selectAllFromFolder()" style="height:30px;font-size:11px;padding:0 10px">📁 全选当前文件夹</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-ft">
@@ -1434,6 +1438,16 @@ function openModal(lockType, slotIdx) {
   document.getElementById("sourceFilter").value = "";
 
   renderModalList();
+  // 初始化文件夹下拉
+  var folderSel = document.getElementById('modalFolderFilter');
+  if (folderSel && folderSel.options.length <= 1) {
+    for (var fi = 0; fi < msFolders.length; fi++) {
+      var opt = document.createElement('option');
+      opt.value = msFolders[fi].id;
+      opt.textContent = msFolders[fi].name;
+      folderSel.appendChild(opt);
+    }
+  }
   document.getElementById("overlay").classList.add("show");
 }
 
@@ -1530,6 +1544,12 @@ function renderModalList() {
     // 基础属性筛选（业务类型和渠道，优化师不用于筛选原料）
     if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
     if (gBasicAttrs.channel && m.channel !== gBasicAttrs.channel) continue;
+    // 文件夹筛选
+    var folderVal = document.getElementById('modalFolderFilter').value;
+    if (folderVal) {
+      var folderId = parseInt(folderVal);
+      if (m.folderId !== folderId) continue;
+    }
     result.push(m);
   }
 
@@ -1590,6 +1610,22 @@ function confirmSel() {
   }
   closeModal();
   renderCards();
+}
+
+// 全选当前文件夹
+function selectAllFromFolder() {
+  var folderVal = document.getElementById('modalFolderFilter').value;
+  if (!folderVal) { showToast('请先选择一个文件夹', 'w'); return; }
+  var folderId = parseInt(folderVal);
+  var items = document.querySelectorAll('.mat-item[data-id]');
+  gModal.tempSel = [];
+  for (var i = 0; i < items.length; i++) {
+    var id = parseInt(items[i].getAttribute('data-id'));
+    var m = getMatById(id);
+    if (m && m.folderId === folderId && gModal.tempSel.indexOf(id) === -1) gModal.tempSel.push(id);
+  }
+  renderModalList();
+  showToast('已选择 ' + gModal.tempSel.length + ' 个素材', 's');
 }
 
 function updateSelInfo() {
