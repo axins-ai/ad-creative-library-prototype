@@ -1308,33 +1308,22 @@ document.getElementById("moveToFolderModal").addEventListener("click", function(
   if (e.target === this) closeMoveModal();
 });
 
-// ========== 供父页面调用的函数 ==========
-function filterByFolder(folderId) {
-  // 从父页面菜单点击文件夹时调用
-  if (folderId === null) {
-    // 全部
-    document.getElementById('folderFilter').value = '';
-    document.getElementById('folderFilter2').value = '';
-  } else if (folderId === '__uncategorized') {
-    document.getElementById('folderFilter').value = '__uncategorized';
-    document.getElementById('folderFilter2').value = '__uncategorized';
-  } else {
-    document.getElementById('folderFilter').value = String(folderId);
-    document.getElementById('folderFilter2').value = String(folderId);
-  }
-  applyMsFilter();
-}
-
-function getFoldersData() {
-  // 返回文件夹数据供父页面使用
-  return JSON.parse(JSON.stringify(msFolders));
-}
-
-// ========== 初始化
- ==========
+// ========== 初始化 ==========
 populateFolderFilters();
 initTagFilters();
 renderMsGrid();
+
+// 从URL读取folder参数（父页面菜单传过来的）
+function readFolderFromUrl() {
+  var match = location.search.match(/folder=(\d+)/);
+  if (match) {
+    var folderId = parseInt(match[1]);
+    document.getElementById('folderFilter').value = String(folderId);
+    document.getElementById('folderFilter2').value = String(folderId);
+    applyMsFilter();
+  }
+}
+readFolderFromUrl();
 
 // Enter键提交新建文件夹
 document.getElementById("newFolderName").addEventListener("keypress", function(e) {
