@@ -46,6 +46,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .folder-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .folder-tab .tab-count{font-size:10px;margin-left:4px;opacity:.65}
 .folder-tab.active .tab-count{opacity:.85}
+.folder-add-btn{width:26px;height:26px;border-radius:50%;border:1px dashed var(--border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:15px;color:var(--text-3);transition:all .15s;flex-shrink:0}
+.folder-add-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 .tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .tag-filter-row .filter-group{margin-bottom:0}
 .tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
@@ -927,6 +929,7 @@ function renderFolderBar() {
     for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
     h += '<span class="folder-tab' + (selFolder === f.id ? ' active' : '') + '" onclick="selFolder=' + f.id + ';renderFolderBar();applyMsFilter()">' + f.name + '<span class="tab-count">' + cnt + '</span></span>';
   }
+  h += '<button class="folder-add-btn" onclick="openFolderManager()" title="新建文件夹">+</button>';
   bar.innerHTML = h;
   syncUploadFolder();
 }
@@ -1237,12 +1240,18 @@ try { renderFolderBar(); } catch(e) { console.error("renderFolderBar failed:", e
 try { renderMsGrid(); } catch(e) { console.error("renderMsGrid init failed:", e); }
 
 // 文件夹管理弹窗
+var gFMShowCreate = false;
 function openFolderManager() {
   document.getElementById('fmModal').classList.add('active');
   document.body.style.overflow = 'hidden';
+  gFMShowCreate = false;
   renderFMList();
 }
 function closeFM() { document.getElementById('fmModal').classList.remove('active'); document.body.style.overflow = ''; }
+function showFMCreateRow() {
+  gFMShowCreate = true;
+  renderFMList();
+}
 function renderFMList() {
   var el = document.getElementById('fmList'); if (!el) return;
   var h = '';
@@ -1256,28 +1265,33 @@ function renderFMList() {
       '<span class="fm-btn fm-del">🗑️ 删除</span></div>';
   }
   if (h === '') { h = '<div class="fm-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">暂无文件夹</div>'; }
-  // 底部内联新建行
-  h += '<div class="fm-row fm-create-row">' +
-    '<span>📁</span>' +
-    '<input type="text" id="fmInlineInput" placeholder="输入文件夹名称..." style="flex:1;height:32px;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:13px;outline:none" onkeydown="if(event.key===\'Enter\')fmInlineCreate()">' +
-    '<span class="fm-btn fm-create-confirm" title="确认" style="font-size:16px">✅</span>' +
-    '<span class="fm-btn fm-create-cancel" title="取消" style="font-size:16px">❌</span>' +
-    '</div>';
+  // 内联新建行（点击新建按钮后才显示）
+  if (gFMShowCreate) {
+    h += '<div class="fm-row fm-create-row">' +
+      '<span>📁</span>' +
+      '<input type="text" id="fmInlineInput" placeholder="输入文件夹名称..." style="flex:1;height:32px;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:13px;outline:none" onkeydown="if(event.key===\'Enter\')fmInlineCreate()">' +
+      '<span class="fm-btn fm-create-confirm" title="确认" style="font-size:16px">✅</span>' +
+      '<span class="fm-btn fm-create-cancel" title="取消" style="font-size:16px">❌</span>' +
+      '</div>';
+  }
   el.innerHTML = h;
   // 自动聚焦
-  var inp = document.getElementById('fmInlineInput');
-  if (inp) setTimeout(function(){inp.focus();},100);
+  if (gFMShowCreate) {
+    var inp = document.getElementById('fmInlineInput');
+    if (inp) setTimeout(function(){inp.focus();},100);
+  }
 }
 function fmInlineCreate() {
   var name = document.getElementById('fmInlineInput').value.trim();
   if (!name) { alert('请输入文件夹名称'); return; }
   for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === name) { alert('已存在同名文件夹'); return; } }
   msFolders.push({id: Date.now(), name: name});
+  gFMShowCreate = false;
   renderFMList(); renderFolderBar(); renderMsGrid();
 }
 function fmInlineCancel() {
-  var inp = document.getElementById('fmInlineInput');
-  if (inp) inp.value = '';
+  gFMShowCreate = false;
+  renderFMList();
 }
 
 // 事件委托 - 用 DOMContentLoaded 确保元素已创建
@@ -1346,7 +1360,10 @@ function fmInlineCancel() {
   <div class="modal" style="width:620px">
     <div class="modal-header">
       <h3>📁 文件夹管理</h3>
-      <button class="close-btn" onclick="closeFM()">✕</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn btn-sm btn-primary" onclick="showFMCreateRow()" style="height:28px;padding:0 10px;font-size:12px">+ 新建</button>
+        <button class="close-btn" onclick="closeFM()">✕</button>
+      </div>
     </div>
     <div class="fm-modal-body">
       <div id="fmList"></div>
