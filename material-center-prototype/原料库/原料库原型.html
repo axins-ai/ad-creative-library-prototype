@@ -56,6 +56,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .folder-card .folder-icon{font-size:48px;line-height:1}
 .folder-card .folder-name{font-size:14px;font-weight:500;color:var(--text-1)}
 .folder-card .folder-count{font-size:12px;color:var(--text-3)}
+
+/* 返回上级按钮 */
+.folder-back-bar{padding:10px 16px;margin-bottom:12px;background:var(--bg-hover);border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--primary);border:1px dashed var(--border);transition:all .15s;text-align:center}
+.folder-back-bar:hover{background:var(--primary-light);border-color:var(--primary)}
 .tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .tag-filter-row .filter-group{margin-bottom:0}
 .tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
@@ -621,9 +625,12 @@ function closeResultModal() {
 }
 
 var msFolders = [
-  {id:1, name:'开场动画合集'},
-  {id:2, name:'产品介绍素材'},
-  {id:3, name:'行动号召素材'},
+  {id:1, name:'开场动画合集', parentId: null},
+  {id:2, name:'产品介绍素材', parentId: null},
+  {id:3, name:'行动号召素材', parentId: null},
+  {id:4, name:'夏季特辑', parentId: 1},
+  {id:7, name:'手机专区', parentId: 2},
+  {id:10, name:'限时活动', parentId: 3},
 ];
 
 var msMaterials = [
@@ -633,17 +640,17 @@ var msMaterials = [
   {id:4, folderId:1, name:"前贴片-夏日版", type:"前贴", biz:"权益", channel:"头条", optimizer:"李雨航", designer:"设计师A", date:"2026-06-17", source:"手动上传", size:"3.2MB", tags:{userCategory:"地区", userValue:"三四线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"街头","对话":"老年女人","口播":"口播女"}}},
   {id:5, folderId:2, name:"中段-功能演示", type:"中段", biz:"存量", channel:"广点通", optimizer:"谭嘉颖", designer:"设计师A", date:"2026-06-16", source:"自动入库", size:"8.4MB", tags:{userCategory:"地区", userValue:"农村", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
   {id:6, folderId:3, name:"尾帧-下载引导", type:"尾帧", biz:"权益", channel:"头条", optimizer:"林金维", designer:"设计师A", date:"2026-06-15", source:"自动入库", size:"1.2MB", tags:{userCategory:"地区", userValue:"一线城市", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
-  {id:7, folderId:1, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条", optimizer:"陈羽思", designer:"设计师A", date:"2026-06-14", source:"自动入库", size:"2.9MB", tags:{userCategory:"年龄", userValue:"35-44", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
-  {id:8, folderId:2, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"叶首龙", designer:"设计师A", date:"2026-06-13", source:"手动上传", size:"4.1MB", tags:{userCategory:"性别", userValue:"男", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
-  {id:9, folderId:3, name:"尾帧-立即行动", type:"尾帧", biz:"存量", channel:"头条", optimizer:"赖嘉俊", designer:"设计师A", date:"2026-06-12", source:"自动入库", size:"1.5MB", tags:{userCategory:"地区", userValue:"二线城市", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
-  {id:10, folderId:1, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", designer:"设计师A", date:"2026-06-11", source:"自动入库", size:"2.7MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
-  {id:11, folderId:2, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"黄雄伟", designer:"设计师A", date:"2026-06-10", source:"自动入库", size:"6.3MB", tags:{userCategory:"性别", userValue:"女", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
-  {id:13, folderId:1, name:"前贴-本地生活", type:"前贴", biz:"存量", channel:"头条", optimizer:"叶首龙", designer:"设计师B", date:"2026-06-08", source:"自动入库", size:"1.9MB", tags:{userCategory:"地区", userValue:"三四线城市", product:"59元", content:{"文案":"系统通知","内容":"猛宠"}}},
-  {id:14, folderId:2, name:"中段-话费促销", type:"中段", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", designer:"设计师B", date:"2026-06-07", source:"手动上传", size:"3.5MB", tags:{userCategory:"年龄", userValue:"18-24", product:"39元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"街头","对话":"老年女人","口播":"口播男"}}},
-  {id:15, folderId:3, name:"尾帧-快速注册", type:"尾帧", biz:"存量", channel:"头条", optimizer:"姚丰育", designer:"设计师C", date:"2026-06-06", source:"自动入库", size:"1.3MB", tags:{userCategory:"性别", userValue:"女", product:"59元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:7, folderId:4, name:"前贴-品牌露出", type:"前贴", biz:"存量", channel:"头条", optimizer:"陈羽思", designer:"设计师A", date:"2026-06-14", source:"自动入库", size:"2.9MB", tags:{userCategory:"年龄", userValue:"35-44", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
+  {id:8, folderId:7, name:"中段-优惠说明", type:"中段", biz:"权益", channel:"广点通", optimizer:"叶首龙", designer:"设计师A", date:"2026-06-13", source:"手动上传", size:"4.1MB", tags:{userCategory:"性别", userValue:"男", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
+  {id:9, folderId:10, name:"尾帧-立即行动", type:"尾帧", biz:"存量", channel:"头条", optimizer:"赖嘉俊", designer:"设计师A", date:"2026-06-12", source:"自动入库", size:"1.5MB", tags:{userCategory:"地区", userValue:"二线城市", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:10, folderId:4, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", designer:"设计师A", date:"2026-06-11", source:"自动入库", size:"2.7MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
+  {id:11, folderId:7, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"黄雄伟", designer:"设计师A", date:"2026-06-10", source:"自动入库", size:"6.3MB", tags:{userCategory:"性别", userValue:"女", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
+  {id:13, folderId:4, name:"前贴-本地生活", type:"前贴", biz:"存量", channel:"头条", optimizer:"叶首龙", designer:"设计师B", date:"2026-06-08", source:"自动入库", size:"1.9MB", tags:{userCategory:"地区", userValue:"三四线城市", product:"59元", content:{"文案":"系统通知","内容":"猛宠"}}},
+  {id:14, folderId:7, name:"中段-话费促销", type:"中段", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", designer:"设计师B", date:"2026-06-07", source:"手动上传", size:"3.5MB", tags:{userCategory:"年龄", userValue:"18-24", product:"39元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"街头","对话":"老年女人","口播":"口播男"}}},
+  {id:15, folderId:10, name:"尾帧-快速注册", type:"尾帧", biz:"存量", channel:"头条", optimizer:"姚丰育", designer:"设计师C", date:"2026-06-06", source:"自动入库", size:"1.3MB", tags:{userCategory:"性别", userValue:"女", product:"59元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
   {id:16, folderId:2, name:"中段-流量包推荐", type:"中段", biz:"权益", channel:"广点通", optimizer:"黎舒晴", designer:"设计师C", date:"2026-06-05", source:"手动上传", size:"4.2MB", tags:{userCategory:"年龄", userValue:"35-44", product:"39元", content:{"文案":"紧迫性","内容":"花鸟"}}},
   {id:17, folderId:1, name:"前贴-夏日清凉", type:"前贴", biz:"存量", channel:"头条", optimizer:"李雨航", designer:"设计师B", date:"2026-06-04", source:"自动入库", size:"2.1MB", tags:{userCategory:"性别", userValue:"男", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费"}}},
-  {id:18, folderId:3, name:"尾帧-送礼引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"林金维", designer:"设计师C", date:"2026-06-03", source:"自动入库", size:"0.9MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","场景":"公园","对话":"老年女人"}}},
+  {id:18, folderId:10, name:"尾帧-送礼引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"林金维", designer:"设计师C", date:"2026-06-03", source:"自动入库", size:"0.9MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","场景":"公园","对话":"老年女人"}}},
   {id:19, folderId:1, name:"前贴-双十一特卖", type:"前贴", biz:"存量", channel:"广点通", optimizer:"崔志恒", designer:"设计师A", date:"2026-05-30", source:"自动入库", size:"2.5MB", tags:{userCategory:"地区", userValue:"一线城市", product:"39元", content:{"文案":"紧迫性","宣传卖点":"话费","场景":"营业厅"}}},
   {id:20, folderId:2, name:"中段-春节促销", type:"中段", biz:"权益", channel:"头条", optimizer:"黄佩贤", designer:"设计师B", date:"2026-05-25", source:"手动上传", size:"4.8MB", tags:{userCategory:"年龄", userValue:"25-34", product:"59元", content:{"文案":"系统通知","宣传卖点":"流量","场景":"小区","对话":"老年女人"}}},
   {id:21, folderId:3, name:"尾帧-新用户引导", type:"尾帧", biz:"存量", channel:"广点通", optimizer:"黎舒晴", designer:"设计师B", date:"2026-05-20", source:"自动入库", size:"1.6MB", tags:{userCategory:"性别", userValue:"男", product:"39元", content:{"场景":"公园","口播":"口播男"}}},
@@ -923,6 +930,32 @@ function resetMsFilter() {
 // ========== 文件夹 ==========
 var selFolder = null; // null=显示文件夹列表, -1=未分类, 数字=具体文件夹
 
+// 获取直接子文件夹
+function getChildFolders(parentId) {
+  var r = [];
+  for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].parentId === parentId) r.push(msFolders[i]); }
+  return r;
+}
+
+// 获取直接子文件夹
+function getChildFolders(parentId) {
+  var r = [];
+  for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].parentId === parentId) r.push(msFolders[i]); }
+  return r;
+}
+
+// 统计文件夹及子文件夹的素材总数
+function countFolderMaterials(folderId) {
+  var cnt = 0;
+  function countRec(pid) {
+    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === pid) cnt++; }
+    var children = getChildFolders(pid);
+    for (var ci = 0; ci < children.length; ci++) { countRec(children[ci].id); }
+  }
+  countRec(folderId);
+  return cnt;
+}
+
 function renderFolderBar() {
   var bar = document.getElementById('folderBar');
   if (!bar) return;
@@ -932,13 +965,14 @@ function renderFolderBar() {
   
   var h = '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
   h += '<span class="folder-tab' + (selFolder === null ? ' active' : '') + '" onclick="selFolder=null;renderFolderBar();renderMsGrid()">全部文件夹<span class="tab-count">' + msFolders.length + '</span></span>';
-  h += '<span class="folder-tab' + (selFolder === -1 ? ' active' : '') + '" onclick="selFolder=-1;gFolderPath=[];renderFolderBar();applyMsFilter()">未分类<span class="tab-count">' + uncat + '</span></span>';
+  h += '<span class="folder-tab' + (selFolder === -1 ? ' active' : '') + '" onclick="selFolder=-1;renderFolderBar();applyMsFilter()">未分类<span class="tab-count">' + uncat + '</span></span>';
   h += '<span class="bc-sep">|</span>';
   
+  // 只显示一级文件夹（根文件夹）
   for (var i = 0; i < msFolders.length; i++) {
     var f = msFolders[i];
-    var cnt = 0;
-    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
+    if (f.parentId) continue; // 只显示根文件夹
+    var cnt = countFolderMaterials(f.id);
     var isActive = selFolder === f.id;
     h += '<span class="folder-tab' + (isActive ? ' active' : '') + '" onclick="selFolder=' + f.id + ';renderFolderBar();renderMsGrid()">' + f.name + '<span class="tab-count">' + cnt + '</span></span>';
   }
@@ -955,7 +989,8 @@ function syncUploadFolder() {
   for (var i = 0; i < msFolders.length; i++) {
     var opt = document.createElement('option');
     opt.value = msFolders[i].id;
-    opt.textContent = msFolders[i].name;
+    var prefix = msFolders[i].parentId ? '  ' : '';
+    opt.textContent = prefix + msFolders[i].name;
     sel.appendChild(opt);
   }
   sel.value = cur;
@@ -1045,9 +1080,15 @@ function renderMsGrid() {
   var el = document.getElementById("msGrid");
   if (!el) { console.error("msGrid not found"); return; }
   
-  // 未选择文件夹时，展示文件夹列表
+  // 未选择文件夹时，展示根文件夹列表
   if (selFolder === null) {
-    renderFolderList(el);
+    renderFolderList(el, null);
+    return;
+  }
+  
+  // 选择了含子文件夹的文件夹：显示子文件夹卡片
+  if (selFolder > 0 && getChildFolders(selFolder).length > 0) {
+    renderFolderList(el, selFolder);
     return;
   }
   
@@ -1093,25 +1134,42 @@ function renderMsGrid() {
 }
 
 // 文件夹列表视图
-function renderFolderList(el) {
+function renderFolderList(el, parentId) {
   var html = '';
+  var folders = [];
   for (var i = 0; i < msFolders.length; i++) {
-    var f = msFolders[i];
-    var cnt = 0;
-    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
+    if (msFolders[i].parentId === parentId) folders.push(msFolders[i]);
+  }
+  
+  // 返回上级按钮（非根目录时）
+  if (parentId !== null) {
+    var parentName = '';
+    for (var pi = 0; pi < msFolders.length; pi++) {
+      if (msFolders[pi].id === parentId) { parentName = msFolders[pi].name; break; }
+    }
+    html += '<div class="folder-back-bar" onclick="selFolder=' + (parentId || 'null') + ';renderFolderBar();renderMsGrid()">⬆ 返回上级 — ' + parentName + '</div>';
+  }
+  
+  for (var i = 0; i < folders.length; i++) {
+    var f = folders[i];
+    var cnt = countFolderMaterials(f.id);
     html += '<div class="folder-card" onclick="selFolder=' + f.id + ';renderFolderBar();renderMsGrid()">' +
       '<div class="folder-icon">📁</div>' +
       '<div class="folder-name">' + f.name + '</div>' +
       '<div class="folder-count">' + cnt + ' 个素材</div>' +
       '</div>';
   }
-  if (html === '') {
-    el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无文件夹</div><div class="desc">点击右上角「📁 文件夹」新建</div></div>';
+  if (html === '' || html.indexOf('folder-card') === -1) {
+    if (parentId !== null) {
+      el.innerHTML = html; // 只有返回按钮，没有子文件夹
+    } else {
+      el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无文件夹</div><div class="desc">点击右上角「📁 文件夹」新建</div></div>';
+    }
   } else {
     el.innerHTML = html;
   }
   var countEl = document.getElementById("msCountInline");
-  if (countEl) countEl.textContent = "共 " + msFolders.length + " 个文件夹";
+  if (countEl) countEl.textContent = "共 " + folders.length + " 个文件夹";
 }
 
 function openMsPreview(id) {
