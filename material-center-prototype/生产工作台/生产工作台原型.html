@@ -702,17 +702,20 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <script>
 // ===== 原料数据 =====
 var msFolders = [
-  {id:1, name:'开场动画合集'},
-  {id:2, name:'产品介绍素材'},
-  {id:3, name:'行动号召素材'},
+  {id:1, name:'开场动画合集', parentId: null},
+  {id:2, name:'产品介绍素材', parentId: null},
+  {id:3, name:'行动号召素材', parentId: null},
+  {id:4, name:'夏季特辑', parentId: 1},
+  {id:7, name:'手机专区', parentId: 2},
+  {id:10, name:'限时活动', parentId: 3},
 ];
 
 var MATERIALS_DB = [
   // ===== 前贴（开场动画合集） =====
   {id:1, folderId:1, name:"开场动画A",       type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:15", size:"12.3 MB", source:"自动入库"},
   {id:4, folderId:1, name:"前贴片-夏日版",   type:"前贴", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-22", duration:"00:18", size:"15.2 MB", source:"自动入库"},
-  {id:7, folderId:1, name:"前贴-品牌露出",     type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB", source:"手动上传"},
-  {id:11, folderId:1, name:"前贴-促销倒计",     type:"前贴", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-24", duration:"00:12", size:"10.1 MB", source:"自动入库"},
+  {id:7, folderId:4, name:"前贴-品牌露出",     type:"前贴", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-06-23", duration:"00:20", size:"18.9 MB", source:"手动上传"},
+  {id:11, folderId:4, name:"前贴-促销倒计",     type:"前贴", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-24", duration:"00:12", size:"10.1 MB", source:"自动入库"},
   {id:12, folderId:1, name:"前贴-品牌故事",     type:"前贴", biz:"存量", channel:"广点通", optimizer:"王五", date:"2026-06-25", duration:"00:22", size:"20.5 MB", source:"手动上传"},
   {id:13, folderId:1, name:"前贴-新品首发",     type:"前贴", biz:"权益", channel:"头条",   optimizer:"张三", date:"2026-06-26", duration:"00:16", size:"14.8 MB", source:"自动入库"},
   {id:14, folderId:1, name:"前贴-节日氛围",     type:"前贴", biz:"存量", channel:"头条",   optimizer:"李四", date:"2026-06-28", duration:"00:14", size:"11.2 MB", source:"手动上传"},
@@ -723,7 +726,7 @@ var MATERIALS_DB = [
   // ===== 中段（产品介绍素材） =====
   {id:2, folderId:2, name:"产品介绍B",       type:"中段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-21", duration:"00:30", size:"28.7 MB", source:"手动上传"},
   {id:5, folderId:2, name:"中段-功能演示",     type:"中段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-21", duration:"00:35", size:"32.4 MB", source:"手动上传"},
-  {id:8, folderId:2, name:"中段-优惠说明",     type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB", source:"自动入库"},
+  {id:8, folderId:7, name:"中段-优惠说明",     type:"中段", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-23", duration:"00:25", size:"22.1 MB", source:"自动入库"},
   {id:18, folderId:2, name:"中段-使用教程",     type:"中段", biz:"存量", channel:"头条",   optimizer:"王五", date:"2026-06-24", duration:"00:40", size:"38.2 MB", source:"自动入库"},
   {id:19, folderId:2, name:"中段-场景代入",     type:"中段", biz:"权益", channel:"头条",   optimizer:"张三", date:"2026-06-25", duration:"00:28", size:"25.6 MB", source:"手动上传"},
   {id:20, folderId:2, name:"中段-对比评测",     type:"中段", biz:"存量", channel:"广点通", optimizer:"李四", date:"2026-06-27", duration:"00:33", size:"30.1 MB", source:"自动入库"},
@@ -733,14 +736,14 @@ var MATERIALS_DB = [
   // ===== 尾帧 + 中后段（行动号召素材） =====
   {id:3, folderId:3, name:"行动号召C",       type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:10", size:"8.1 MB", source:"自动入库"},
   {id:6, folderId:3, name:"尾帧-下载引导",     type:"尾帧", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-22", duration:"00:12", size:"9.6 MB", source:"自动入库"},
-  {id:23, folderId:3, name:"尾帧-立即咨询",     type:"尾帧", biz:"存量", channel:"头条",   optimizer:"王五", date:"2026-06-24", duration:"00:08", size:"6.3 MB", source:"手动上传"},
-  {id:24, folderId:3, name:"尾帧-领取优惠",     type:"尾帧", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-26", duration:"00:11", size:"7.9 MB", source:"自动入库"},
+  {id:23, folderId:10, name:"尾帧-立即咨询",     type:"尾帧", biz:"存量", channel:"头条",   optimizer:"王五", date:"2026-06-24", duration:"00:08", size:"6.3 MB", source:"手动上传"},
+  {id:24, folderId:10, name:"尾帧-领取优惠",     type:"尾帧", biz:"权益", channel:"广点通", optimizer:"李四", date:"2026-06-26", duration:"00:11", size:"7.9 MB", source:"自动入库"},
   {id:25, folderId:3, name:"尾帧-关注公众号",   type:"尾帧", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-28", duration:"00:09", size:"7.1 MB", source:"手动上传"},
   {id:26, folderId:3, name:"尾帧-预约试驾",     type:"尾帧", biz:"权益", channel:"头条",   optimizer:"王五", date:"2026-06-30", duration:"00:13", size:"10.8 MB", source:"自动入库"},
   {id:27, folderId:3, name:"尾帧-分享有礼",     type:"尾帧", biz:"存量", channel:"头条",   optimizer:"李四", date:"2026-07-01", duration:"00:10", size:"8.4 MB", source:"手动上传"},
 
   // ===== 中后段（行动号召素材） =====
-  {id:9, folderId:3, name:"中后段-合成样片A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", duration:"00:28", size:"18.5 MB", source:"手动上传"},
+  {id:9, folderId:10, name:"中后段-合成样片A", type:"中后段", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-27", duration:"00:28", size:"18.5 MB", source:"手动上传"},
   {id:10, folderId:3, name:"中后段-合成样片B", type:"中后段", biz:"权益", channel:"头条",   optimizer:"李四", date:"2026-06-28", duration:"00:22", size:"14.3 MB", source:"自动入库"},
   {id:28, folderId:3, name:"中后段-口播带货",   type:"中后段", biz:"权益", channel:"广点通", optimizer:"王五", date:"2026-06-29", duration:"00:32", size:"26.7 MB", source:"手动上传"},
   {id:29, folderId:3, name:"中后段-剧情反转",   type:"中后段", biz:"存量", channel:"头条",   optimizer:"张三", date:"2026-07-02", duration:"00:25", size:"21.3 MB", source:"自动入库"},
@@ -1444,7 +1447,8 @@ function openModal(lockType, slotIdx) {
     for (var fi = 0; fi < msFolders.length; fi++) {
       var opt = document.createElement('option');
       opt.value = msFolders[fi].id;
-      opt.textContent = msFolders[fi].name;
+      var prefix = msFolders[fi].parentId ? '  ' : '';
+      opt.textContent = prefix + msFolders[fi].name;
       folderSel.appendChild(opt);
     }
   }
