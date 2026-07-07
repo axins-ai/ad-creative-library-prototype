@@ -56,28 +56,7 @@ body{font-family:var(--font);color:var(--text-1);line-height:1.6;-webkit-font-sm
 .menu-item .mi-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
 .menu-item .mi-label{flex:1;overflow:hidden;text-overflow:ellipsis}
 
-/* 子菜单 */
-.menu-item.sub{padding-left:38px;font-size:12px}
-.menu-item.sub .mi-icon{width:16px;font-size:13px}
-.menu-item.sub.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary)}
-.menu-item.sub-expandable{padding-left:38px;font-size:12px;display:flex;align-items:center;gap:8px;user-select:none;transition:all .15s;border-left:3px solid transparent;cursor:pointer}
-.menu-item.sub-expandable:hover{background:var(--bg-hover);color:var(--text-1)}
-.menu-item.sub-expandable .mi-icon{width:16px;font-size:13px}
-.menu-item.sub-expandable.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary)}
-.menu-item.expandable .expand-icon{font-size:10px;color:var(--text-3);margin-left:auto;transition:transform .2s;width:16px;text-align:center;flex-shrink:0;cursor:pointer}
-.menu-item.expandable.expanded .expand-icon{transform:rotate(90deg)}
-.sub-menu-wrap{overflow:hidden;max-height:0;transition:max-height .25s ease}
-.sub-menu-wrap.expanded{max-height:400px}
-.sub-menu-wrap .sub-menu-wrap{margin-left:0}
-
-/* 三级菜单 - 文件夹 */
-.menu-item.folder-item{padding-left:52px;font-size:12px;display:flex;align-items:center;gap:8px;border-left:3px solid transparent;cursor:pointer;user-select:none;transition:all .15s}
-.menu-item.folder-item .mi-icon{width:16px;font-size:12px}
-.menu-item.folder-item:hover{background:var(--bg-hover)}
-.menu-item.folder-item.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary)}
-.menu-item.folder-item .folder-mgr-btn{font-size:10px;color:var(--text-3);margin-left:auto;padding:1px 4px;border-radius:3px;cursor:pointer;display:none}
-.menu-item.folder-item:hover .folder-mgr-btn{display:inline}
-.menu-item.folder-item .folder-mgr-btn:hover{color:var(--danger)}
+.sidebar .bottom-area{
 
 .sidebar .bottom-area{
   border-top:1px solid var(--border-light);padding:8px 0;flex-shrink:0;
@@ -118,30 +97,9 @@ body{font-family:var(--font);color:var(--text-1);line-height:1.6;-webkit-font-sm
   <div class="menu-area">
     <div class="menu-group">
       <div class="menu-group-title">素材中心</div>
-      <div class="menu-item expandable expanded" onclick="toggleSubMenu(event, this)">
+      <div class="menu-item active" data-target="原料库" onclick="switchMenu(event, this)">
         <span class="mi-icon">📂</span>
         <span class="mi-label">原料库</span>
-        <span class="expand-icon">▶</span>
-      </div>
-      <div class="sub-menu-wrap expanded" id="subMenu-原料库">
-        <div class="menu-item sub active" data-target="原料库" onclick="switchMenu(event, this)">
-          <span class="mi-icon">📂</span>
-          <span class="mi-label">首页</span>
-        </div>
-        <div class="menu-item sub-expandable expandable" onclick="toggleSubSubMenu(event, this)">
-          <span class="mi-icon">📁</span>
-          <span class="mi-label">个人文件夹</span>
-          <span class="expand-icon">▶</span>
-        </div>
-        <div class="sub-menu-wrap" id="subSubMenu-个人文件夹">
-          <div id="folderMenuList">
-            <!-- 通过JS渲染文件夹列表 -->
-          </div>
-          <div class="menu-item folder-item" onclick="event.stopPropagation();openNewFolderFromMenu()" style="cursor:pointer;border-left:3px solid transparent">
-            <span class="mi-icon">＋</span>
-            <span style="font-size:11px;color:var(--primary)">新建文件夹</span>
-          </div>
-        </div>
       </div>
       <div class="menu-item" data-target="素材库" onclick="switchMenu(event, this)">
         <span class="mi-icon">📂</span>
@@ -199,136 +157,16 @@ var menuFolders = [];
 
 function switchMenu(ev, el) {
   if (ev) ev.stopPropagation();
-  
   var items = document.querySelectorAll('.menu-item');
-  for (var i = 0; i < items.length; i++) {
-    items[i].classList.remove('active');
-  }
+  for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
   el.classList.add('active');
-  
   var targetKey = el.getAttribute('data-target');
   var cfg = MENU_CONFIG[targetKey];
   if (!cfg) return;
-  
-  // 加载对应内容
   var sep = cfg.file.indexOf('?') >= 0 ? '&' : '?';
-  var ts = 'v=' + Date.now();
-  document.getElementById('contentFrame').src = cfg.file + sep + ts;
-  document.getElementById('pageTitle').innerHTML =
-    cfg.title + ' <span class="tag">原型预览</span>';
+  document.getElementById('contentFrame').src = cfg.file + sep + 'v=' + Date.now();
+  document.getElementById('pageTitle').innerHTML = cfg.title + ' <span class="tag">原型预览</span>';
 }
-
-function toggleSubMenu(ev, el) {
-  if (ev) ev.stopPropagation();
-  var wrap = document.getElementById('subMenu-原料库');
-  if (!wrap) return;
-  el.classList.toggle('expanded');
-  wrap.classList.toggle('expanded');
-}
-
-function toggleSubSubMenu(ev, el) {
-  if (ev) ev.stopPropagation();
-  var wrap = document.getElementById('subSubMenu-个人文件夹');
-  if (!wrap) return;
-  el.classList.toggle('expanded');
-  wrap.classList.toggle('expanded');
-}
-
-// 从菜单点击文件夹
-function selectFolderFromMenu(folderId) {
-  var items = document.querySelectorAll('.menu-item');
-  for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
-  var el = document.querySelector('.folder-item[data-folder-id="' + folderId + '"]');
-  if (el) el.classList.add('active');
-  document.querySelector('.menu-item.expandable').classList.add('active');
-  
-  // 加载原料库，通过URL参数传递folderId
-  var cfg = MENU_CONFIG['原料库'];
-  if (!cfg) return;
-  var src = cfg.file + '?v=' + Date.now() + '&folder=' + folderId;
-  document.getElementById('contentFrame').src = src;
-  document.getElementById('pageTitle').innerHTML =
-    '原料库 <span class="tag">' + getFolderName(folderId) + '</span>';
-}
-
-function getFolderName(folderId) {
-  for (var i = 0; i < menuFolders.length; i++) {
-    if (menuFolders[i].id === folderId) return menuFolders[i].name;
-  }
-  return '文件夹';
-}
-
-// 从菜单新建文件夹
-function openNewFolderFromMenu() {
-  var frame = document.getElementById('contentFrame');
-  try {
-    if (frame && frame.contentWindow && frame.contentWindow.openNewFolderModal) {
-      frame.contentWindow.openNewFolderModal();
-    }
-  } catch (e) {}
-}
-
-// 从菜单删除文件夹
-function deleteFolderFromMenu(folderId) {
-  if (!confirm('确定删除该文件夹吗？')) return;
-  var frame = document.getElementById('contentFrame');
-  try {
-    if (frame && frame.contentWindow && frame.contentWindow.msFolders) {
-      var fw = frame.contentWindow;
-      for (var i = 0; i < fw.msFolders.length; i++) {
-        if (fw.msFolders[i].id == folderId) {
-          for (var j = 0; j < fw.msMaterials.length; j++) {
-            if (fw.msMaterials[j].folders) {
-              var idx = fw.msMaterials[j].folders.indexOf(folderId);
-              if (idx !== -1) fw.msMaterials[j].folders.splice(idx, 1);
-            }
-          }
-          fw.msFolders.splice(i, 1);
-          fw.populateFolderFilters();
-          fw.renderMsGrid();
-          break;
-        }
-      }
-      syncFoldersFromIframe();
-    }
-  } catch (e) {}
-}
-
-// 渲染文件夹菜单列表
-function renderFolderMenuItems() {
-  var listEl = document.getElementById('folderMenuList');
-  if (!listEl) return;
-  var html = '';
-  var myFolders = menuFolders.filter(function(f) { return f.creator === '崔志恒'; });
-  for (var i = 0; i < myFolders.length; i++) {
-    var f = myFolders[i];
-    html += '<div class="menu-item folder-item" data-folder-id="' + f.id + '" onclick="selectFolderFromMenu(' + f.id + ')">' +
-      '<span class="mi-icon">📁</span>' +
-      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + f.name + '</span>' +
-      '<span class="folder-mgr-btn" title="删除" onclick="event.stopPropagation();deleteFolderFromMenu(' + f.id + ')">✕</span>' +
-      '</div>';
-  }
-  if (myFolders.length === 0) {
-    html += '<div class="menu-item folder-item" style="cursor:default;opacity:.5"><span class="mi-icon">📁</span><span>暂无文件夹</span></div>';
-  }
-  listEl.innerHTML = html;
-}
-
-// 从iframe同步文件夹数据
-function syncFoldersFromIframe() {
-  var frame = document.getElementById('contentFrame');
-  try {
-    if (frame && frame.contentWindow && frame.contentWindow.msFolders) {
-      menuFolders = JSON.parse(JSON.stringify(frame.contentWindow.msFolders));
-      renderFolderMenuItems();
-    }
-  } catch (e) {}
-}
-
-// 监听iframe加载完成
-document.getElementById('contentFrame').addEventListener('load', function() {
-  setTimeout(syncFoldersFromIframe, 400);
-});
 
 function updateMaterialTags(cfg) {
   var frame = document.getElementById('contentFrame');
@@ -339,6 +177,14 @@ function updateMaterialTags(cfg) {
   } catch (e) {}
 }
 
+// 默认加载
+(function(){
+  var first = document.querySelector('.menu-item');
+  if (first) first.classList.add('active');
+  var key = '原料库';
+  var cfg = MENU_CONFIG[key];
+  if (cfg) document.getElementById('contentFrame').src = cfg.file + '?v=' + Date.now();
+})();
 // 默认加载 - 加载原料库首页
 (function(){
   var key = '原料库';
