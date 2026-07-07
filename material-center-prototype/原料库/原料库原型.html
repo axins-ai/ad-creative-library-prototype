@@ -29,56 +29,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 /* 主布局 */
 .main-layout{display:flex;flex:1;overflow:hidden}
 
-/* 左侧文件夹侧边栏 */
-.folder-sidebar{width:240px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s,min-width .25s;position:relative}
-.folder-sidebar.collapsed{width:48px;min-width:48px}
-.folder-sidebar-toggle{position:absolute;top:8px;right:-12px;width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-3);z-index:10;box-shadow:var(--shadow-s);transition:all .2s}
-.folder-sidebar-toggle:hover{color:var(--primary);border-color:var(--primary);transform:scale(1.1)}
-.folder-sidebar.collapsed .folder-sidebar-toggle{right:-12px}
-.folder-sidebar.collapsed .folder-sidebar-toggle .arrow{transform:rotate(180deg);display:inline-block}
-
-.folder-sidebar-header{padding:14px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.folder-sidebar.collapsed .folder-sidebar-header{padding:14px 0;justify-content:center}
-.folder-sidebar-header .title{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px}
-.folder-sidebar.collapsed .folder-sidebar-header .title{display:none}
-.folder-sidebar-header .btn-new-folder{width:26px;height:26px;border-radius:var(--radius-s);border:1px solid var(--border);background:var(--bg-hover);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--primary);transition:all .2s;flex-shrink:0}
-.folder-sidebar-header .btn-new-folder:hover{background:var(--primary-light);border-color:var(--primary)}
-.folder-sidebar.collapsed .folder-sidebar-header .btn-new-folder{margin:0 auto}
-
-.folder-tree{flex:1;overflow-y:auto;padding:6px 0}
-.folder-sidebar.collapsed .folder-tree{padding:6px 0}
-
-.folder-item{display:flex;align-items:center;padding:6px 12px;margin:1px 8px;cursor:pointer;transition:all .18s;position:relative;user-select:none;border-radius:var(--radius-s)}
-.folder-sidebar.collapsed .folder-item{padding:8px 0;margin:1px 0;justify-content:center}
-.folder-item:hover{background:var(--bg-hover)}
-.folder-item.active{background:var(--primary-light);color:var(--primary)}
-.folder-item.active .folder-name{color:var(--primary);font-weight:600}
-.folder-item .folder-icon{font-size:15px;margin-right:8px;flex-shrink:0;width:20px;text-align:center}
-.folder-sidebar.collapsed .folder-item .folder-icon{margin-right:0}
-.folder-item .folder-name{flex:1;font-size:12px;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.folder-sidebar.collapsed .folder-item .folder-name{display:none}
-.folder-item .folder-count{font-size:10px;color:var(--text-3);margin-left:4px;flex-shrink:0;background:var(--bg-hover);padding:0 6px;border-radius:10px;line-height:18px;min-width:18px;text-align:center}
-.folder-sidebar.collapsed .folder-item .folder-count{display:none}
-.folder-item .folder-actions{display:none;gap:2px;flex-shrink:0;margin-left:4px}
-.folder-sidebar.collapsed .folder-item .folder-actions{display:none !important}
-.folder-item:hover .folder-actions{display:flex}
-.folder-item.active .folder-actions{display:flex}
-.folder-action-btn{width:20px;height:20px;border-radius:4px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-3);transition:all .15s}
-.folder-action-btn:hover{background:rgba(0,0,0,.06);color:var(--text-1)}
-.folder-action-btn.delete:hover{background:#fff1f0;color:var(--danger)}
-
-.sidebar-divider{height:1px;background:var(--border-light);margin:6px 16px}
-.folder-sidebar.collapsed .sidebar-divider{display:none}
-
-/* 当前用户 */
-.sidebar-user{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border-light);flex-shrink:0;transition:all .25s;overflow:hidden}
-.folder-sidebar.collapsed .sidebar-user{justify-content:center;padding:10px 0}
-.sidebar-user .user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#617afa);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
-.sidebar-user .user-info{flex:1;min-width:0}
-.folder-sidebar.collapsed .sidebar-user .user-info{display:none}
-.sidebar-user .user-name{font-size:12px;font-weight:500;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-user .user-role{font-size:10px;color:var(--text-3)}
-
+/* 文件夹侧边栏已移除，改为顶部筛选 */
 /* 右侧内容区 */
 .content-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
 
@@ -232,7 +183,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .ms-card:hover .card-checkbox,.select-mode .ms-card .card-checkbox{display:flex}
 .ms-card .card-checkbox:not(.checked):hover{border-color:#fff;background:rgba(0,0,0,.3)}
 
-/* 此CSS已被sidebar-user替代 */
 </style>
 </head>
 <body>
@@ -246,36 +196,20 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 </div>
 
 <!-- 主布局 -->
-<div class="main-layout">
-  <!-- 左侧文件夹侧边栏 -->
-  <div class="folder-sidebar" id="folderSidebar">
-    <button class="folder-sidebar-toggle" onclick="toggleSidebar()" title="折叠/展开侧边栏">
-      <span class="arrow">◀</span>
-    </button>
-    <div class="sidebar-user">
-      <div class="user-avatar">崔</div>
-      <div class="user-info">
-        <div class="user-name">崔志恒</div>
-        <div class="user-role">优化师</div>
-      </div>
-    </div>
-    
-    <div class="folder-sidebar-header">
-      <div class="title">文件夹</div>
-      <button class="btn-new-folder" onclick="openNewFolderModal()" title="新建文件夹">＋</button>
-    </div>
-    
-    <div class="folder-tree" id="folderTree">
-      <!-- 文件夹树通过JS渲染 -->
-    </div>
-  </div>
 
   <!-- 右侧内容区 -->
-  <div class="content-area">
+  <div class="content-area" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
     <div class="content">
       <!-- 工具栏 -->
       <div class="toolbar">
         <div class="toolbar-left">
+          <div class="filter-group" style="margin-right:8px">
+            <label>📁 文件夹</label>
+            <select id="folderFilter" onchange="applyMsFilter()" style="min-width:120px">
+              <option value="">全部文件夹</option>
+              <option value="__uncategorized">未分类</option>
+            </select>
+          </div>
           <button class="btn btn-primary" onclick="openMsUploadModal()">↑ 上传素材</button>
           <button class="btn btn-default" id="btnSelectMode" onclick="toggleSelectMode()">☑️ 批量管理</button>
           <button class="btn btn-default" id="btnMoveToFolder" onclick="openMoveModal()" style="display:none">📂 移动到文件夹</button>
@@ -296,6 +230,13 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
             <div class="filter-group">
               <label>名称搜索</label>
               <input type="text" id="nameFilter" placeholder="搜索原料名称..." oninput="applyMsFilter()">
+            </div>
+            <div class="filter-group">
+              <label>文件夹</label>
+              <select id="folderFilter2" onchange="syncFolderFilter(this.value)">
+                <option value="">全部文件夹</option>
+                <option value="__uncategorized">未分类</option>
+              </select>
             </div>
             <div class="filter-group">
               <label>类型</label>
@@ -582,81 +523,62 @@ var msMaterials = [
   {id:12, name:"尾帧-关注引导", type:"尾帧", optimizer:"姚丰育", date:"2026-06-09", source:"手动上传", folders:[]},
 ];
 
-var currentFolderId = null; // null = 全部原料
 var isSelectMode = false;
 var selectedMaterialIds = [];
 var renameFolderId = null;
 var moveTargetFolderId = null;
 
-// ========== 文件夹树渲染 ==========
-function renderFolderTree() {
-  var tree = document.getElementById("folderTree");
-  var html = "";
-  
-  // "全部原料"选项
-  var totalCount = msMaterials.length;
-  html += '<div class="folder-item ' + (currentFolderId === null ? 'active' : '') + '" onclick="selectFolder(null)">' +
-    '<span class="folder-icon">📂</span>' +
-    '<span class="folder-name">全部原料</span>' +
-    '<span class="folder-count">' + totalCount + '</span>' +
-    '</div>';
-  
-  // "未分类"选项
-  var uncategorizedCount = 0;
-  for (var i = 0; i < msMaterials.length; i++) {
-    if (!msMaterials[i].folders || msMaterials[i].folders.length === 0) {
-      uncategorizedCount++;
+// ========== 文件夹筛选填充 ==========
+function populateFolderFilters() {
+  var selects = ['folderFilter', 'folderFilter2'];
+  for (var si = 0; si < selects.length; si++) {
+    var sel = document.getElementById(selects[si]);
+    if (!sel) continue;
+    var currentVal = sel.value;
+    sel.innerHTML = '<option value="">全部文件夹</option><option value="__uncategorized">未分类</option>';
+    for (var i = 0; i < msFolders.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = msFolders[i].id;
+      opt.textContent = msFolders[i].name + ' (' + msFolders[i].materials.length + ')';
+      sel.appendChild(opt);
     }
-  }
-  html += '<div class="folder-item ' + (currentFolderId === -1 ? 'active' : '') + '" onclick="selectFolder(-1)">' +
-    '<span class="folder-icon">📄</span>' +
-    '<span class="folder-name">未分类</span>' +
-    '<span class="folder-count">' + uncategorizedCount + '</span>' +
-    '</div>';
-  
-  // 分隔线
-  html += '<div class="sidebar-divider"></div>';
-  
-  // 用户创建的文件夹
-  for (var i = 0; i < msFolders.length; i++) {
-    var f = msFolders[i];
-    var isOwner = f.creator === CURRENT_USER;
-    html += '<div class="folder-item ' + (currentFolderId === f.id ? 'active' : '') + '" onclick="selectFolder(' + f.id + ')">' +
-      '<span class="folder-icon">📁</span>' +
-      '<span class="folder-name">' + f.name + '</span>' +
-      '<span class="folder-count">' + f.materials.length + '</span>' +
-      (isOwner ? '<div class="folder-actions">' +
-        '<button class="folder-action-btn" title="重命名" onclick="event.stopPropagation();openRenameFolderModal(' + f.id + ')">✏️</button>' +
-        '<button class="folder-action-btn delete" title="删除" onclick="event.stopPropagation();deleteFolder(' + f.id + ')">🗑️</button>' +
-        '</div>' : '') +
-      '</div>';
-  }
-  
-  tree.innerHTML = html;
-  
-  // 同时更新上传弹窗的文件夹下拉
-  var uploadFolderSel = document.getElementById("msUploadFolder");
-  if (uploadFolderSel) {
-    var options = '<option value="">未分类</option>';
-    for (var j = 0; j < msFolders.length; j++) {
-      options += '<option value="' + msFolders[j].id + '">' + msFolders[j].name + '</option>';
-    }
-    uploadFolderSel.innerHTML = options;
+    sel.value = currentVal;
   }
 }
 
-// ========== 文件夹操作 ==========
+// 同步两个文件夹筛选下拉
+function syncFolderFilter(value) {
+  document.getElementById('folderFilter').value = value;
+  document.getElementById('folderFilter2').value = value;
+  applyMsFilter();
+}
+
 function selectFolder(folderId) {
-  currentFolderId = folderId;
-  renderFolderTree();
-  renderMsGrid();
+  // 从下拉中选择对应文件夹
+  var val = folderId === null ? '' : (folderId === -1 ? '__uncategorized' : String(folderId));
+  syncFolderFilter(val);
 }
 
-// 折叠/展开侧边栏
-function toggleSidebar() {
-  var sidebar = document.getElementById("folderSidebar");
-  sidebar.classList.toggle("collapsed");
+// 折叠/展开侧边栏（已移除，保留兼容）
+function toggleSidebar() {}
+
+// 同时更新上传弹窗的文件夹下拉
+function updateUploadFolderOptions() {
+  var uploadFolderSel = document.getElementById("msUploadFolder");
+  if (!uploadFolderSel) return;
+  var options = '<option value="">未分类</option>';
+  for (var j = 0; j < msFolders.length; j++) {
+    options += '<option value="' + msFolders[j].id + '">' + msFolders[j].name + '</option>';
+  }
+  uploadFolderSel.innerHTML = options;
 }
+
+// 新增时同步更新上传弹窗
+var _origPopulate = populateFolderFilters;
+populateFolderFilters = function() {
+  _origPopulate();
+  updateUploadFolderOptions();
+};
 
 function openNewFolderModal() {
   document.getElementById("newFolderName").value = "";
@@ -701,7 +623,7 @@ function createFolder() {
   });
   
   closeNewFolderModal();
-  renderFolderTree();
+  populateFolderFilters();
   showMsgModal("文件夹「" + name + "」创建成功！");
 }
 
@@ -742,7 +664,7 @@ function renameFolder() {
   }
   
   closeRenameFolderModal();
-  renderFolderTree();
+  populateFolderFilters();
   showMsgModal("文件夹重命名成功！");
 }
 
@@ -770,12 +692,7 @@ function deleteFolder(folderId) {
   // 删除文件夹
   msFolders = msFolders.filter(function(f) { return f.id !== folderId; });
   
-  // 如果当前正在查看这个文件夹，切换回"全部原料"
-  if (currentFolderId === folderId) {
-    currentFolderId = null;
-  }
-  
-  renderFolderTree();
+  populateFolderFilters();
   renderMsGrid();
   showMsgModal("文件夹「" + folder.name + "」已删除");
 }
@@ -790,13 +707,15 @@ function getFilteredMsMaterials() {
   for (var i = 0; i < msMaterials.length; i++) {
     var m = msMaterials[i];
     
-    // 文件夹筛选
-    if (currentFolderId === -1) {
+    // 文件夹筛选（从下拉获取）
+    var folderVal = document.getElementById('folderFilter') ? document.getElementById('folderFilter').value : '';
+    if (folderVal === '__uncategorized') {
       // 未分类
       if (m.folders && m.folders.length > 0) continue;
-    } else if (currentFolderId !== null) {
+    } else if (folderVal !== '') {
       // 特定文件夹
-      if (!m.folders || m.folders.indexOf(currentFolderId) === -1) continue;
+      var fid = parseInt(folderVal);
+      if (!m.folders || m.folders.indexOf(fid) === -1) continue;
     }
     
     // 其他筛选
@@ -1002,7 +921,7 @@ function confirmMoveToFolder() {
   document.getElementById("btnSelectMode").textContent = "☑️ 批量管理";
   document.getElementById("btnMoveToFolder").style.display = "none";
   document.getElementById("btnDeleteMaterials").style.display = "none";
-  renderFolderTree();
+  populateFolderFilters();
   renderMsGrid();
   showMsgModal("已成功移动 " + selectedMaterialIds.length + " 个素材");
 }
@@ -1024,7 +943,7 @@ function deleteSelectedMaterials() {
   document.getElementById("btnSelectMode").textContent = "☑️ 批量管理";
   document.getElementById("btnMoveToFolder").style.display = "none";
   document.getElementById("btnDeleteMaterials").style.display = "none";
-  renderFolderTree();
+  populateFolderFilters();
   renderMsGrid();
   showMsgModal("已删除选中素材");
 }
@@ -1105,7 +1024,7 @@ function submitMsUpload() {
   }
   
   closeMsUploadModal();
-  renderFolderTree();
+  populateFolderFilters();
   renderMsGrid();
   showMsgModal("素材上传成功！");
 }
@@ -1147,7 +1066,7 @@ function closeMsgModal() {
 }
 
 // ========== 初始化 ==========
-renderFolderTree();
+populateFolderFilters();
 renderMsGrid();
 
 // 点击弹窗外部关闭
