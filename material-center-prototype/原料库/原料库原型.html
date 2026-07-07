@@ -142,6 +142,15 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .upload-body .file-list{font-size:12px;color:var(--text-2);margin-top:8px;padding:8px 12px;background:var(--bg-page);border-radius:var(--radius-s);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .upload-body .fm-group{margin-bottom:14px}
 .upload-body .fm-group label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
+
+/* 文件夹管理弹窗 */
+.fm-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border-light)}
+.fm-row .fm-name{flex:1;font-size:13px}
+.fm-row .fm-cnt{font-size:11px;color:var(--text-3)}
+.fm-row .fm-btn{font-size:12px;cursor:pointer;padding:2px 4px;border-radius:4px}
+.fm-row .fm-rename:hover{color:var(--primary);background:var(--primary-light)}
+.fm-row .fm-del:hover{color:var(--danger);background:#fff1f0}
+.fm-empty{text-align:center;padding:30px;color:var(--text-3);font-size:13px}
 .upload-body .fm-group label .req{color:var(--danger);margin-left:2px}
 .upload-body .fm-group input,.upload-body .fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
 .upload-body .fm-group input:focus,.upload-body .fm-group select:focus{border-color:var(--primary)}
@@ -1212,15 +1221,40 @@ function renderFMList() {
   for (var i = 0; i < msFolders.length; i++) {
     var f = msFolders[i]; var cnt = 0;
     for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
-    h += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border-light)">' +
-      '<span>📁</span><span style="flex:1;font-size:13px">' + f.name + '</span>' +
-      '<span style="font-size:11px;color:var(--text-3)">' + cnt + '</span>' +
-      '<button class="btn-text" onclick="var n=prompt('新名称:','' + f.name + '');if(n&&n.trim()&&n.trim()!=='' + f.name + ''){for(var i=0;i<msFolders.length;i++){if(msFolders[i].id===' + f.id + '){msFolders[i].name=n.trim();break;}}renderFMList();renderFolderBar();}" style="font-size:11px;color:var(--primary)">✏️</button>' +
-      '<button class="btn-text" onclick="if(confirm('确定删除？')){for(var j=0;j<msMaterials.length;j++){if(msMaterials[j].folderId===' + f.id + ')msMaterials[j].folderId=0}msFolders=msFolders.filter(function(x){return x.id!==' + f.id + '});if(selFolder===' + f.id + ')selFolder=null;renderFMList();renderFolderBar();renderMsGrid();}" style="font-size:11px;color:var(--danger)">🗑️</button></div>';
+    h += '<div class="fm-row" data-id="' + f.id + '" data-name="' + f.name.replace(/"/g,'') + '">' +
+      '<span>📁</span><span class="fm-name">' + f.name + '</span>' +
+      '<span class="fm-cnt">' + cnt + '</span>' +
+      '<span class="fm-btn fm-rename">✏️</span>' +
+      '<span class="fm-btn fm-del">🗑️</span></div>';
   }
-  if (h === '') h = '<div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px">暂无文件夹</div>';
+  if (h === '') h = '<div class="fm-empty">暂无文件夹</div>';
   el.innerHTML = h;
 }
+
+// 文件夹管理弹窗事件委托
+document.getElementById('fmModal').addEventListener('click', function(e) {
+  var row = e.target.closest('.fm-row');
+  if (!row) return;
+  var id = parseInt(row.getAttribute('data-id'));
+  var name = row.getAttribute('data-name');
+  
+  if (e.target.classList.contains('fm-rename')) {
+    var n = prompt('新名称:', name);
+    if (!n || !n.trim() || n.trim() === name) return;
+    n = n.trim();
+    for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === n) { alert('已存在同名文件夹'); return; } }
+    for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].id === id) { msFolders[i].name = n; break; } }
+    renderFMList(); renderFolderBar();
+  }
+  
+  if (e.target.classList.contains('fm-del')) {
+    if (!confirm('确定删除该文件夹吗？')) return;
+    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === id) msMaterials[j].folderId = 0; }
+    msFolders = msFolders.filter(function(x) { return x.id !== id; });
+    if (selFolder === id) selFolder = null;
+    renderFMList(); renderFolderBar(); renderMsGrid();
+  }
+});
 function fmCreate() {
   var name = document.getElementById('fmInput').value.trim();
   if (!name) { alert('请输入名称'); return; }
