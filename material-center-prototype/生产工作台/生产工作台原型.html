@@ -1563,7 +1563,7 @@ function renderModalList() {
     var m = result[i];
     var isSel = gModal.tempSel.indexOf(m.id) !== -1;
     var tc = m.type === "前贴" ? "tag-qt" : m.type === "中段" ? "tag-zd" : m.type === "尾帧" ? "tag-wq" : "tag-zhd";
-    html += '<div class="modal-item ' + (isSel ? 'selected' : '') + '" onclick="toggleItem(' + m.id + ')">' +
+    html += '<div class="modal-item ' + (isSel ? 'selected' : '') + '" data-id="' + m.id + '" onclick="toggleItem(' + m.id + ')">' +
       '<div class="cb">' + (isSel ? '✓' : '') + '</div>' +
       '<span class="mname">' + esc(m.name) + '</span>' +
       '<span class="mtype-tag ' + tc + '">' + m.type + '</span>' +
@@ -1617,7 +1617,7 @@ function selectAllFromFolder() {
   var folderVal = document.getElementById('modalFolderFilter').value;
   if (!folderVal) { showToast('请先选择一个文件夹', 'w'); return; }
   var folderId = parseInt(folderVal);
-  var items = document.querySelectorAll('.mat-item[data-id]');
+  var items = document.querySelectorAll('#modalBody .modal-item[data-id]');
   gModal.tempSel = [];
   for (var i = 0; i < items.length; i++) {
     var id = parseInt(items[i].getAttribute('data-id'));
