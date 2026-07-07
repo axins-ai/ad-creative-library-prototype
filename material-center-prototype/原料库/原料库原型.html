@@ -46,11 +46,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .folder-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .folder-tab .tab-count{font-size:10px;margin-left:4px;opacity:.65}
 .folder-tab.active .tab-count{opacity:.85}
-.folder-back:hover{border-color:var(--text-3) !important;color:var(--text-3) !important;background:var(--bg-hover)}
-.bc-crumb{font-size:12px;color:var(--primary);cursor:pointer;white-space:nowrap;padding:2px 4px;border-radius:4px;transition:background .15s}
-.bc-crumb:hover{background:var(--primary-light)}
-.bc-crumb.bc-current{color:var(--text-1);font-weight:500;cursor:default;background:transparent}
-.bc-sep{font-size:11px;color:var(--text-3);margin:0 2px}
+.btn-back{color:var(--text-3) !important;border-style:dashed !important;font-size:12px}
+.btn-back:hover{border-color:var(--text-3) !important;color:var(--primary) !important}
 .fm-row-selected{background:var(--primary-light) !important;border-color:var(--primary) !important}
 .fm-row .fm-add-sub{font-size:11px;color:var(--text-3)}
 .fm-row .fm-add-sub:hover{color:var(--primary)}
@@ -984,51 +981,33 @@ function renderFolderBar() {
   var uncat = 0;
   for (var i = 0; i < msMaterials.length; i++) { if (!msMaterials[i].folderId) uncat++; }
   
-  var h = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">';
-  // 第一行：快速筛选 + 面包屑
+  var h = '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
+  // 根部快捷按钮
   h += '<span class="folder-tab' + (selFolder === null ? ' active' : '') + '" onclick="selFolder=null;gFolderPath=[];renderFolderBar();applyMsFilter()">全部<span class="tab-count">' + cntAll + '</span></span>';
   h += '<span class="folder-tab' + (selFolder === -1 ? ' active' : '') + '" onclick="selFolder=-1;gFolderPath=[];renderFolderBar();applyMsFilter()">未分类<span class="tab-count">' + uncat + '</span></span>';
+  h += '<span class="bc-sep">|</span>';
   
-  // 面包屑导航
-  if (gFolderPath.length > 0) {
-    h += '<span class="bc-sep">▸</span>';
-    // 面包屑: 全部(回到根)
-    h += '<span class="bc-crumb" onclick="gFolderPath=[];selFolder=\'nav\';renderFolderBar();applyMsFilter()">全部</span>';
-    for (var pi = 0; pi < gFolderPath.length; pi++) {
-      var fid = gFolderPath[pi];
-      var fname = getFolderName(fid);
-      h += '<span class="bc-sep">▸</span>';
-      if (pi === gFolderPath.length - 1) {
-        h += '<span class="bc-crumb bc-current">' + fname + '</span>';
-      } else {
-        h += '<span class="bc-crumb" onclick="gFolderPath=gFolderPath.slice(0,' + (pi+1) + ');selFolder=\'nav\';renderFolderBar();applyMsFilter()">' + fname + '</span>';
-      }
-    }
-  }
-  h += '</div>';
-  
-  // 第二行：当前层级的文件夹标签
+  // 显示当前层级的文件夹
   var currentFolders = getCurrentLevelFolders();
-  if (currentFolders.length > 0) {
-    h += '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">';
-    for (var i = 0; i < currentFolders.length; i++) {
-      var f = currentFolders[i];
-      var cnt = 0;
-      var allIds = getFolderAndChildrenIds(f.id);
-      for (var j = 0; j < msMaterials.length; j++) {
-        if (allIds.indexOf(msMaterials[j].folderId) !== -1) cnt++;
-      }
-      var hasChildren = getChildFolders(f.id).length > 0;
-      var cls = selFolder > 0 && selFolder !== 'nav' && selFolder === f.id ? ' active' : '';
-      h += '<span class="folder-tab' + cls + '" onclick="if(' + (hasChildren ? 'true' : 'false') + '){gFolderPath.push(' + f.id + ');selFolder=\'nav\';renderFolderBar();applyMsFilter()}else{selFolder=' + f.id + ';gFolderPath=[];renderFolderBar();applyMsFilter()}">' + f.name + '<span class="tab-count">' + cnt + '</span>' + (hasChildren ? '<span style="font-size:10px;margin-left:3px">▶</span>' : '') + '</span>';
+  for (var i = 0; i < currentFolders.length; i++) {
+    var f = currentFolders[i];
+    var cnt = 0;
+    var allIds = getFolderAndChildrenIds(f.id);
+    for (var j = 0; j < msMaterials.length; j++) {
+      if (allIds.indexOf(msMaterials[j].folderId) !== -1) cnt++;
     }
-    // 返回上级按钮
-    if (gFolderPath.length > 0) {
-      h += '<span class="folder-tab folder-back" onclick="gFolderPath.pop();selFolder=\'nav\';renderFolderBar();applyMsFilter()" style="color:var(--text-3);font-size:11px;border-style:dashed">⬆ 上一级</span>';
-    }
-    h += '</div>';
+    var hasChildren = getChildFolders(f.id).length > 0;
+    var isActive = selFolder === f.id;
+    // 点击：选中该文件夹，如果有子文件夹则推进
+    h += '<span class="folder-tab' + (isActive ? ' active' : '') + '" onclick="selFolder=' + f.id + ';if(' + (hasChildren ? 'true' : 'false') + '){gFolderPath.push(' + f.id + ')}else{gFolderPath=[]};renderFolderBar();applyMsFilter()">' + f.name + '<span class="tab-count">' + cnt + '</span></span>';
   }
   
+  // 返回上级（非根目录时显示）
+  if (gFolderPath.length > 0) {
+    h += '<span class="folder-tab btn-back" onclick="gFolderPath.pop();selFolder=gFolderPath.length>0?gFolderPath[gFolderPath.length-1]:null;renderFolderBar();applyMsFilter()">← 返回</span>';
+  }
+  
+  h += '</div>';
   bar.innerHTML = h;
   syncUploadFolder();
 }
@@ -1095,11 +1074,10 @@ function getFilteredMsMaterials() {
   for (var i = 0; i < msMaterials.length; i++) {
     var m = msMaterials[i];
     if (selFolder === -1 && m.folderId) continue;
-    if (selFolder > 0 && selFolder !== 'nav') {
+    if (selFolder > 0) {
       var allowedIds = getFolderAndChildrenIds(selFolder);
       if (allowedIds.indexOf(m.folderId) === -1) continue;
     }
-    if (selFolder === 'nav') continue; // 导航状态不显示素材
     if (nameKw && m.name.toLowerCase().indexOf(nameKw) === -1) continue;
     if (typeVal !== "全部类型" && m.type !== typeVal) continue;
     if (sourceVal !== "全部来源" && m.source !== sourceVal) continue;
