@@ -496,6 +496,12 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </select>
       </div>
       <div class="fm-group">
+        <label>保存到文件夹</label>
+        <select id="msUploadFolder">
+          <option value="">未分类</option>
+        </select>
+      </div>
+      <div class="fm-group">
         <label>优化师</label>
         <div class="search-select" id="msUploadOptimizerWrap">
           <select id="msUploadOptimizer">
@@ -1134,6 +1140,7 @@ function submitMsUpload() {
   var userAge = document.getElementById("msUploadUserAge").value;
   var userGender = document.getElementById("msUploadUserGender").value;
   var productTag = document.getElementById("msUploadProductTag").value;
+  var folderId = parseInt(document.getElementById("msUploadFolder").value) || 0;
   if (!userRegion || !userAge || !userGender) { showMsgModal("请完整填写用户标签（地区、年龄、性别）"); return; }
   if (!productTag) { showMsgModal("请选择产品标签"); return; }
   var contentTags = {};
@@ -1161,6 +1168,7 @@ function submitMsUpload() {
       msMaterials.push({
         id: Date.now() + Math.random(),
         name: file.name,
+        folderId: folderId,
         type: fileType,
         biz: biz,
         channel: channel,
@@ -1290,7 +1298,7 @@ function fmCreate() {
 </div>
 <!-- 文件夹管理弹窗 -->
 <div class="modal-overlay" id="fmModal">
-  <div class="modal" style="width:440px">
+  <div class="modal" style="width:580px">
     <div class="modal-header">
       <h3>📁 文件夹管理</h3>
       <button class="close-btn" onclick="closeFM()">✕</button>
