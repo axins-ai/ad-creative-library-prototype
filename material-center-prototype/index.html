@@ -56,15 +56,6 @@ body{font-family:var(--font);color:var(--text-1);line-height:1.6;-webkit-font-sm
 .menu-item .mi-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
 .menu-item .mi-label{flex:1;overflow:hidden;text-overflow:ellipsis}
 
-/* 子菜单 */
-.menu-item.sub{padding-left:38px;font-size:12px}
-.menu-item.sub .mi-icon{width:16px;font-size:13px}
-.menu-item.sub.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary)}
-.menu-item.expandable .expand-icon{font-size:10px;color:var(--text-3);margin-left:auto;transition:transform .2s;width:16px;text-align:center;flex-shrink:0}
-.menu-item.expandable.expanded .expand-icon{transform:rotate(90deg)}
-.sub-menu-wrap{overflow:hidden;max-height:0;transition:max-height .25s ease;background:var(--bg-page)}
-.sub-menu-wrap.expanded{max-height:200px}
-
 .sidebar .bottom-area{
   border-top:1px solid var(--border-light);padding:8px 0;flex-shrink:0;
 }
@@ -104,20 +95,9 @@ body{font-family:var(--font);color:var(--text-1);line-height:1.6;-webkit-font-sm
   <div class="menu-area">
     <div class="menu-group">
       <div class="menu-group-title">素材中心</div>
-      <div class="menu-item active expandable expanded" data-target="原料库" onclick="toggleSubMenu(this)">
+      <div class="menu-item active" data-target="原料库" onclick="switchMenu(event, this)">
         <span class="mi-icon">📂</span>
         <span class="mi-label">原料库</span>
-        <span class="expand-icon">▶</span>
-      </div>
-      <div class="sub-menu-wrap expanded" id="subMenu-原料库">
-        <div class="menu-item sub active" data-target="原料库" onclick="switchMenu(event, this)">
-          <span class="mi-icon">📂</span>
-          <span class="mi-label">原料库</span>
-        </div>
-        <div class="menu-item sub" data-target="文件夹管理" onclick="switchMenu(event, this)">
-          <span class="mi-icon">📁</span>
-          <span class="mi-label">文件夹管理</span>
-        </div>
       </div>
       <div class="menu-item" data-target="素材库" onclick="switchMenu(event, this)">
         <span class="mi-icon">📂</span>
@@ -181,7 +161,6 @@ function switchMenu(ev, el) {
   }
   el.classList.add('active');
   
-  // 如果该菜单有子菜单并且是展开状态，展开它
   var targetKey = el.getAttribute('data-target');
 
   // 加载对应内容（每次带最新时间戳强制刷新）
@@ -191,24 +170,6 @@ function switchMenu(ev, el) {
   document.getElementById('contentFrame').src = cfg.file + sep + 'v=' + Date.now();
   document.getElementById('pageTitle').innerHTML =
     cfg.title + ' <span class="tag">原型预览</span>';
-  
-  // 更新面包屑高亮 - 父级也高亮
-  var parentWrap = el.closest('.sub-menu-wrap');
-  if (parentWrap) {
-    var parentExpand = parentWrap.previousElementSibling;
-    if (parentExpand && parentExpand.classList.contains('expandable')) {
-      parentExpand.classList.add('active');
-    }
-  }
-}
-
-function toggleSubMenu(el) {
-  var key = el.getAttribute('data-target');
-  var wrap = document.getElementById('subMenu-' + key);
-  if (!wrap) return;
-  
-  el.classList.toggle('expanded');
-  wrap.classList.toggle('expanded');
 }
 
 function updateMaterialTags(cfg) {
@@ -220,11 +181,12 @@ function updateMaterialTags(cfg) {
   } catch (e) {}
 }
 
-// 默认加载"原料库"子菜单
+// 默认加载第一个菜单
 (function(){
-  var firstSub = document.querySelector('.menu-item.sub');
-  if (firstSub) {
-    firstSub.classList.add('active');
+  var first = document.querySelector('.menu-item');
+  if (first) {
+    first.classList.add('active');
+    var key = first.getAttribute('data-target');
     var key = firstSub.getAttribute('data-target');
     var cfg = MENU_CONFIG[key];
     if (cfg) {
