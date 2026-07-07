@@ -1268,32 +1268,41 @@ function renderFMList() {
   for (var i = 0; i < msFolders.length; i++) {
     var f = msFolders[i]; var cnt = 0;
     for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
-    var sid = f.id;
-    var snm = f.name.replace(/'/g,'');
-    h += '<div class="fm-row">' +
+    h += '<div class="fm-row" data-fid="' + f.id + '" data-fname="' + f.name.replace(/"/g,'').replace(/'/g,'') + '">' +
       '<span>📁</span><span class="fm-name">' + f.name + '</span>' +
       '<span class="fm-cnt">' + cnt + '素材</span>' +
-      '<span class="fm-btn fm-rename" onclick="fmRename(' + sid + ',\'' + snm + '\')">✏️ 重命名</span>' +
-      '<span class="fm-btn fm-del" onclick="fmDelete(' + sid + ')">🗑️ 删除</span></div>';
+      '<span class="fm-btn fm-rename">✏️ 重命名</span>' +
+      '<span class="fm-btn fm-del">🗑️ 删除</span></div>';
   }
   if (h === '') h = '<div class="fm-empty">暂无文件夹</div>';
   el.innerHTML = h;
 }
-function fmRename(id, name) {
-  var n = prompt('新名称:', name);
-  if (!n || !n.trim() || n.trim() === name) return;
-  n = n.trim();
-  for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === n) { alert('已存在同名文件夹'); return; } }
-  for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].id === id) { msFolders[i].name = n; break; } }
-  renderFMList(); renderFolderBar();
-}
-function fmDelete(id) {
-  if (!confirm('确定删除该文件夹吗？')) return;
-  for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === id) msMaterials[j].folderId = 0; }
-  msFolders = msFolders.filter(function(x) { return x.id !== id; });
-  if (selFolder === id) selFolder = null;
-  renderFMList(); renderFolderBar(); renderMsGrid();
-}
+
+// 事件委托
+document.getElementById('fmList').addEventListener('click', function(e) {
+  var btn = e.target.closest('.fm-btn');
+  if (!btn) return;
+  var row = btn.closest('.fm-row');
+  if (!row) return;
+  var fid = parseInt(row.getAttribute('data-fid'));
+  var fname = row.getAttribute('data-fname');
+  if (btn.classList.contains('fm-rename')) {
+    var n = prompt('新名称:', fname);
+    if (!n || !n.trim() || n.trim() === fname) return;
+    n = n.trim();
+    for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === n) { alert('已存在同名文件夹'); return; } }
+    for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].id === fid) { msFolders[i].name = n; break; } }
+    renderFMList(); renderFolderBar();
+  }
+  if (btn.classList.contains('fm-del')) {
+    if (!confirm('确定删除该文件夹吗？')) return;
+    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === fid) msMaterials[j].folderId = 0; }
+    msFolders = msFolders.filter(function(x) { return x.id !== fid; });
+    if (selFolder === fid) selFolder = null;
+    renderFMList(); renderFolderBar(); renderMsGrid();
+  }
+});
+
 function fmCreate() {
   var name = document.getElementById('fmInput').value.trim();
   if (!name) { alert('请输入名称'); return; }
