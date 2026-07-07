@@ -57,6 +57,23 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap}
 
 
+/* 文件夹栏（横向标签） */
+.folder-bar{display:flex;align-items:center;gap:4px;margin-bottom:14px;padding:6px 0;flex-wrap:wrap;border-bottom:1px solid var(--border-light)}
+.folder-tab{padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;transition:all .15s;border:1px solid var(--border-light);background:var(--bg-card);color:var(--text-2);white-space:nowrap}
+.folder-tab:hover{border-color:var(--primary);color:var(--primary)}
+.folder-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.folder-tab .tab-count{font-size:10px;margin-left:4px;opacity:.7}
+.folder-tab.active .tab-count{opacity:.9}
+.folder-tab-add{width:26px;height:26px;border-radius:50%;border:1px dashed var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-3);transition:all .15s;flex-shrink:0}
+.folder-tab-add:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.folder-tab-wrap{position:relative}
+.folder-tab-mgr{display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-s);box-shadow:var(--shadow-m);z-index:50;min-width:100px;overflow:hidden}
+.folder-tab-mgr.show{display:block}
+.folder-tab-mgr .mgr-item{padding:6px 12px;font-size:12px;cursor:pointer;transition:background .1s;white-space:nowrap}
+.folder-tab-mgr .mgr-item:hover{background:var(--bg-hover)}
+.folder-tab-mgr .mgr-item.danger{color:var(--danger)}
+.folder-tab-mgr .mgr-item.danger:hover{background:#fff1f0}
+
 /* Filter card style */
 .filter-card{background:var(--bg-card);border-radius:var(--radius-l);box-shadow:var(--shadow-s);margin-bottom:16px;overflow:hidden}
 .filter-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border-light);transition:background .15s}
@@ -201,16 +218,14 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   <!-- 右侧内容区 -->
   <div class="content-area" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
     <div class="content">
+      <!-- 文件夹栏 -->
+      <div class="folder-bar" id="folderBar">
+        <!-- 通过JS渲染 -->
+      </div>
+
       <!-- 工具栏 -->
       <div class="toolbar">
         <div class="toolbar-left">
-          <div class="filter-group" style="margin-right:8px">
-            <label>📁 文件夹</label>
-            <select id="folderFilter" onchange="applyMsFilter()" style="min-width:120px">
-              <option value="">全部文件夹</option>
-              <option value="__uncategorized">未分类</option>
-            </select>
-          </div>
           <button class="btn btn-primary" onclick="openMsUploadModal()">↑ 上传素材</button>
           <button class="btn btn-default" id="btnSelectMode" onclick="toggleSelectMode()">☑️ 批量管理</button>
           <button class="btn btn-default" id="btnMoveToFolder" onclick="openMoveModal()" style="display:none">📂 移动到文件夹</button>
@@ -231,13 +246,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
               <div class="filter-group">
               <label>名称搜索</label>
               <input type="text" id="nameFilter" placeholder="搜索原料名称..." oninput="applyMsFilter()">
-            </div>
-            <div class="filter-group">
-              <label>文件夹</label>
-              <select id="folderFilter2" onchange="syncFolderFilter(this.value)">
-                <option value="">全部文件夹</option>
-                <option value="__uncategorized">未分类</option>
-              </select>
             </div>
             <div class="filter-group">
               <label>类型</label>
@@ -641,44 +649,49 @@ var moveTargetFolderId = null;
 // ========== 文件夹标签渲染 ==========
 var selectedFolder = null; // 已废弃（使用下拉筛选）
 var renderedFolderTabs = null; // '__uncategorized'=未分类, 数字ID=具体文件夹
-// ========== 文件夹筛选填充 ==========
-function populateFolderFilters() {
-  var selects = ['folderFilter', 'folderFilter2'];
-  for (var si = 0; si < selects.length; si++) {
-    var sel = document.getElementById(selects[si]);
-    if (!sel) continue;
-    var currentVal = sel.value;
-    sel.innerHTML = '<option value="">全部文件夹</option><option value="__uncategorized">未分类</option>';
-    for (var i = 0; i < msFolders.length; i++) {
-      var opt = document.createElement('option');
-      opt.value = msFolders[i].id;
-      opt.textContent = msFolders[i].name + ' (' + msFolders[i].materials.length + ')';
-      sel.appendChild(opt);
-    }
-    sel.value = currentVal;
+// ========== 文件夹标签栏 ==========
+var msSelectedFolder = null; // null=全部, '__uncategorized'=未分类, number=具体文件夹
+
+function renderFolderBar() {
+  var bar = document.getElementById('folderBar');
+  if (!bar) return;
+  var html = '';
+  
+  // 全部
+  html += '<span class="folder-tab' + (msSelectedFolder === null ? ' active' : '') + '" onclick="selectFolderTab(null)">全部</span>';
+  
+  // 未分类
+  var uncatCount = 0;
+  for (var i = 0; i < msMaterials.length; i++) {
+    if (!msMaterials[i].folders || msMaterials[i].folders.length === 0) uncatCount++;
   }
+  html += '<span class="folder-tab' + (msSelectedFolder === '__uncategorized' ? ' active' : '') + '" onclick="selectFolderTab('__uncategorized')">未分类<span class="tab-count">' + uncatCount + '</span></span>';
+  
+  // 各文件夹
+  for (var i = 0; i < msFolders.length; i++) {
+    var f = msFolders[i];
+    var active = msSelectedFolder === f.id;
+    var isOwner = f.creator === CURRENT_USER;
+    html += '<span class="folder-tab-wrap"><span class="folder-tab' + (active ? ' active' : '') + '" onclick="selectFolderTab(' + f.id + ')" oncontextmenu="event.preventDefault();showFolderMenu(' + f.id + ', event)">' + f.name + '<span class="tab-count">' + f.materials.length + '</span></span></span>';
+  }
+  
+  // + 新建按钮
+  html += '<button class="folder-tab-add" onclick="openNewFolderModal()" title="新建文件夹">+</button>';
+  
+  bar.innerHTML = html;
   updateUploadFolderOptions();
 }
 
-// 同步两个文件夹筛选下拉
-function syncFolderFilter(value) {
-  var sel1 = document.getElementById('folderFilter');
-  var sel2 = document.getElementById('folderFilter2');
-  if (sel1) sel1.value = value;
-  if (sel2) sel2.value = value;
+function selectFolderTab(folderId) {
+  msSelectedFolder = folderId;
+  renderFolderBar();
   applyMsFilter();
-}
-
-function selectFolder(folderId) {
-  // 从下拉中选择对应文件夹
-  var val = folderId === null ? '' : (folderId === -1 ? '__uncategorized' : String(folderId));
-  syncFolderFilter(val);
 }
 
 
 function renderFolderTabs() {
   // 已迁移到 populateFolderFilters
-  populateFolderFilters();
+  renderFolderBar();
 }
 
 function selectFolderTab(folderId) {
@@ -1291,7 +1304,7 @@ function getFoldersData() {
 
 // ========== 初始化
  ==========
-populateFolderFilters();
+renderFolderBar();
 renderMsGrid();
 
 // 点击弹窗外部关闭
@@ -1309,7 +1322,7 @@ document.getElementById("moveToFolderModal").addEventListener("click", function(
 });
 
 // ========== 初始化 ==========
-populateFolderFilters();
+renderFolderBar();
 initTagFilters();
 renderMsGrid();
 
