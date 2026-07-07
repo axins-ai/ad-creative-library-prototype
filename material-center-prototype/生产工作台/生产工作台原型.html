@@ -702,15 +702,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 <script>
 // ===== 原料数据 =====
 var msFolders = [
-  {id:1, name:'开场动画合集', parentId: null},
-  {id:2, name:'产品介绍素材', parentId: null},
-  {id:3, name:'行动号召素材', parentId: null},
-  {id:4, name:'夏季开场', parentId: 1},
-  {id:5, name:'冬季开场', parentId: 1},
-  {id:7, name:'手机产品', parentId: 2},
-  {id:8, name:'宽带产品', parentId: 2},
-  {id:6, name:'阳光沙滩版', parentId: 4},
-  {id:9, name:'5G套餐版', parentId: 8},
+  {id:1, name:'开场动画合集'},
+  {id:2, name:'产品介绍素材'},
+  {id:3, name:'行动号召素材'},
 ];
 
 var MATERIALS_DB = [
@@ -829,34 +823,6 @@ function getMatById(id) {
     if (MATERIALS_DB[i].id === id) return MATERIALS_DB[i];
   }
   return null;
-}
-
-// 递归获取文件夹及其所有子文件夹的ID
-function getFolderAndChildrenIds(folderId) {
-  var ids = [folderId];
-  for (var i = 0; i < msFolders.length; i++) {
-    if (msFolders[i].parentId === folderId) {
-      ids = ids.concat(getFolderAndChildrenIds(msFolders[i].id));
-    }
-  }
-  return ids;
-}
-
-// 筛选下拉框的递归函数
-function getAllFolderOptions() {
-  var html = '<option value="">全部文件夹</option>';
-  function addOpts(parentId, indent) {
-    var indentStr = '';
-    for (var di = 0; di < indent; di++) indentStr += '  ';
-    for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].parentId === parentId) {
-        html += '<option value="' + msFolders[i].id + '">' + indentStr + msFolders[i].name + '</option>';
-        addOpts(msFolders[i].id, indent + 1);
-      }
-    }
-  }
-  addOpts(null, 0);
-  return html;
 }
 
 // ===== 视图切换 =====
@@ -1472,24 +1438,15 @@ function openModal(lockType, slotIdx) {
   document.getElementById("sourceFilter").value = "";
 
   renderModalList();
-  // 初始化文件夹下拉（带层级）
+  // 初始化文件夹下拉
   var folderSel = document.getElementById('modalFolderFilter');
   if (folderSel && folderSel.options.length <= 1) {
-    // 递归添加
-    function addFolderOptions(parentId, indent) {
-      var indentStr = '';
-      for (var di = 0; di < indent; di++) indentStr += '  ';
-      for (var fi = 0; fi < msFolders.length; fi++) {
-        if (msFolders[fi].parentId === parentId) {
-          var opt = document.createElement('option');
-          opt.value = msFolders[fi].id;
-          opt.textContent = indentStr + msFolders[fi].name;
-          folderSel.appendChild(opt);
-          addFolderOptions(msFolders[fi].id, indent + 1);
-        }
-      }
+    for (var fi = 0; fi < msFolders.length; fi++) {
+      var opt = document.createElement('option');
+      opt.value = msFolders[fi].id;
+      opt.textContent = msFolders[fi].name;
+      folderSel.appendChild(opt);
     }
-    addFolderOptions(null, 0);
   }
   document.getElementById("overlay").classList.add("show");
 }
@@ -1591,8 +1548,7 @@ function renderModalList() {
     var folderVal = document.getElementById('modalFolderFilter').value;
     if (folderVal) {
       var folderId = parseInt(folderVal);
-      var allowedIds = getFolderAndChildrenIds(folderId);
-      if (allowedIds.indexOf(m.folderId) === -1) continue;
+      if (m.folderId !== folderId) continue;
     }
     result.push(m);
   }
@@ -1676,10 +1632,9 @@ function selectAllFromFolder() {
   }
   // 直接从数据源筛选
   gModal.tempSel = [];
-  var allowedIds = getFolderAndChildrenIds(folderId);
   for (var i = 0; i < MATERIALS_DB.length; i++) {
     var m = MATERIALS_DB[i];
-    if (allowedIds.indexOf(m.folderId) === -1) continue;
+    if (m.folderId !== folderId) continue;
     if (filterType && m.type !== filterType) continue;
     // 基础属性筛选
     if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
