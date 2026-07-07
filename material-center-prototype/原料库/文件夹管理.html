@@ -12,241 +12,125 @@
   --text-1:rgba(0,0,0,.88);--text-2:rgba(0,0,0,.65);--text-3:rgba(0,0,0,.42);
   --bg-page:#f0f2f5;--bg-card:#fff;--bg-hover:#f7f8fa;
   --border:#e8e8e8;--border-light:#f0f0f0;
-  --shadow-s:0 1px 3px rgba(0,0,0,.05);--shadow-m:0 4px 16px rgba(0,0,0,.1);--shadow-l:0 12px 40px rgba(0,0,0,.12);
-  --radius:8px;--radius-s:6px;--radius-l:12px;--radius-xl:16px;
+  --shadow-s:0 1px 3px rgba(0,0,0,.05);
+  --radius:8px;--radius-s:6px;
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 }
 html{font-size:14px}
 body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;margin:0;padding:0}
 
-/* 顶部导航 */
-.top-nav{height:52px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;flex-shrink:0;z-index:100;box-shadow:var(--shadow-s)}
-.top-nav .nav-title{font-size:16px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:8px}
-.top-nav .nav-back{font-size:12px;color:var(--primary);cursor:pointer;padding:4px 10px;border-radius:var(--radius-s);transition:background .15s}
-.top-nav .nav-back:hover{background:var(--primary-light)}
+/* 顶部 */
+.top-nav{height:48px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;flex-shrink:0}
+.top-nav .nav-title{font-size:15px;font-weight:600}
+.top-nav .nav-title .icon{font-size:16px}
 
 /* 主内容 */
-.content{padding:24px;flex:1;overflow-y:auto;max-width:1200px;margin:0 auto;width:100%}
+.content{padding:20px;flex:1;overflow-y:auto;max-width:960px;margin:0 auto;width:100%}
 
 /* 页面头部 */
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.page-header h2{font-size:20px;font-weight:700;color:var(--text-1);display:flex;align-items:center;gap:8px}
-.page-header h2 .icon{font-size:24px}
-.page-header .actions{display:flex;gap:10px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.page-header h2{font-size:16px;font-weight:600}
+.page-header .actions{display:flex;gap:8px}
 
-/* 统计栏 */
-.stats-bar{display:flex;gap:16px;margin-bottom:24px}
-.stat-card{background:var(--bg-card);border-radius:var(--radius-l);padding:16px 20px;flex:1;box-shadow:var(--shadow-s);display:flex;align-items:center;gap:14px;transition:transform .2s,box-shadow .2s}
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-m)}
-.stat-card .stat-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.stat-card .stat-icon.blue{background:#e8f1ff;color:#1664ff}
-.stat-card .stat-icon.green{background:#e8f8e8;color:#52c41a}
-.stat-card .stat-icon.orange{background:#fff8e1;color:#faad14}
-.stat-card .stat-info .stat-number{font-size:24px;font-weight:700;color:var(--text-1);line-height:1.2}
-.stat-card .stat-info .stat-label{font-size:12px;color:var(--text-3);margin-top:2px}
+/* 工具栏 */
+.toolbar{margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.toolbar .search-input{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:13px;outline:none;flex:1;max-width:300px;background:#fff}
+.toolbar .search-input:focus{border-color:var(--primary)}
+.toolbar .count-info{font-size:12px;color:var(--text-3);margin-left:auto}
 
-/* 搜索栏 */
-.search-bar{display:flex;gap:10px;margin-bottom:20px}
-.search-input-wrap{flex:1;position:relative}
-.search-input-wrap input{width:100%;height:40px;padding:0 16px 0 40px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;outline:none;transition:border .2s;background:#fff}
-.search-input-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,100,255,.08)}
-.search-input-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text-3)}
-.search-bar select{height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);background:#fff;outline:none;transition:border .2s}
-.search-bar select:focus{border-color:var(--primary)}
+/* 表格 */
+.folder-table{width:100%;background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.folder-table table{width:100%;border-collapse:collapse}
+.folder-table th{text-align:left;padding:10px 14px;font-size:12px;font-weight:600;color:var(--text-3);background:var(--bg-page);border-bottom:1px solid var(--border)}
+.folder-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+.folder-table tr:last-child td{border-bottom:none}
+.folder-table tr:hover td{background:var(--bg-hover)}
+.folder-table .folder-icon-cell{font-size:16px;text-align:center;width:36px}
+.folder-table .folder-name{font-weight:500;color:var(--text-1)}
+.folder-table .folder-creator{font-size:12px;color:var(--text-3)}
+.folder-table .folder-mcount{font-size:12px;color:var(--text-2);text-align:center}
+.folder-table .folder-actions{text-align:right;white-space:nowrap}
+.folder-table .empty-row td{text-align:center;padding:40px 20px;color:var(--text-3);font-size:13px}
 
-/* 文件夹网格 */
-.folder-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:32px}
-
-.folder-card{background:var(--bg-card);border-radius:var(--radius-l);padding:20px;box-shadow:var(--shadow-s);cursor:pointer;transition:all .25s;border:1px solid var(--border-light);position:relative;overflow:hidden}
-.folder-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-m);border-color:#bae0ff}
-.folder-card .folder-emoji{font-size:36px;margin-bottom:12px;display:block}
-.folder-card .folder-name{font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.folder-card .folder-meta{display:flex;gap:12px;font-size:12px;color:var(--text-3)}
-.folder-card .folder-meta span{display:flex;align-items:center;gap:4px}
-.folder-card .folder-actions{position:absolute;top:12px;right:12px;display:none;gap:4px}
-.folder-card:hover .folder-actions{display:flex}
-.folder-card .folder-action-btn{width:28px;height:28px;border-radius:var(--radius-s);border:none;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-3);box-shadow:var(--shadow-s);transition:all .15s}
-.folder-card .folder-action-btn:hover{color:var(--primary);box-shadow:var(--shadow-m)}
-.folder-card .folder-action-btn.danger:hover{color:var(--danger)}
-.folder-card .folder-preview{display:flex;gap:4px;margin-top:12px}
-.folder-card .preview-thumb{width:32px;height:32px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center}
-.folder-card .preview-thumb.more{background:var(--bg-page);font-size:10px;color:var(--text-3);font-weight:600}
-.folder-card.readonly .folder-name:after{content:" (只读)";font-size:11px;color:var(--text-3);font-weight:400}
-.folder-card .folder-empty{font-size:11px;color:var(--text-3);margin-top:10px;font-style:italic}
-
-/* 素材网格（点击文件夹后展示） */
-.materials-section{display:none;margin-top:24px}
-.materials-section.visible{display:block}
-.materials-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border-light)}
-.materials-header h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
-.materials-header .back-btn{font-size:12px;color:var(--primary);cursor:pointer;padding:4px 10px;border-radius:var(--radius-s);background:var(--primary-light);transition:background .15s}
-.materials-header .back-btn:hover{background:#d6e4ff}
-.materials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.material-thumb{background:var(--bg-card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:all .2s;cursor:pointer}
-.material-thumb:hover{transform:translateY(-2px);box-shadow:var(--shadow-m)}
-.material-thumb .thumb-img{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;align-items:center;justify-content:center}
-.material-thumb .thumb-info{padding:10px 12px}
-.material-thumb .thumb-name{font-size:12px;font-weight:500;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.material-thumb .thumb-meta{font-size:11px;color:var(--text-3);margin-top:4px;display:flex;gap:6px}
-
-/* 空状态 */
-.empty-state{text-align:center;padding:60px 20px;color:var(--text-3)}
-.empty-state .empty-icon{font-size:64px;margin-bottom:16px;display:block}
-.empty-state h3{font-size:16px;color:var(--text-2);margin-bottom:8px}
-.empty-state p{font-size:13px}
-
-/* 弹窗组件 */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s}
-.modal-overlay.active{display:flex}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal{background:#fff;border-radius:var(--radius-xl);width:420px;max-width:90vw;box-shadow:var(--shadow-l);animation:slideUp .25s;overflow:hidden}
-.modal-header{padding:20px 24px 12px;display:flex;align-items:center;justify-content:space-between}
-.modal-header h3{font-size:16px;font-weight:600}
-.modal-header .close-btn{width:28px;height:28px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-3);transition:background .15s}
-.modal-header .close-btn:hover{background:var(--bg-hover)}
-.modal-body{padding:0 24px 20px}
-.modal-body .label{font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:6px;display:block}
-.modal-body input{width:100%;height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:13px;outline:none;transition:border .2s}
-.modal-body input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,100,255,.08)}
-.modal-body .hint{font-size:11px;color:var(--text-3);margin-top:6px}
-.modal-footer{padding:16px 24px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:8px}
-
-/* 确认弹窗 */
-.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s}
-.confirm-overlay.active{display:flex}
-.confirm-modal{background:#fff;border-radius:var(--radius-xl);width:380px;max-width:90vw;box-shadow:var(--shadow-l);animation:slideUp .25s;overflow:hidden;text-align:center}
-.confirm-modal .confirm-icon{font-size:48px;margin:28px 0 8px}
-.confirm-modal .confirm-text{font-size:14px;color:var(--text-1);padding:0 24px 20px;line-height:1.6}
-.confirm-modal .confirm-actions{display:flex;border-top:1px solid var(--border-light)}
-.confirm-modal .confirm-btn{flex:1;padding:14px 0;font-size:14px;cursor:pointer;transition:background .15s;border:none;background:transparent}
-.confirm-modal .confirm-btn:hover{background:var(--bg-hover)}
-.confirm-modal .confirm-btn.primary{color:var(--primary);font-weight:600}
-.confirm-modal .confirm-btn.danger{color:var(--danger);font-weight:600}
-.confirm-modal .confirm-btn + .confirm-btn{border-left:1px solid var(--border-light)}
-
-/* 成功提示 */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:#fff;border-radius:var(--radius);padding:12px 24px;box-shadow:var(--shadow-l);font-size:13px;display:none;align-items:center;gap:8px;animation:slideDown .3s}
-@keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-.toast.show{display:flex}
-.toast.success{border-left:4px solid var(--success)}
-.toast .toast-icon{font-size:18px}
-
-/* 通用 */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:36px;padding:0 16px;border-radius:var(--radius-s);font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all .18s;white-space:nowrap}
+/* 按钮 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:30px;padding:0 12px;border-radius:var(--radius-s);font-size:12px;font-weight:500;border:none;cursor:pointer;transition:background .15s;white-space:nowrap}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-primary:hover{background:var(--primary-dark)}
-.btn-default{background:var(--bg-card);color:var(--text-2);border:1px solid var(--border)}
-.btn-default:hover{color:var(--primary);border-color:var(--primary);background:var(--primary-light)}
-.btn-text{background:transparent;color:var(--text-2)}
-.btn-text:hover{color:var(--primary);background:var(--bg-hover)}
+.btn-default{background:#fff;color:var(--text-2);border:1px solid var(--border)}
+.btn-default:hover{color:var(--primary);border-color:var(--primary)}
+.btn-text{background:transparent;border:none;color:var(--text-3);padding:2px 6px;font-size:12px;cursor:pointer}
+.btn-text:hover{color:var(--primary)}
+.btn-text.danger:hover{color:var(--danger)}
+
+/* 弹窗 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:var(--radius);width:380px;max-width:90vw;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.modal-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:15px;font-weight:600}
+.modal-header .close-btn{width:24px;height:24px;border-radius:50%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--text-3);display:flex;align-items:center;justify-content:center}
+.modal-header .close-btn:hover{background:var(--bg-hover)}
+.modal-body{padding:0 20px 16px}
+.modal-body label{font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:4px;display:block}
+.modal-body input[type=text]{width:100%;height:34px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:13px;outline:none;background:#fff}
+.modal-body input[type=text]:focus{border-color:var(--primary)}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:6px}
 </style>
 </head>
 <body>
 
-<!-- 顶部导航 -->
 <div class="top-nav">
-  <div class="nav-title">
-    <span>📁</span>
-    <span>文件夹管理</span>
-  </div>
+  <div class="nav-title"><span class="icon">📁</span> 文件夹管理</div>
 </div>
 
-<!-- 主内容 -->
 <div class="content">
   <!-- 页面头部 -->
   <div class="page-header">
-    <h2>
-      <span class="icon">📂</span>
-      我的文件夹
-    </h2>
+    <h2>文件夹列表</h2>
     <div class="actions">
-      <button class="btn btn-primary" onclick="openNewFolderModal()">＋ 新建文件夹</button>
+      <button class="btn btn-primary" onclick="openNewFolder()">+ 新建文件夹</button>
     </div>
   </div>
 
-  <!-- 统计栏 -->
-  <div class="stats-bar" id="statsBar"></div>
-
-  <!-- 搜索栏 -->
-  <div class="search-bar">
-    <div class="search-input-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="搜索文件夹名称..." oninput="renderFolderGrid()">
-    </div>
-    <select id="sortSelect" onchange="renderFolderGrid()">
-      <option value="name">按名称排序</option>
-      <option value="count">按素材数排序</option>
-      <option value="newest">最新创建</option>
-    </select>
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <input class="search-input" type="text" id="searchInput" placeholder="搜索文件夹名称..." oninput="renderTable()">
+    <span class="count-info" id="countInfo"></span>
   </div>
 
-  <!-- 文件夹网格 -->
-  <div class="folder-grid" id="folderGrid"></div>
-
-  <!-- 素材展示区 -->
-  <div class="materials-section" id="materialsSection">
-    <div class="materials-header">
-      <h3 id="materialsSectionTitle">📁 <span id="materialsFolderName"></span></h3>
-      <span class="back-btn" onclick="closeMaterialsSection()">← 返回文件夹</span>
-    </div>
-    <div class="materials-grid" id="materialsGrid"></div>
+  <!-- 文件夹表格 -->
+  <div class="folder-table" id="folderTableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px"></th>
+          <th>文件夹名称</th>
+          <th style="width:60px">素材</th>
+          <th style="width:80px">创建人</th>
+          <th style="width:100px">操作</th>
+        </tr>
+      </thead>
+      <tbody id="folderTableBody"></tbody>
+    </table>
   </div>
 </div>
 
-<!-- 新建文件夹弹窗 -->
-<div class="modal-overlay" id="newFolderModal">
+<!-- 新建/重命名 弹窗 -->
+<div class="modal-overlay" id="folderModal">
   <div class="modal">
     <div class="modal-header">
-      <h3>📁 新建文件夹</h3>
-      <button class="close-btn" onclick="closeModal('newFolderModal')">✕</button>
+      <h3 id="modalTitle">新建文件夹</h3>
+      <button class="close-btn" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <label class="label">文件夹名称</label>
-      <input type="text" id="newFolderName" placeholder="请输入文件夹名称" maxlength="50">
-      <div class="hint">最多50个字符，同一用户下不可重名</div>
+      <label>文件夹名称</label>
+      <input type="text" id="folderNameInput" placeholder="请输入名称" maxlength="50">
     </div>
     <div class="modal-footer">
-      <button class="btn btn-default" onclick="closeModal('newFolderModal')">取消</button>
-      <button class="btn btn-primary" onclick="createFolder()">创建</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="modalConfirmBtn" onclick="confirmModal()">确定</button>
     </div>
   </div>
-</div>
-
-<!-- 重命名弹窗 -->
-<div class="modal-overlay" id="renameModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>✏️ 重命名文件夹</h3>
-      <button class="close-btn" onclick="closeModal('renameModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <label class="label">文件夹名称</label>
-      <input type="text" id="renameInput" placeholder="请输入新名称" maxlength="50">
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-default" onclick="closeModal('renameModal')">取消</button>
-      <button class="btn btn-primary" onclick="confirmRename()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- 确认弹窗 -->
-<div class="confirm-overlay" id="confirmModal">
-  <div class="confirm-modal">
-    <div class="confirm-icon" id="confirmIcon">🗑️</div>
-    <div class="confirm-text" id="confirmText">确定要删除该文件夹吗？</div>
-    <div class="confirm-actions">
-      <button class="confirm-btn" onclick="closeConfirm()">取消</button>
-      <button class="confirm-btn danger" id="confirmActionBtn" onclick="executeConfirm()">删除</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast success" id="toast">
-  <span class="toast-icon">✅</span>
-  <span id="toastText">操作成功</span>
 </div>
 
 <script>
@@ -254,270 +138,135 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 var CURRENT_USER = "崔志恒";
 
 var msFolders = [
-  {id: 1, name: "开场动画合集", creator: "崔志恒", materials: [1, 4, 7]},
-  {id: 2, name: "产品介绍素材", creator: "崔志恒", materials: [2, 5]},
-  {id: 3, name: "行动号召素材", creator: "黄佩贤", materials: [3, 6]},
-  {id: 4, name: "节日促销", creator: "崔志恒", materials: []},
+  {id: 1, name: "开场动画合集", creator: "崔志恒"},
+  {id: 2, name: "产品介绍素材", creator: "崔志恒"},
+  {id: 3, name: "行动号召素材", creator: "黄佩贤"},
+  {id: 4, name: "临时测试", creator: "崔志恒"},
 ];
 
 var msMaterials = [
-  {id:1, name:"开场动画A", type:"前贴", optimizer:"崔志恒", date:"2026-06-20", source:"自动入库", folders:[1]},
-  {id:2, name:"产品介绍B", type:"中段", optimizer:"黄佩贤", date:"2026-06-19", source:"手动上传", folders:[2,3]},
-  {id:3, name:"行动号召C", type:"尾帧", optimizer:"黎舒晴", date:"2026-06-18", source:"自动入库", folders:[3]},
-  {id:4, name:"前贴片-夏日版", type:"前贴", optimizer:"李雨航", date:"2026-06-17", source:"手动上传", folders:[1]},
-  {id:5, name:"中段-功能演示", type:"中段", optimizer:"谭嘉颖", date:"2026-06-16", source:"自动入库", folders:[2]},
-  {id:6, name:"尾帧-下载引导", type:"尾帧", optimizer:"林金维", date:"2026-06-15", source:"自动入库", folders:[3]},
-  {id:7, name:"前贴-品牌露出", type:"前贴", optimizer:"陈羽思", date:"2026-06-14", source:"自动入库", folders:[1]},
-  {id:8, name:"中段-优惠说明", type:"中段", optimizer:"叶首龙", date:"2026-06-13", source:"手动上传", folders:[]},
-  {id:9, name:"尾帧-立即行动", type:"尾帧", optimizer:"赖嘉俊", date:"2026-06-12", source:"自动入库", folders:[]},
-  {id:10, name:"前贴-促销快剪", type:"前贴", optimizer:"戚嘉豪", date:"2026-06-11", source:"自动入库", folders:[]},
+  {id:1, name:"开场动画A", folders:[1]},{id:2, name:"产品介绍B", folders:[2,3]},
+  {id:3, name:"行动号召C", folders:[3]},{id:4, name:"前贴片-夏日版", folders:[1]},
+  {id:5, name:"中段-功能演示", folders:[2]},{id:6, name:"尾帧-下载引导", folders:[3]},
+  {id:7, name:"前贴-品牌露出", folders:[1]},{id:8, name:"中段-优惠说明", folders:[]},
+  {id:9, name:"尾帧-立即行动", folders:[]},{id:10, name:"前贴-促销快剪", folders:[]},
 ];
 
-var pendingConfirm = null; // {type, payload}
+var modalMode = null; // 'create' | 'rename'
+var editFolderId = null;
 
-// ========== 统计栏 ==========
-function renderStatsBar() {
-  var total = msFolders.length;
-  var myFolders = msFolders.filter(function(f) { return f.creator === CURRENT_USER; }).length;
-  var totalMaterials = msMaterials.length;
-  var uncategorized = msMaterials.filter(function(m) { return !m.folders || m.folders.length === 0; }).length;
-  
-  document.getElementById("statsBar").innerHTML = 
-    '<div class="stat-card"><div class="stat-icon blue">📁</div><div class="stat-info"><div class="stat-number">' + total + '</div><div class="stat-label">总文件夹数</div></div></div>' +
-    '<div class="stat-card"><div class="stat-icon green">📂</div><div class="stat-info"><div class="stat-number">' + myFolders + '</div><div class="stat-label">我的文件夹</div></div></div>' +
-    '<div class="stat-card"><div class="stat-icon orange">🎬</div><div class="stat-info"><div class="stat-number">' + totalMaterials + '</div><div class="stat-label">原料总数</div></div></div>' +
-    '<div class="stat-card"><div class="stat-icon" style="background:#fff8e1;color:#faad14">📄</div><div class="stat-info"><div class="stat-number">' + uncategorized + '</div><div class="stat-label">未分类素材</div></div></div>';
+function getFolderCount(folderId) {
+  var c = 0;
+  for (var i = 0; i < msMaterials.length; i++) {
+    if (msMaterials[i].folders && msMaterials[i].folders.indexOf(folderId) !== -1) c++;
+  }
+  return c;
 }
 
-// ========== 文件夹网格 ==========
-function getFolderMaterials(folderId) {
-  return msMaterials.filter(function(m) {
-    return m.folders && m.folders.indexOf(folderId) !== -1;
-  });
-}
-
-function renderFolderGrid() {
-  var grid = document.getElementById("folderGrid");
-  var keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-  var sortBy = document.getElementById("sortSelect").value;
-  
-  var list = msFolders.slice();
-  
-  // 搜索过滤
-  if (keyword) {
-    list = list.filter(function(f) { return f.name.toLowerCase().indexOf(keyword) >= 0; });
-  }
-  
-  // 排序
-  list.sort(function(a, b) {
-    if (sortBy === "name") return a.name.localeCompare(b.name);
-    if (sortBy === "count") return b.materials.length - a.materials.length;
-    if (sortBy === "newest") return b.id - a.id;
-    return 0;
-  });
-  
-  if (list.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><span class="empty-icon">📂</span><h3>暂无文件夹</h3><p>点击上方「新建文件夹」按钮创建你的第一个文件夹</p></div>';
-    return;
-  }
-  
+function renderTable() {
+  var kw = document.getElementById("searchInput").value.trim().toLowerCase();
+  var tbody = document.getElementById("folderTableBody");
   var html = "";
-  for (var i = 0; i < list.length; i++) {
-    var f = list[i];
-    var isOwner = f.creator === CURRENT_USER;
-    var folderMaterials = getFolderMaterials(f.id);
-    var materialCount = folderMaterials.length;
-    
-    // 生成预览缩略图
-    var previewHtml = '';
-    if (materialCount > 0) {
-      var colors = ['linear-gradient(135deg,#667eea,#764ba2)', 'linear-gradient(135deg,#f093fb,#f5576c)', 'linear-gradient(135deg,#4facfe,#00f2fe)', 'linear-gradient(135deg,#43e97b,#38f9d7)'];
-      var previews = [];
-      for (var j = 0; j < Math.min(materialCount, 4); j++) {
-        previews.push('<div class="preview-thumb" style="background:' + colors[j % colors.length] + '">🎬</div>');
-      }
-      if (materialCount > 4) {
-        previews.push('<div class="preview-thumb more">+' + (materialCount - 4) + '</div>');
-      }
-      previewHtml = '<div class="folder-preview">' + previews.join('') + '</div>';
-    } else {
-      previewHtml = '<div class="folder-empty">暂无素材</div>';
-    }
-    
-    html += '<div class="folder-card' + (isOwner ? '' : ' readonly') + '" onclick="openFolder(' + f.id + ')">' +
-      (isOwner ? '<div class="folder-actions">' +
-        '<button class="folder-action-btn" title="重命名" onclick="event.stopPropagation();openRename(' + f.id + ')">✏️</button>' +
-        '<button class="folder-action-btn danger" title="删除" onclick="event.stopPropagation();openDeleteConfirm(' + f.id + ')">🗑️</button>' +
-        '</div>' : '') +
-      '<span class="folder-emoji">📁</span>' +
-      '<div class="folder-name">' + f.name + '</div>' +
-      '<div class="folder-meta">' +
-        '<span>🎬 ' + materialCount + ' 个素材</span>' +
-        '<span>👤 ' + f.creator + '</span>' +
-      '</div>' +
-      previewHtml +
-      '</div>';
-  }
-  grid.innerHTML = html;
-}
-
-// ========== 文件夹操作 ==========
-function openNewFolderModal() {
-  document.getElementById("newFolderName").value = "";
-  document.getElementById("newFolderModal").classList.add("active");
-  document.body.style.overflow = "hidden";
-  setTimeout(function() { document.getElementById("newFolderName").focus(); }, 100);
-}
-
-function createFolder() {
-  var name = document.getElementById("newFolderName").value.trim();
-  if (!name) { showToast("请输入文件夹名称", true); return; }
+  var shown = 0;
   
-  // 检查重名
   for (var i = 0; i < msFolders.length; i++) {
-    if (msFolders[i].name === name) { showToast("已存在同名文件夹", true); return; }
-  }
-  
-  msFolders.push({id: Date.now(), name: name, creator: CURRENT_USER, materials: []});
-  closeModal('newFolderModal');
-  renderStatsBar();
-  renderFolderGrid();
-  showToast("文件夹「" + name + "」创建成功");
-}
-
-var renameFolderId = null;
-function openRename(id) {
-  renameFolderId = id;
-  var f = msFolders.find(function(f) { return f.id === id; });
-  if (!f) return;
-  document.getElementById("renameInput").value = f.name;
-  document.getElementById("renameModal").classList.add("active");
-  document.body.style.overflow = "hidden";
-  setTimeout(function() { document.getElementById("renameInput").focus(); }, 100);
-}
-
-function confirmRename() {
-  var name = document.getElementById("renameInput").value.trim();
-  if (!name) { showToast("请输入文件夹名称", true); return; }
-  
-  var f = msFolders.find(function(f) { return f.id === renameFolderId; });
-  if (f) { f.name = name; }
-  
-  closeModal('renameModal');
-  renderFolderGrid();
-  showToast("文件夹已重命名");
-}
-
-function openDeleteConfirm(id) {
-  var f = msFolders.find(function(f) { return f.id === id; });
-  if (!f) return;
-  
-  document.getElementById("confirmIcon").textContent = "🗑️";
-  document.getElementById("confirmText").innerHTML = '确定要删除文件夹「' + f.name + '」吗？<br><span style="font-size:12px;color:var(--text-3)">文件夹内的素材不会被删除，仅移出文件夹</span>';
-  document.getElementById("confirmActionBtn").textContent = "删除";
-  document.getElementById("confirmActionBtn").className = "confirm-btn danger";
-  
-  pendingConfirm = {type: "deleteFolder", payload: id};
-  document.getElementById("confirmModal").classList.add("active");
-  document.body.style.overflow = "hidden";
-}
-
-function executeConfirm() {
-  if (!pendingConfirm) return;
-  
-  if (pendingConfirm.type === "deleteFolder") {
-    var folderId = pendingConfirm.payload;
-    // 从素材的folders属性中移除该文件夹
-    for (var j = 0; j < msMaterials.length; j++) {
-      if (msMaterials[j].folders) {
-        var idx = msMaterials[j].folders.indexOf(folderId);
-        if (idx !== -1) msMaterials[j].folders.splice(idx, 1);
-      }
-    }
-    msFolders = msFolders.filter(function(f) { return f.id !== folderId; });
+    var f = msFolders[i];
+    var count = getFolderCount(f.id);
+    if (kw && f.name.toLowerCase().indexOf(kw) === -1) continue;
+    var isOwner = f.creator === CURRENT_USER;
     
-    closeConfirm();
-    renderStatsBar();
-    renderFolderGrid();
-    showToast("文件夹已删除");
+    html += '<tr>' +
+      '<td class="folder-icon-cell">📁</td>' +
+      '<td><div class="folder-name">' + f.name + '</div></td>' +
+      '<td class="folder-mcount">' + count + '</td>' +
+      '<td><span class="folder-creator">' + f.creator + '</span></td>' +
+      '<td class="folder-actions">' +
+        (isOwner ? 
+          '<button class="btn btn-text" onclick="openRename(\'' + f.name + '\',' + f.id + ')">编辑</button>' +
+          '<button class="btn btn-text danger" onclick="deleteFolder(' + f.id + ',\'' + f.name.replace(/'/g, "\\'") + '\')">删除</button>'
+          : '<span style="font-size:11px;color:var(--text-3)">只读</span>') +
+      '</td></tr>';
+    shown++;
   }
+  
+  if (shown === 0) {
+    html = '<tr class="empty-row"><td colspan="5">暂无文件夹，点击「新建文件夹」开始</td></tr>';
+  }
+  
+  tbody.innerHTML = html;
+  document.getElementById("countInfo").textContent = "共 " + shown + " 个文件夹";
 }
 
-// ========== 打开文件夹查看素材 ==========
-var currentViewFolderId = null;
+// ========== 新建文件夹 ==========
+function openNewFolder() {
+  modalMode = 'create';
+  editFolderId = null;
+  document.getElementById("modalTitle").textContent = "新建文件夹";
+  document.getElementById("folderNameInput").value = "";
+  document.getElementById("modalConfirmBtn").textContent = "创建";
+  document.getElementById("folderModal").classList.add("active");
+  setTimeout(function() { document.getElementById("folderNameInput").focus(); }, 50);
+}
 
-function openFolder(folderId) {
-  currentViewFolderId = folderId;
-  var f = msFolders.find(function(f) { return f.id === folderId; });
-  if (!f) return;
+function openRename(name, id) {
+  modalMode = 'rename';
+  editFolderId = id;
+  document.getElementById("modalTitle").textContent = "重命名文件夹";
+  document.getElementById("folderNameInput").value = name;
+  document.getElementById("modalConfirmBtn").textContent = "保存";
+  document.getElementById("folderModal").classList.add("active");
+  setTimeout(function() { document.getElementById("folderNameInput").focus(); }, 50);
+}
+
+function closeModal() {
+  document.getElementById("folderModal").classList.remove("active");
+  modalMode = null;
+  editFolderId = null;
+}
+
+function confirmModal() {
+  var name = document.getElementById("folderNameInput").value.trim();
+  if (!name) { alert("请输入文件夹名称"); return; }
   
-  document.getElementById("materialsFolderName").textContent = f.name;
-  var folderMaterials = getFolderMaterials(folderId);
-  
-  if (folderMaterials.length === 0) {
-    document.getElementById("materialsGrid").innerHTML = 
-      '<div class="empty-state" style="grid-column:1/-1"><span class="empty-icon">🎬</span><h3>该文件夹暂无素材</h3><p>你可以从原料库将素材移动到该文件夹</p></div>';
-  } else {
-    var html = "";
-    for (var i = 0; i < folderMaterials.length; i++) {
-      var m = folderMaterials[i];
-      html += '<div class="material-thumb">' +
-        '<div class="thumb-img">🎬</div>' +
-        '<div class="thumb-info">' +
-        '<div class="thumb-name">' + m.name + '</div>' +
-        '<div class="thumb-meta"><span>' + m.type + '</span><span>·</span><span>' + m.date + '</span></div>' +
-        '</div></div>';
+  if (modalMode === 'create') {
+    // 检查重名
+    for (var i = 0; i < msFolders.length; i++) {
+      if (msFolders[i].name === name) { alert("已存在同名文件夹"); return; }
     }
-    document.getElementById("materialsGrid").innerHTML = html;
+    msFolders.push({id: Date.now(), name: name, creator: CURRENT_USER});
+  } else if (modalMode === 'rename') {
+    for (var i = 0; i < msFolders.length; i++) {
+      if (msFolders[i].id === editFolderId) { msFolders[i].name = name; break; }
+    }
   }
   
-  document.getElementById("materialsSection").classList.add("visible");
-  document.getElementById("materialsSection").scrollIntoView({behavior: "smooth", block: "start"});
+  closeModal();
+  renderTable();
 }
 
-function closeMaterialsSection() {
-  document.getElementById("materialsSection").classList.remove("visible");
-  currentViewFolderId = null;
-}
-
-// ========== 工具函数 ==========
-function closeModal(id) {
-  document.getElementById(id).classList.remove("active");
-  document.body.style.overflow = "";
-}
-
-function closeConfirm() {
-  document.getElementById("confirmModal").classList.remove("active");
-  document.body.style.overflow = "";
-  pendingConfirm = null;
-}
-
-function showToast(msg, isError) {
-  var el = document.getElementById("toast");
-  var textEl = document.getElementById("toastText");
-  textEl.textContent = msg;
-  el.className = "toast " + (isError ? "" : "success");
-  el.classList.add("show");
-  clearTimeout(el._timer);
-  el._timer = setTimeout(function() { el.classList.remove("show"); }, 2500);
+function deleteFolder(id, name) {
+  if (!confirm("确定要删除文件夹「" + name + "」吗？")) return;
+  
+  // 从素材中移除该文件夹
+  for (var j = 0; j < msMaterials.length; j++) {
+    if (msMaterials[j].folders) {
+      var idx = msMaterials[j].folders.indexOf(id);
+      if (idx !== -1) msMaterials[j].folders.splice(idx, 1);
+    }
+  }
+  
+  msFolders = msFolders.filter(function(f) { return f.id !== id; });
+  renderTable();
 }
 
 // ========== 键盘快捷键 ==========
 document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") {
-    closeModal("newFolderModal");
-    closeModal("renameModal");
-    closeConfirm();
-  }
-  if (e.key === "Enter") {
-    if (document.getElementById("newFolderModal").classList.contains("active")) createFolder();
-    if (document.getElementById("renameModal").classList.contains("active")) confirmRename();
-  }
+  if (e.key === "Escape") closeModal();
+  if (e.key === "Enter" && document.getElementById("folderModal").classList.contains("active")) confirmModal();
 });
 
 // ========== 初始化 ==========
-renderStatsBar();
-renderFolderGrid();
+renderTable();
 </script>
 </body>
 </html>
