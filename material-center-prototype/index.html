@@ -57,8 +57,6 @@ body{font-family:var(--font);color:var(--text-1);line-height:1.6;-webkit-font-sm
 .menu-item .mi-label{flex:1;overflow:hidden;text-overflow:ellipsis}
 
 .sidebar .bottom-area{
-
-.sidebar .bottom-area{
   border-top:1px solid var(--border-light);padding:8px 0;flex-shrink:0;
 }
 .sidebar .user-info{
@@ -97,27 +95,27 @@ body{font-family:var(--font);color:var(--text-1);line-height:1.6;-webkit-font-sm
   <div class="menu-area">
     <div class="menu-group">
       <div class="menu-group-title">素材中心</div>
-      <div class="menu-item active" data-target="原料库" onclick="switchMenu(event, this)">
+      <div class="menu-item active" data-target="原料库" onclick="switchMenu(this)">
         <span class="mi-icon">📂</span>
         <span class="mi-label">原料库</span>
       </div>
-      <div class="menu-item" data-target="素材库" onclick="switchMenu(event, this)">
+      <div class="menu-item" data-target="素材库" onclick="switchMenu(this)">
         <span class="mi-icon">📂</span>
         <span class="mi-label">素材库</span>
       </div>
-      <div class="menu-item" data-target="生产工作台" onclick="switchMenu(event, this)">
+      <div class="menu-item" data-target="生产工作台" onclick="switchMenu(this)">
         <span class="mi-icon">⚙️</span>
         <span class="mi-label">生产工作台</span>
       </div>
-      <div class="menu-item" data-target="标签库" onclick="switchMenu(event, this)">
+      <div class="menu-item" data-target="标签库" onclick="switchMenu(this)">
         <span class="mi-icon">🏷️</span>
         <span class="mi-label">标签库</span>
       </div>
-      <div class="menu-item" data-target="素材报表" onclick="switchMenu(event, this)">
+      <div class="menu-item" data-target="素材报表" onclick="switchMenu(this)">
         <span class="mi-icon">📊</span>
         <span class="mi-label">素材报表 V1</span>
       </div>
-      <div class="menu-item" data-target="素材报表V2" onclick="switchMenu(event, this)">
+      <div class="menu-item" data-target="素材报表V2" onclick="switchMenu(this)">
         <span class="mi-icon">📊</span>
         <span class="mi-label">素材报表 V2</span>
       </div>
@@ -149,23 +147,25 @@ var MENU_CONFIG = {
   "生产工作台": { file: "生产工作台/生产工作台原型.html", title: "生产工作台" },
   "素材报表":     { file: "素材报表V1/素材报表V1原型.html", title: "素材报表（V1 基础报表）" },
   "素材报表V2": { file: "素材报表V2/素材报表V2原型.html", title: "素材报表（V2）" },
-  "文件夹管理": { file: "原料库/文件夹管理.html",       title: "文件夹管理" },
   "标签库":       { file: "标签库/标签库原型.html",       title: "标签库" },
 };
 
-var menuFolders = [];
-
-function switchMenu(ev, el) {
-  if (ev) ev.stopPropagation();
+function switchMenu(el) {
+  // 更新菜单高亮
   var items = document.querySelectorAll('.menu-item');
-  for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
+  for (var i = 0; i < items.length; i++) {
+    items[i].classList.remove('active');
+  }
   el.classList.add('active');
-  var targetKey = el.getAttribute('data-target');
-  var cfg = MENU_CONFIG[targetKey];
+
+  // 加载对应内容（每次带最新时间戳强制刷新）
+  var key = el.getAttribute('data-target');
+  var cfg = MENU_CONFIG[key];
   if (!cfg) return;
   var sep = cfg.file.indexOf('?') >= 0 ? '&' : '?';
   document.getElementById('contentFrame').src = cfg.file + sep + 'v=' + Date.now();
-  document.getElementById('pageTitle').innerHTML = cfg.title + ' <span class="tag">原型预览</span>';
+  document.getElementById('pageTitle').innerHTML =
+    cfg.title + ' <span class="tag">原型预览</span>';
 }
 
 function updateMaterialTags(cfg) {
@@ -177,27 +177,19 @@ function updateMaterialTags(cfg) {
   } catch (e) {}
 }
 
-// 默认加载
+// 默认加载第一个菜单
 (function(){
   var first = document.querySelector('.menu-item');
-  if (first) first.classList.add('active');
-  var key = '原料库';
-  var cfg = MENU_CONFIG[key];
-  if (cfg) document.getElementById('contentFrame').src = cfg.file + '?v=' + Date.now();
-})();
-// 默认加载 - 加载原料库首页
-(function(){
-  var key = '原料库';
-  var cfg = MENU_CONFIG[key];
-  if (cfg) {
-    var sep = cfg.file.indexOf('?') >= 0 ? '&' : '?';
-    document.getElementById('contentFrame').src = cfg.file + sep + 'v=' + Date.now();
+  if (first) {
+    first.classList.add('active');
+    // 带时间戳加载默认页面
+    var key = first.getAttribute('data-target');
+    var cfg = MENU_CONFIG[key];
+    if (cfg) {
+      var sep = cfg.file.indexOf('?') >= 0 ? '&' : '?';
+      document.getElementById('contentFrame').src = cfg.file + sep + 'v=' + Date.now();
+    }
   }
-  // 高亮首页
-  var home = document.querySelector('.menu-item.sub');
-  if (home) home.classList.add('active');
-  var parent = document.querySelector('.menu-item.expandable');
-  if (parent) parent.classList.add('expanded');
 })();
 </script>
 
