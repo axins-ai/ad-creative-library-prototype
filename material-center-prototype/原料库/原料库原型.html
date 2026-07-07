@@ -263,6 +263,95 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </div>
       </div>
 
+      <!-- 标签筛选卡片 -->
+      <div class="filter-card">
+        <div class="filter-card-header" onclick="toggleTagFilter()">
+          <div class="filter-card-title">🏷️ 标签筛选 <span class="filter-card-toggle collapsed" id="tagFilterToggle">▶</span></div>
+        </div>
+        <div class="filter-card-body collapsed" id="tagFilterBar">
+          <!-- 用户标签 -->
+          <div class="tag-cat-row">
+            <div class="tag-cat-label">用户标签</div>
+            <div class="tag-cat-items">
+              <div class="filter-group">
+                <label>地区</label>
+                <select id="filterUserRegion" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>年龄</label>
+                <select id="filterUserAge" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>性别</label>
+                <select id="filterUserGender" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- 产品标签 -->
+          <div class="tag-cat-row">
+            <div class="tag-cat-label">产品标签</div>
+            <div class="tag-cat-items">
+              <div class="filter-group">
+                <label>产品标签</label>
+                <select id="filterProductTag" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                  <option>39元</option>
+                  <option>59元</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- 内容标签 -->
+          <div class="tag-cat-row">
+            <div class="tag-cat-label">内容标签</div>
+            <div class="tag-cat-items">
+              <div class="filter-group">
+                <label>文案</label>
+                <select id="filterContentWenan" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>宣传卖点</label>
+                <select id="filterContentMaidian" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>场景</label>
+                <select id="filterContentChangjing" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>对话</label>
+                <select id="filterContentDuihua" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>口播</label>
+                <select id="filterContentKoubo" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>内容</label>
+                <select id="filterContentNeirong" onchange="applyMsFilter()">
+                  <option value="">全部</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 素材网格 -->
       <div class="ms-grid" id="msGrid"></div>
     </div>
@@ -1030,6 +1119,56 @@ function submitMsUpload() {
 }
 
 // ========== 筛选 ==========
+// ========== 标签筛选 ==========
+function toggleTagFilter() {
+  var bar = document.getElementById("tagFilterBar");
+  var toggle = document.getElementById("tagFilterToggle");
+  if (!bar || !toggle) return;
+  if (bar.classList.contains("collapsed")) {
+    bar.classList.remove("collapsed");
+    toggle.classList.remove("collapsed");
+  } else {
+    bar.classList.add("collapsed");
+    toggle.classList.add("collapsed");
+  }
+}
+
+function initTagFilters() {
+  // 用户标签 - 地区
+  var regionSel = document.getElementById("filterUserRegion");
+  if (regionSel) {
+    var regions = ["一线城市", "二线城市", "三四线城市", "农村"];
+    for (var i = 0; i < regions.length; i++) {
+      regionSel.innerHTML += '<option>' + regions[i] + '</option>';
+    }
+  }
+  // 用户标签 - 年龄
+  var ageSel = document.getElementById("filterUserAge");
+  if (ageSel) {
+    var ages = ["18-24", "25-34", "35-44", "45+"];
+    for (var i = 0; i < ages.length; i++) {
+      ageSel.innerHTML += '<option>' + ages[i] + '</option>';
+    }
+  }
+  // 用户标签 - 性别
+  var genderSel = document.getElementById("filterUserGender");
+  if (genderSel) {
+    var genders = ["男", "女"];
+    for (var i = 0; i < genders.length; i++) {
+      genderSel.innerHTML += '<option>' + genders[i] + '</option>';
+    }
+  }
+  // 内容标签
+  var contentOpts = {"filterContentWenan":["紧迫性","系统通知"],"filterContentMaidian":["话费","流量"],"filterContentChangjing":["营业厅","公园","小区","街头"],"filterContentDuihua":["老年男人","老年女人"],"filterContentKoubo":["口播女","口播男"],"filterContentNeirong":["风景","猛宠","花鸟"]};
+  for (var key in contentOpts) {
+    var sel = document.getElementById(key);
+    if (!sel) continue;
+    for (var j = 0; j < contentOpts[key].length; j++) {
+      sel.innerHTML += '<option>' + contentOpts[key][j] + '</option>';
+    }
+  }
+}
+
 function toggleMsFilterBar() {
   var bar = document.getElementById("msFilterBar");
   var toggle = document.getElementById("msFilterBarToggle");
@@ -1082,6 +1221,11 @@ document.getElementById("renameFolderModal").addEventListener("click", function(
 document.getElementById("moveToFolderModal").addEventListener("click", function(e) {
   if (e.target === this) closeMoveModal();
 });
+
+// ========== 初始化 ==========
+populateFolderFilters();
+initTagFilters();
+renderMsGrid();
 
 // Enter键提交新建文件夹
 document.getElementById("newFolderName").addEventListener("keypress", function(e) {
