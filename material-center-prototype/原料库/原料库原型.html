@@ -144,10 +144,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .upload-body .fm-group label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:5px}
 
 /* 文件夹管理弹窗 */
-.fm-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border-light)}
-.fm-row .fm-name{flex:1;font-size:13px}
-.fm-row .fm-cnt{font-size:11px;color:var(--text-3)}
-.fm-row .fm-btn{font-size:12px;cursor:pointer;padding:2px 4px;border-radius:4px}
+.fm-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border-light)}
+.fm-row .fm-name{flex:1;font-size:13px;font-weight:500}
+.fm-row .fm-cnt{font-size:11px;color:var(--text-3);min-width:30px;text-align:right}
+.fm-row .fm-btn{font-size:13px;cursor:pointer;padding:4px 8px;border-radius:4px;user-select:none}
 .fm-row .fm-rename:hover{color:var(--primary);background:var(--primary-light)}
 .fm-row .fm-del:hover{color:var(--danger);background:#fff1f0}
 .fm-empty{text-align:center;padding:30px;color:var(--text-3);font-size:13px}
@@ -911,14 +911,36 @@ function renderFolderBar() {
   }
   h += '<button class="folder-add-btn" onclick="createFolder()" title="新建文件夹">+</button>';
   bar.innerHTML = h;
+  syncUploadFolder();
+}
+
+function syncUploadFolder() {
+  var sel = document.getElementById('msUploadFolder');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">未分类</option>';
+  for (var i = 0; i < msFolders.length; i++) {
+    var opt = document.createElement('option');
+    opt.value = msFolders[i].id;
+    opt.textContent = msFolders[i].name;
+    sel.appendChild(opt);
+  }
+  sel.value = cur;
 }
 
 function createFolder() {
-  var name = prompt('请输入文件夹名称：');
-  if (!name || !name.trim()) return;
-  name = name.trim();
+  document.getElementById('createFolderOverlay').classList.add('active');
+  document.getElementById('createFolderInput').value = '';
+  document.body.style.overflow = 'hidden';
+  setTimeout(function(){document.getElementById('createFolderInput').focus();},100);
+}
+function submitCreateFolder() {
+  var name = document.getElementById('createFolderInput').value.trim();
+  if (!name) { alert('请输入文件夹名称'); return; }
   for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === name) { alert('已存在同名文件夹'); return; } }
   msFolders.push({id: Date.now(), name: name});
+  document.getElementById('createFolderOverlay').classList.remove('active');
+  document.body.style.overflow = '';
   renderFolderBar();
   renderMsGrid();
 }
@@ -1298,12 +1320,12 @@ function fmCreate() {
 </div>
 <!-- 文件夹管理弹窗 -->
 <div class="modal-overlay" id="fmModal">
-  <div class="modal" style="width:580px">
+  <div class="modal" style="width:620px">
     <div class="modal-header">
       <h3>📁 文件夹管理</h3>
       <button class="close-btn" onclick="closeFM()">✕</button>
     </div>
-    <div class="modal-body" style="max-height:380px;overflow-y:auto">
+    <div class="modal-body" style="min-height:200px;max-height:500px;overflow-y:auto">
       <div style="display:flex;gap:8px;margin-bottom:14px">
         <input type="text" id="fmInput" placeholder="输入名称..." style="flex:1;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none">
         <button class="btn btn-primary" onclick="fmCreate()" style="height:32px">新建</button>
@@ -1312,6 +1334,24 @@ function fmCreate() {
     </div>
     <div class="modal-footer">
       <button class="btn btn-default" onclick="closeFM()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新建文件夹弹窗 -->
+<div class="modal-overlay" id="createFolderOverlay">
+  <div class="modal" style="width:380px">
+    <div class="modal-header">
+      <h3>📁 新建文件夹</h3>
+      <button class="close-btn" onclick="document.getElementById('createFolderOverlay').classList.remove('active');document.body.style.overflow=''">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:12px;color:var(--text-2);margin-bottom:6px;display:block">文件夹名称</label>
+      <input type="text" id="createFolderInput" placeholder="请输入名称" maxlength="50" style="width:100%;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none" onkeydown="if(event.key==='Enter')submitCreateFolder()">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="document.getElementById('createFolderOverlay').classList.remove('active');document.body.style.overflow=''">取消</button>
+      <button class="btn btn-primary" onclick="submitCreateFolder()">创建</button>
     </div>
   </div>
 </div>
