@@ -1199,6 +1199,15 @@ try { renderFolderBar(); } catch(e) { console.error("renderFolderBar failed:", e
 try { initMsTagFilters(); } catch(e) { console.error("initMsTagFilters failed:", e); }
 try { renderMsUploadContentTagFields(); } catch(e) { console.error("renderMsUploadContentTagFields failed:", e); }
 try { renderMsGrid(); } catch(e) { console.error("renderMsGrid init failed:", e); }
+// 从URL读取文件夹参数
+try {
+  var m = location.search.match(/folder=(\d+)/);
+  if (m) {
+    selFolder = parseInt(m[1]);
+    renderFolderBar();
+    renderMsGrid();
+  }
+} catch(e) {}
 </script>
 
 <!-- 消息弹窗 -->
