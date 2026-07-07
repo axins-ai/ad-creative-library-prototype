@@ -1617,12 +1617,29 @@ function selectAllFromFolder() {
   var folderVal = document.getElementById('modalFolderFilter').value;
   if (!folderVal) { showToast('请先选择一个文件夹', 'w'); return; }
   var folderId = parseInt(folderVal);
-  var items = document.querySelectorAll('#modalBody .modal-item[data-id]');
+  // 获取当前类型筛选（锁定的类型或选中的类型tab）
+  var filterType = '';
+  if (gModal.lockedType === '前贴' || gModal.lockedType === '尾帧') {
+    filterType = gModal.lockedType;
+  } else if (gModal.lockedType === '中段') {
+    var midTabs = document.getElementById('midTypeTabs').children;
+    for (var mi = 0; mi < midTabs.length; mi++) {
+      if (midTabs[mi].classList.contains('active')) {
+        filterType = midTabs[mi].getAttribute('data-type');
+        break;
+      }
+    }
+  }
+  // 直接从数据源筛选
   gModal.tempSel = [];
-  for (var i = 0; i < items.length; i++) {
-    var id = parseInt(items[i].getAttribute('data-id'));
-    var m = getMatById(id);
-    if (m && m.folderId === folderId && gModal.tempSel.indexOf(id) === -1) gModal.tempSel.push(id);
+  for (var i = 0; i < MATERIALS_DB.length; i++) {
+    var m = MATERIALS_DB[i];
+    if (m.folderId !== folderId) continue;
+    if (filterType && m.type !== filterType) continue;
+    // 基础属性筛选
+    if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
+    if (gBasicAttrs.channel && m.channel !== gBasicAttrs.channel) continue;
+    if (gModal.tempSel.indexOf(m.id) === -1) gModal.tempSel.push(m.id);
   }
   renderModalList();
   showToast('已选择 ' + gModal.tempSel.length + ' 个素材', 's');
