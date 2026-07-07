@@ -46,6 +46,14 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .folder-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .folder-tab .tab-count{font-size:10px;margin-left:4px;opacity:.65}
 .folder-tab.active .tab-count{opacity:.85}
+.folder-back:hover{border-color:var(--text-3) !important;color:var(--text-3) !important;background:var(--bg-hover)}
+.bc-crumb{font-size:12px;color:var(--primary);cursor:pointer;white-space:nowrap;padding:2px 4px;border-radius:4px;transition:background .15s}
+.bc-crumb:hover{background:var(--primary-light)}
+.bc-crumb.bc-current{color:var(--text-1);font-weight:500;cursor:default;background:transparent}
+.bc-sep{font-size:11px;color:var(--text-3);margin:0 2px}
+.fm-row-selected{background:var(--primary-light) !important;border-color:var(--primary) !important}
+.fm-row .fm-add-sub{font-size:11px;color:var(--text-3)}
+.fm-row .fm-add-sub:hover{color:var(--primary)}
 .tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .tag-filter-row .filter-group{margin-bottom:0}
 .tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
@@ -611,9 +619,18 @@ function closeResultModal() {
 }
 
 var msFolders = [
-  {id:1, name:'开场动画合集'},
-  {id:2, name:'产品介绍素材'},
-  {id:3, name:'行动号召素材'},
+  // 一级
+  {id:1, name:'开场动画合集', parentId: null},
+  {id:2, name:'产品介绍素材', parentId: null},
+  {id:3, name:'行动号召素材', parentId: null},
+  // 二级（子文件夹）
+  {id:4, name:'夏季开场', parentId: 1},
+  {id:5, name:'冬季开场', parentId: 1},
+  {id:7, name:'手机产品', parentId: 2},
+  {id:8, name:'宽带产品', parentId: 2},
+  // 三级（子-子文件夹）
+  {id:6, name:'阳光沙滩版', parentId: 4},
+  {id:9, name:'5G套餐版', parentId: 8},
 ];
 
 var msMaterials = [
@@ -912,6 +929,53 @@ function resetMsFilter() {
 
 // ========== 文件夹 ==========
 var selFolder = null; // null=全部, -1=未分类, 数字=具体文件夹
+var gFolderPath = []; // 面包屑导航栈, []表示根层级(显示所有一级文件夹)
+
+// 获取某个文件夹的所有子文件夹ID（递归，包含自身）
+function getFolderAndChildrenIds(folderId) {
+  var ids = [folderId];
+  for (var i = 0; i < msFolders.length; i++) {
+    if (msFolders[i].parentId === folderId) {
+      ids = ids.concat(getFolderAndChildrenIds(msFolders[i].id));
+    }
+  }
+  return ids;
+}
+
+// 获取某个文件夹的直接子文件夹
+function getChildFolders(parentId) {
+  var result = [];
+  for (var i = 0; i < msFolders.length; i++) {
+    if (msFolders[i].parentId === parentId) result.push(msFolders[i]);
+  }
+  return result;
+}
+
+// 获取一级文件夹（parentId === null）
+function getRootFolders() {
+  var result = [];
+  for (var i = 0; i < msFolders.length; i++) {
+    if (!msFolders[i].parentId) result.push(msFolders[i]);
+  }
+  return result;
+}
+
+// 根据ID获取文件夹名称
+function getFolderName(folderId) {
+  for (var i = 0; i < msFolders.length; i++) {
+    if (msFolders[i].id === folderId) return msFolders[i].name;
+  }
+  return '';
+}
+
+// 获取当前层级需要显示的文件夹列表
+function getCurrentLevelFolders() {
+  if (gFolderPath.length === 0) {
+    return getRootFolders();
+  }
+  var parentId = gFolderPath[gFolderPath.length - 1];
+  return getChildFolders(parentId);
+}
 
 function renderFolderBar() {
   var bar = document.getElementById('folderBar');
@@ -919,14 +983,52 @@ function renderFolderBar() {
   var cntAll = msMaterials.length;
   var uncat = 0;
   for (var i = 0; i < msMaterials.length; i++) { if (!msMaterials[i].folderId) uncat++; }
-  var h = '<span class="folder-tab' + (selFolder === null ? ' active' : '') + '" onclick="selFolder=null;renderFolderBar();applyMsFilter()">全部<span class="tab-count">' + cntAll + '</span></span>';
-  h += '<span class="folder-tab' + (selFolder === -1 ? ' active' : '') + '" onclick="selFolder=-1;renderFolderBar();applyMsFilter()">未分类<span class="tab-count">' + uncat + '</span></span>';
-  for (var i = 0; i < msFolders.length; i++) {
-    var f = msFolders[i];
-    var cnt = 0;
-    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
-    h += '<span class="folder-tab' + (selFolder === f.id ? ' active' : '') + '" onclick="selFolder=' + f.id + ';renderFolderBar();applyMsFilter()">' + f.name + '<span class="tab-count">' + cnt + '</span></span>';
+  
+  var h = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">';
+  // 第一行：快速筛选 + 面包屑
+  h += '<span class="folder-tab' + (selFolder === null ? ' active' : '') + '" onclick="selFolder=null;gFolderPath=[];renderFolderBar();applyMsFilter()">全部<span class="tab-count">' + cntAll + '</span></span>';
+  h += '<span class="folder-tab' + (selFolder === -1 ? ' active' : '') + '" onclick="selFolder=-1;gFolderPath=[];renderFolderBar();applyMsFilter()">未分类<span class="tab-count">' + uncat + '</span></span>';
+  
+  // 面包屑导航
+  if (gFolderPath.length > 0) {
+    h += '<span class="bc-sep">▸</span>';
+    // 面包屑: 全部(回到根)
+    h += '<span class="bc-crumb" onclick="gFolderPath=[];selFolder=\'nav\';renderFolderBar();applyMsFilter()">全部</span>';
+    for (var pi = 0; pi < gFolderPath.length; pi++) {
+      var fid = gFolderPath[pi];
+      var fname = getFolderName(fid);
+      h += '<span class="bc-sep">▸</span>';
+      if (pi === gFolderPath.length - 1) {
+        h += '<span class="bc-crumb bc-current">' + fname + '</span>';
+      } else {
+        h += '<span class="bc-crumb" onclick="gFolderPath=gFolderPath.slice(0,' + (pi+1) + ');selFolder=\'nav\';renderFolderBar();applyMsFilter()">' + fname + '</span>';
+      }
+    }
   }
+  h += '</div>';
+  
+  // 第二行：当前层级的文件夹标签
+  var currentFolders = getCurrentLevelFolders();
+  if (currentFolders.length > 0) {
+    h += '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">';
+    for (var i = 0; i < currentFolders.length; i++) {
+      var f = currentFolders[i];
+      var cnt = 0;
+      var allIds = getFolderAndChildrenIds(f.id);
+      for (var j = 0; j < msMaterials.length; j++) {
+        if (allIds.indexOf(msMaterials[j].folderId) !== -1) cnt++;
+      }
+      var hasChildren = getChildFolders(f.id).length > 0;
+      var cls = selFolder > 0 && selFolder !== 'nav' && selFolder === f.id ? ' active' : '';
+      h += '<span class="folder-tab' + cls + '" onclick="if(' + (hasChildren ? 'true' : 'false') + '){gFolderPath.push(' + f.id + ');selFolder=\'nav\';renderFolderBar();applyMsFilter()}else{selFolder=' + f.id + ';gFolderPath=[];renderFolderBar();applyMsFilter()}">' + f.name + '<span class="tab-count">' + cnt + '</span>' + (hasChildren ? '<span style="font-size:10px;margin-left:3px">▶</span>' : '') + '</span>';
+    }
+    // 返回上级按钮
+    if (gFolderPath.length > 0) {
+      h += '<span class="folder-tab folder-back" onclick="gFolderPath.pop();selFolder=\'nav\';renderFolderBar();applyMsFilter()" style="color:var(--text-3);font-size:11px;border-style:dashed">⬆ 上一级</span>';
+    }
+    h += '</div>';
+  }
+  
   bar.innerHTML = h;
   syncUploadFolder();
 }
@@ -936,12 +1038,21 @@ function syncUploadFolder() {
   if (!sel) return;
   var cur = sel.value;
   sel.innerHTML = '<option value="">未分类</option>';
-  for (var i = 0; i < msFolders.length; i++) {
-    var opt = document.createElement('option');
-    opt.value = msFolders[i].id;
-    opt.textContent = msFolders[i].name;
-    sel.appendChild(opt);
+  // 递归添加文件夹选项（带缩进）
+  function addFolderOptions(parentId, indent) {
+    var indentStr = '';
+    for (var di = 0; di < indent; di++) indentStr += '  ';
+    for (var i = 0; i < msFolders.length; i++) {
+      if (msFolders[i].parentId === parentId) {
+        var opt = document.createElement('option');
+        opt.value = msFolders[i].id;
+        opt.textContent = indentStr + msFolders[i].name;
+        sel.appendChild(opt);
+        addFolderOptions(msFolders[i].id, indent + 1);
+      }
+    }
   }
+  addFolderOptions(null, 0);
   sel.value = cur;
 }
 
@@ -984,7 +1095,11 @@ function getFilteredMsMaterials() {
   for (var i = 0; i < msMaterials.length; i++) {
     var m = msMaterials[i];
     if (selFolder === -1 && m.folderId) continue;
-    if (selFolder > 0 && m.folderId !== selFolder) continue;
+    if (selFolder > 0 && selFolder !== 'nav') {
+      var allowedIds = getFolderAndChildrenIds(selFolder);
+      if (allowedIds.indexOf(m.folderId) === -1) continue;
+    }
+    if (selFolder === 'nav') continue; // 导航状态不显示素材
     if (nameKw && m.name.toLowerCase().indexOf(nameKw) === -1) continue;
     if (typeVal !== "全部类型" && m.type !== typeVal) continue;
     if (sourceVal !== "全部来源" && m.source !== sourceVal) continue;
@@ -1238,31 +1353,86 @@ try { renderMsGrid(); } catch(e) { console.error("renderMsGrid init failed:", e)
 
 // 文件夹管理弹窗
 var gFMShowCreate = false;
+var gFMParentId = null; // 新建文件夹的上级，null=一级
+
 function openFolderManager() {
   document.getElementById('fmModal').classList.add('active');
   document.body.style.overflow = 'hidden';
   gFMShowCreate = false;
+  gFMParentId = null;
   renderFMList();
 }
 function closeFM() { document.getElementById('fmModal').classList.remove('active'); document.body.style.overflow = ''; }
-function showFMCreateRow() {
+function showFMCreateRow(parentId) {
+  gFMParentId = parentId !== undefined ? parentId : gFMParentId;
   gFMShowCreate = true;
   renderFMList();
 }
+
+// 递归渲染文件夹树
 function renderFMList() {
   var el = document.getElementById('fmList'); if (!el) return;
-  var h = '';
-  for (var i = 0; i < msFolders.length; i++) {
-    var f = msFolders[i]; var cnt = 0;
-    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
-    h += '<div class="fm-row" data-fid="' + f.id + '" data-fname="' + f.name.replace(/"/g,'').replace(/'/g,'') + '">' +
-      '<span>📁</span><span class="fm-name">' + f.name + '</span>' +
-      '<span class="fm-cnt">' + cnt + '素材</span>' +
-      '<span class="fm-btn fm-rename">✏️ 重命名</span>' +
-      '<span class="fm-btn fm-del">🗑️ 删除</span></div>';
+  
+  // 获取当前父级名称用于显示上下文
+  var parentLabel = '根目录（一级）';
+  if (gFMParentId) {
+    for (var pi = 0; pi < msFolders.length; pi++) {
+      if (msFolders[pi].id === gFMParentId) { parentLabel = msFolders[pi].name; break; }
+    }
   }
-  if (h === '') { h = '<div class="fm-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">暂无文件夹</div>'; }
-  // 内联新建行（点击新建按钮后才显示）
+  
+  var h = '';
+  // 当前目录指示器
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:6px 10px;background:var(--bg-hover);border-radius:6px;font-size:12px">' +
+    '<span style="color:var(--text-2)">📁 当前位置：<strong>' + parentLabel + '</strong></span>' +
+    (gFMParentId ? '<span class="fm-btn fm-up" onclick="gFMParentId=null;gFMShowCreate=false;renderFMList()" style="font-size:11px">⬆ 回到根目录</span>' : '') +
+    '</div>';
+  
+  // 递归函数：渲染子文件夹
+  function renderTree(parentId, depth) {
+    var html = '';
+    if (depth >= 3) return html; // 最多三级
+    var padding = 20 + depth * 24;
+    for (var i = 0; i < msFolders.length; i++) {
+      var f = msFolders[i];
+      if (f.parentId !== parentId) continue;
+      var cnt = 0;
+      var allIds = getFolderAndChildrenIds(f.id);
+      for (var j = 0; j < msMaterials.length; j++) {
+        if (allIds.indexOf(msMaterials[j].folderId) !== -1) cnt++;
+      }
+      var hasChildren = getChildFolders(f.id).length > 0;
+      var isSelected = gFMParentId === f.id;
+      html += '<div class="fm-row' + (isSelected ? ' fm-row-selected' : '') + '" data-fid="' + f.id + '" data-fname="' + f.name.replace(/"/g,'').replace(/'/g,'') + '" style="padding-left:' + padding + 'px">';
+      
+      // 展开/折叠按钮
+      if (hasChildren) {
+        html += '<span class="fm-tree-toggle" onclick="event.stopPropagation();gFMParentId=' + f.id + ';gFMShowCreate=false;renderFMList()" style="cursor:pointer;font-size:10px;margin-right:2px">▶</span>';
+      } else {
+        html += '<span style="width:12px;display:inline-block"></span>';
+      }
+      
+      html += '<span>📁</span><span class="fm-name" onclick="gFMParentId=' + f.id + ';gFMShowCreate=false;renderFMList()" style="cursor:pointer">' + f.name + '</span>' +
+        '<span class="fm-cnt">' + cnt + '素材</span>' +
+        (depth < 2 ? '<span class="fm-btn fm-add-sub" onclick="event.stopPropagation();showFMCreateRow(' + f.id + ')" style="font-size:11px">➕ 子文件夹</span>' : '') +
+        '<span class="fm-btn fm-rename">✏️ 重命名</span>' +
+        '<span class="fm-btn fm-del">🗑️ 删除</span></div>';
+      
+      // 如果这个文件夹被选中（展开），渲染其子文件夹
+      if (gFMParentId === f.id) {
+        html += renderTree(f.id, depth + 1);
+      }
+    }
+    return html;
+  }
+  
+  h += renderTree(null, 0);
+  
+  if (h === '' || h.indexOf('fm-row') === -1) { 
+    h += '<div class="fm-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">暂无文件夹</div>'; 
+  }
+  
+  // 内联新建行
   if (gFMShowCreate) {
     h += '<div class="fm-row fm-create-row">' +
       '<span>📁</span>' +
@@ -1282,7 +1452,7 @@ function fmInlineCreate() {
   var name = document.getElementById('fmInlineInput').value.trim();
   if (!name) { alert('请输入文件夹名称'); return; }
   for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === name) { alert('已存在同名文件夹'); return; } }
-  msFolders.push({id: Date.now(), name: name});
+  msFolders.push({id: Date.now(), name: name, parentId: gFMParentId || null});
   gFMShowCreate = false;
   renderFMList(); renderFolderBar(); renderMsGrid();
 }
@@ -1317,10 +1487,26 @@ function fmInlineCancel() {
         renderFMList(); renderFolderBar();
       }
       if (btn.classList.contains('fm-del')) {
-        if (!confirm('确定删除该文件夹吗？')) return;
-        for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === fid) msMaterials[j].folderId = 0; }
-        msFolders = msFolders.filter(function(x) { return x.id !== fid; });
-        if (selFolder === fid) selFolder = null;
+        // 递归删除所有子文件夹
+        function collectDescendantIds(folderId) {
+          var ids = [];
+          for (var i = 0; i < msFolders.length; i++) {
+            if (msFolders[i].parentId === folderId) {
+              ids.push(msFolders[i].id);
+              ids = ids.concat(collectDescendantIds(msFolders[i].id));
+            }
+          }
+          return ids;
+        }
+        var allIds = [fid].concat(collectDescendantIds(fid));
+        var msg = '确定删除该文件夹及其所有子文件夹吗？(' + allIds.length + '个)';
+        if (!confirm(msg)) return;
+        // 素材改为未分类
+        for (var j = 0; j < msMaterials.length; j++) {
+          if (allIds.indexOf(msMaterials[j].folderId) !== -1) msMaterials[j].folderId = 0;
+        }
+        msFolders = msFolders.filter(function(x) { return allIds.indexOf(x.id) === -1; });
+        if (allIds.indexOf(selFolder) !== -1) selFolder = null;
         renderFMList(); renderFolderBar(); renderMsGrid();
       }
     });
@@ -1358,7 +1544,7 @@ function fmInlineCancel() {
     <div class="modal-header">
       <h3>📁 文件夹管理</h3>
       <div style="display:flex;align-items:center;gap:6px">
-        <button class="btn btn-sm btn-primary" onclick="showFMCreateRow()" style="height:28px;padding:0 10px;font-size:12px">+ 新建</button>
+        <button class="btn btn-sm btn-primary" onclick="showFMCreateRow(gFMParentId)" style="height:28px;padding:0 10px;font-size:12px">+ 新建</button>
         <button class="close-btn" onclick="closeFM()">✕</button>
       </div>
     </div>
