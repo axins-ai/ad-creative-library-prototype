@@ -46,11 +46,16 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .folder-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .folder-tab .tab-count{font-size:10px;margin-left:4px;opacity:.65}
 .folder-tab.active .tab-count{opacity:.85}
-.btn-back{color:var(--text-3) !important;border-style:dashed !important;font-size:12px}
-.btn-back:hover{border-color:var(--text-3) !important;color:var(--primary) !important}
 .fm-row-selected{background:var(--primary-light) !important;border-color:var(--primary) !important}
 .fm-row .fm-add-sub{font-size:11px;color:var(--text-3)}
 .fm-row .fm-add-sub:hover{color:var(--primary)}
+
+/* 文件夹卡片 */
+.folder-card{background:var(--bg-card);border-radius:var(--radius-l);padding:24px;text-align:center;cursor:pointer;border:1px solid var(--border-light);box-shadow:var(--shadow-s);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:8px}
+.folder-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-m);border-color:var(--primary)}
+.folder-card .folder-icon{font-size:48px;line-height:1}
+.folder-card .folder-name{font-size:14px;font-weight:500;color:var(--text-1)}
+.folder-card .folder-count{font-size:12px;color:var(--text-3)}
 .tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .tag-filter-row .filter-group{margin-bottom:0}
 .tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
@@ -616,18 +621,9 @@ function closeResultModal() {
 }
 
 var msFolders = [
-  // 一级
-  {id:1, name:'开场动画合集', parentId: null},
-  {id:2, name:'产品介绍素材', parentId: null},
-  {id:3, name:'行动号召素材', parentId: null},
-  // 二级（子文件夹）
-  {id:4, name:'夏季开场', parentId: 1},
-  {id:5, name:'冬季开场', parentId: 1},
-  {id:7, name:'手机产品', parentId: 2},
-  {id:8, name:'宽带产品', parentId: 2},
-  // 三级（子-子文件夹）
-  {id:6, name:'阳光沙滩版', parentId: 4},
-  {id:9, name:'5G套餐版', parentId: 8},
+  {id:1, name:'开场动画合集'},
+  {id:2, name:'产品介绍素材'},
+  {id:3, name:'行动号召素材'},
 ];
 
 var msMaterials = [
@@ -925,54 +921,7 @@ function resetMsFilter() {
 }
 
 // ========== 文件夹 ==========
-var selFolder = null; // null=全部, -1=未分类, 数字=具体文件夹
-var gFolderPath = []; // 面包屑导航栈, []表示根层级(显示所有一级文件夹)
-
-// 获取某个文件夹的所有子文件夹ID（递归，包含自身）
-function getFolderAndChildrenIds(folderId) {
-  var ids = [folderId];
-  for (var i = 0; i < msFolders.length; i++) {
-    if (msFolders[i].parentId === folderId) {
-      ids = ids.concat(getFolderAndChildrenIds(msFolders[i].id));
-    }
-  }
-  return ids;
-}
-
-// 获取某个文件夹的直接子文件夹
-function getChildFolders(parentId) {
-  var result = [];
-  for (var i = 0; i < msFolders.length; i++) {
-    if (msFolders[i].parentId === parentId) result.push(msFolders[i]);
-  }
-  return result;
-}
-
-// 获取一级文件夹（parentId === null）
-function getRootFolders() {
-  var result = [];
-  for (var i = 0; i < msFolders.length; i++) {
-    if (!msFolders[i].parentId) result.push(msFolders[i]);
-  }
-  return result;
-}
-
-// 根据ID获取文件夹名称
-function getFolderName(folderId) {
-  for (var i = 0; i < msFolders.length; i++) {
-    if (msFolders[i].id === folderId) return msFolders[i].name;
-  }
-  return '';
-}
-
-// 获取当前层级需要显示的文件夹列表
-function getCurrentLevelFolders() {
-  if (gFolderPath.length === 0) {
-    return getRootFolders();
-  }
-  var parentId = gFolderPath[gFolderPath.length - 1];
-  return getChildFolders(parentId);
-}
+var selFolder = null; // null=显示文件夹列表, -1=未分类, 数字=具体文件夹
 
 function renderFolderBar() {
   var bar = document.getElementById('folderBar');
@@ -982,31 +931,17 @@ function renderFolderBar() {
   for (var i = 0; i < msMaterials.length; i++) { if (!msMaterials[i].folderId) uncat++; }
   
   var h = '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
-  // 根部快捷按钮
-  h += '<span class="folder-tab' + (selFolder === null ? ' active' : '') + '" onclick="selFolder=null;gFolderPath=[];renderFolderBar();applyMsFilter()">全部<span class="tab-count">' + cntAll + '</span></span>';
+  h += '<span class="folder-tab' + (selFolder === null ? ' active' : '') + '" onclick="selFolder=null;renderFolderBar();renderMsGrid()">全部文件夹<span class="tab-count">' + msFolders.length + '</span></span>';
   h += '<span class="folder-tab' + (selFolder === -1 ? ' active' : '') + '" onclick="selFolder=-1;gFolderPath=[];renderFolderBar();applyMsFilter()">未分类<span class="tab-count">' + uncat + '</span></span>';
   h += '<span class="bc-sep">|</span>';
   
-  // 显示当前层级的文件夹
-  var currentFolders = getCurrentLevelFolders();
-  for (var i = 0; i < currentFolders.length; i++) {
-    var f = currentFolders[i];
+  for (var i = 0; i < msFolders.length; i++) {
+    var f = msFolders[i];
     var cnt = 0;
-    var allIds = getFolderAndChildrenIds(f.id);
-    for (var j = 0; j < msMaterials.length; j++) {
-      if (allIds.indexOf(msMaterials[j].folderId) !== -1) cnt++;
-    }
-    var hasChildren = getChildFolders(f.id).length > 0;
+    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
     var isActive = selFolder === f.id;
-    // 点击：选中该文件夹，如果有子文件夹则推进
-    h += '<span class="folder-tab' + (isActive ? ' active' : '') + '" onclick="selFolder=' + f.id + ';if(' + (hasChildren ? 'true' : 'false') + '){gFolderPath.push(' + f.id + ')}else{gFolderPath=[]};renderFolderBar();applyMsFilter()">' + f.name + '<span class="tab-count">' + cnt + '</span></span>';
+    h += '<span class="folder-tab' + (isActive ? ' active' : '') + '" onclick="selFolder=' + f.id + ';renderFolderBar();renderMsGrid()">' + f.name + '<span class="tab-count">' + cnt + '</span></span>';
   }
-  
-  // 返回上级（非根目录时显示）
-  if (gFolderPath.length > 0) {
-    h += '<span class="folder-tab btn-back" onclick="gFolderPath.pop();selFolder=gFolderPath.length>0?gFolderPath[gFolderPath.length-1]:null;renderFolderBar();applyMsFilter()">← 返回</span>';
-  }
-  
   h += '</div>';
   bar.innerHTML = h;
   syncUploadFolder();
@@ -1017,21 +952,12 @@ function syncUploadFolder() {
   if (!sel) return;
   var cur = sel.value;
   sel.innerHTML = '<option value="">未分类</option>';
-  // 递归添加文件夹选项（带缩进）
-  function addFolderOptions(parentId, indent) {
-    var indentStr = '';
-    for (var di = 0; di < indent; di++) indentStr += '  ';
-    for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].parentId === parentId) {
-        var opt = document.createElement('option');
-        opt.value = msFolders[i].id;
-        opt.textContent = indentStr + msFolders[i].name;
-        sel.appendChild(opt);
-        addFolderOptions(msFolders[i].id, indent + 1);
-      }
-    }
+  for (var i = 0; i < msFolders.length; i++) {
+    var opt = document.createElement('option');
+    opt.value = msFolders[i].id;
+    opt.textContent = msFolders[i].name;
+    sel.appendChild(opt);
   }
-  addFolderOptions(null, 0);
   sel.value = cur;
 }
 
@@ -1074,10 +1000,7 @@ function getFilteredMsMaterials() {
   for (var i = 0; i < msMaterials.length; i++) {
     var m = msMaterials[i];
     if (selFolder === -1 && m.folderId) continue;
-    if (selFolder > 0) {
-      var allowedIds = getFolderAndChildrenIds(selFolder);
-      if (allowedIds.indexOf(m.folderId) === -1) continue;
-    }
+    if (selFolder > 0 && m.folderId !== selFolder) continue;
     if (nameKw && m.name.toLowerCase().indexOf(nameKw) === -1) continue;
     if (typeVal !== "全部类型" && m.type !== typeVal) continue;
     if (sourceVal !== "全部来源" && m.source !== sourceVal) continue;
@@ -1119,9 +1042,16 @@ function getFilteredMsMaterials() {
 
 function renderMsGrid() {
   try {
-  var data = getFilteredMsMaterials();
   var el = document.getElementById("msGrid");
   if (!el) { console.error("msGrid not found"); return; }
+  
+  // 未选择文件夹时，展示文件夹列表
+  if (selFolder === null) {
+    renderFolderList(el);
+    return;
+  }
+  
+  var data = getFilteredMsMaterials();
   if (data.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无原料</div><div class="desc">试试调整筛选条件，或上传新原料</div></div>';
     return;
@@ -1160,6 +1090,28 @@ function renderMsGrid() {
     var el2 = document.getElementById("msGrid");
     if (el2) el2.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div class="title">渲染出错</div><div class="desc">' + e.message + '</div></div>';
   }
+}
+
+// 文件夹列表视图
+function renderFolderList(el) {
+  var html = '';
+  for (var i = 0; i < msFolders.length; i++) {
+    var f = msFolders[i];
+    var cnt = 0;
+    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
+    html += '<div class="folder-card" onclick="selFolder=' + f.id + ';renderFolderBar();renderMsGrid()">' +
+      '<div class="folder-icon">📁</div>' +
+      '<div class="folder-name">' + f.name + '</div>' +
+      '<div class="folder-count">' + cnt + ' 个素材</div>' +
+      '</div>';
+  }
+  if (html === '') {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><div class="title">暂无文件夹</div><div class="desc">点击右上角「📁 文件夹」新建</div></div>';
+  } else {
+    el.innerHTML = html;
+  }
+  var countEl = document.getElementById("msCountInline");
+  if (countEl) countEl.textContent = "共 " + msFolders.length + " 个文件夹";
 }
 
 function openMsPreview(id) {
