@@ -228,47 +228,19 @@ function toggleSubSubMenu(ev, el) {
   wrap.classList.toggle('expanded');
 }
 
-// 渲染文件夹菜单列表
-function renderFolderMenuItems() {
-  var listEl = document.getElementById('folderMenuList');
-  if (!listEl) return;
-  var html = '';
-  // 只显示当前用户的文件夹
-  var myFolders = menuFolders.filter(function(f) { return f.creator === '崔志恒'; });
-  for (var i = 0; i < myFolders.length; i++) {
-    var f = myFolders[i];
-    html += '<div class="menu-item folder-item" data-folder-id="' + f.id + '" onclick="selectFolderFromMenu(' + f.id + ')">' +
-      '<span class="mi-icon">📁</span>' +
-      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + f.name + '</span>' +
-      '<span class="folder-mgr-btn" title="删除" onclick="event.stopPropagation();deleteFolderFromMenu(' + f.id + ')">✕</span>' +
-      '</div>';
-  }
-  if (myFolders.length === 0) {
-    html += '<div class="menu-item folder-item" style="cursor:default;opacity:.5"><span class="mi-icon">📁</span><span>暂无文件夹</span></div>';
-  }
-  listEl.innerHTML = html;
-}
-
-// 从菜单点击文件夹 - 先加载原料库再筛选
+// 从菜单点击文件夹
 function selectFolderFromMenu(folderId) {
-  // 先高亮菜单
   var items = document.querySelectorAll('.menu-item');
-  for (var i = 0; i < items.length; i++) {
-    items[i].classList.remove('active');
-  }
-  // 高亮文件夹
+  for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
   var el = document.querySelector('.folder-item[data-folder-id="' + folderId + '"]');
   if (el) el.classList.add('active');
-  // 高亮父级
-  var parentExpand = document.querySelector('.menu-item.expandable');
-  if (parentExpand) parentExpand.classList.add('active');
+  document.querySelector('.menu-item.expandable').classList.add('active');
   
-  // 加载原料库页面，等待iframe加载完成后筛选
+  // 加载原料库，通过URL参数传递folderId
   var cfg = MENU_CONFIG['原料库'];
   if (!cfg) return;
-  var sep = cfg.file.indexOf('?') >= 0 ? '&' : '?';
-  var ts = 'v=' + Date.now() + '&folder=' + folderId;
-  document.getElementById('contentFrame').src = cfg.file + sep + ts;
+  var src = cfg.file + '?v=' + Date.now() + '&folder=' + folderId;
+  document.getElementById('contentFrame').src = src;
   document.getElementById('pageTitle').innerHTML =
     '原料库 <span class="tag">' + getFolderName(folderId) + '</span>';
 }
@@ -295,38 +267,45 @@ function deleteFolderFromMenu(folderId) {
   if (!confirm('确定删除该文件夹吗？')) return;
   var frame = document.getElementById('contentFrame');
   try {
-    if (frame && frame.contentWindow) {
-      // 直接调用iframe的msFolders删除逻辑
+    if (frame && frame.contentWindow && frame.contentWindow.msFolders) {
       var fw = frame.contentWindow;
-      if (fw.msFolders) {
-        for (var i = 0; i < fw.msFolders.length; i++) {
-          if (fw.msFolders[i].id == folderId) {
-            // 从素材中移除该文件夹
-            if (fw.msMaterials) {
-              for (var j = 0; j < fw.msMaterials.length; j++) {
-                if (fw.msMaterials[j].folders) {
-                  var idx = fw.msMaterials[j].folders.indexOf(folderId);
-                  if (idx !== -1) fw.msMaterials[j].folders.splice(idx, 1);
-                }
-              }
+      for (var i = 0; i < fw.msFolders.length; i++) {
+        if (fw.msFolders[i].id == folderId) {
+          for (var j = 0; j < fw.msMaterials.length; j++) {
+            if (fw.msMaterials[j].folders) {
+              var idx = fw.msMaterials[j].folders.indexOf(folderId);
+              if (idx !== -1) fw.msMaterials[j].folders.splice(idx, 1);
             }
-            fw.msFolders.splice(i, 1);
-            fw.populateFolderFilters();
-            fw.renderMsGrid();
-            break;
           }
+          fw.msFolders.splice(i, 1);
+          fw.populateFolderFilters();
+          fw.renderMsGrid();
+          break;
         }
-        // 同步菜单
-        menuFolders = JSON.parse(JSON.stringify(fw.msFolders));
-        renderFolderMenuItems();
       }
+      syncFoldersFromIframe();
     }
   } catch (e) {}
-  // 刷新原料库页面
-  var cfg = MENU_CONFIG['原料库'];
-  if (cfg) {
-    document.getElementById('contentFrame').src = cfg.file + '?v=' + Date.now();
+}
+
+// 渲染文件夹菜单列表
+function renderFolderMenuItems() {
+  var listEl = document.getElementById('folderMenuList');
+  if (!listEl) return;
+  var html = '';
+  var myFolders = menuFolders.filter(function(f) { return f.creator === '崔志恒'; });
+  for (var i = 0; i < myFolders.length; i++) {
+    var f = myFolders[i];
+    html += '<div class="menu-item folder-item" data-folder-id="' + f.id + '" onclick="selectFolderFromMenu(' + f.id + ')">' +
+      '<span class="mi-icon">📁</span>' +
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + f.name + '</span>' +
+      '<span class="folder-mgr-btn" title="删除" onclick="event.stopPropagation();deleteFolderFromMenu(' + f.id + ')">✕</span>' +
+      '</div>';
   }
+  if (myFolders.length === 0) {
+    html += '<div class="menu-item folder-item" style="cursor:default;opacity:.5"><span class="mi-icon">📁</span><span>暂无文件夹</span></div>';
+  }
+  listEl.innerHTML = html;
 }
 
 // 从iframe同步文件夹数据
@@ -342,23 +321,7 @@ function syncFoldersFromIframe() {
 
 // 监听iframe加载完成
 document.getElementById('contentFrame').addEventListener('load', function() {
-  // 同步文件夹数据到菜单
-  setTimeout(syncFoldersFromIframe, 300);
-  
-  // 检查URL中是否有folder参数
-  try {
-    var src = this.src;
-    var match = src.match(/[?&]folder=(\d+)/);
-    if (match) {
-      var folderId = parseInt(match[1]);
-      setTimeout(function() {
-        var fw = document.getElementById('contentFrame').contentWindow;
-        if (fw && fw.filterByFolder) {
-          fw.filterByFolder(folderId);
-        }
-      }, 500);
-    }
-  } catch(e) {}
+  setTimeout(syncFoldersFromIframe, 400);
 });
 
 function updateMaterialTags(cfg) {
