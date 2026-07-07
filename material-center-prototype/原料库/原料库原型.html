@@ -627,7 +627,13 @@ var msMaterials = [
   {id:9, name:"尾帧-立即行动", type:"尾帧", biz:"存量", channel:"头条", optimizer:"赖嘉俊", designer:"设计师A", date:"2026-06-12", source:"自动入库", size:"1.5MB", tags:{userCategory:"地区", userValue:"二线城市", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
   {id:10, name:"前贴-促销快剪", type:"前贴", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", designer:"设计师A", date:"2026-06-11", source:"自动入库", size:"2.7MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"公园","对话":"老年女人","口播":"口播男"}}},
   {id:11, name:"中段-场景展示", type:"中段", biz:"存量", channel:"头条", optimizer:"黄雄伟", designer:"设计师A", date:"2026-06-10", source:"自动入库", size:"6.3MB", tags:{userCategory:"性别", userValue:"女", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"街头","对话":"老年男人","口播":"口播女"}}},
-  {id:12, name:"尾帧-关注引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer:"姚丰育", designer:"设计师A", date:"2026-06-09", source:"手动上传", size:"1.1MB", tags:{userCategory:"地区", userValue:"农村", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
+  {id:13, name:"前贴-本地生活", type:"前贴", biz:"存量", channel:"头条", optimizer:"叶首龙", designer:"设计师B", date:"2026-06-08", source:"自动入库", size:"1.9MB", tags:{userCategory:"地区", userValue:"三四线城市", product:"59元", content:{"文案":"系统通知","内容":"猛宠"}}},
+  {id:14, name:"中段-话费促销", type:"中段", biz:"权益", channel:"广点通", optimizer:"戚嘉豪", designer:"设计师B", date:"2026-06-07", source:"手动上传", size:"3.5MB", tags:{userCategory:"年龄", userValue:"18-24", product:"39元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"街头","对话":"老年女人","口播":"口播男"}}},
+  {id:15, name:"尾帧-快速注册", type:"尾帧", biz:"存量", channel:"头条", optimizer:"姚丰育", designer:"设计师C", date:"2026-06-06", source:"自动入库", size:"1.3MB", tags:{userCategory:"性别", userValue:"女", product:"59元", content:{"文案":"系统通知","宣传卖点":"话费","场景":"营业厅","对话":"老年男人","口播":"口播女"}}},
+  {id:16, name:"中段-流量包推荐", type:"中段", biz:"权益", channel:"广点通", optimizer:"黎舒晴", designer:"设计师C", date:"2026-06-05", source:"手动上传", size:"4.2MB", tags:{userCategory:"年龄", userValue:"35-44", product:"39元", content:{"文案":"紧迫性","内容":"花鸟"}}},
+  {id:17, name:"前贴-夏日清凉", type:"前贴", biz:"存量", channel:"头条", optimizer:"李雨航", designer:"设计师B", date:"2026-06-04", source:"自动入库", size:"2.1MB", tags:{userCategory:"性别", userValue:"男", product:"39元", content:{"文案":"系统通知","宣传卖点":"话费"}}},
+  {id:18, name:"尾帧-送礼引导", type:"尾帧", biz:"权益", channel:"广点通", optimizer："林金维", designer:"设计师C", date:"2026-06-03", source:"自动入库", size:"0.9MB", tags:{userCategory:"年龄", userValue:"45+", product:"59元", content:{"文案":"紧迫性","场景":"公园","对话":"老年女人"}}},
+], type:"尾帧", biz:"权益", channel:"广点通", optimizer:"姚丰育", designer:"设计师A", date:"2026-06-09", source:"手动上传", size:"1.1MB", tags:{userCategory:"地区", userValue:"农村", product:"59元", content:{"文案":"紧迫性","宣传卖点":"流量","场景":"小区","对话":"老年女人","口播":"口播男"}}},
 ];
 var uploadSelectedFiles = [];
 
@@ -1251,40 +1257,32 @@ function renderFMList() {
   for (var i = 0; i < msFolders.length; i++) {
     var f = msFolders[i]; var cnt = 0;
     for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === f.id) cnt++; }
-    h += '<div class="fm-row" data-id="' + f.id + '" data-name="' + f.name.replace(/"/g,'') + '">' +
+    var sid = f.id;
+    var snm = f.name.replace(/'/g,'');
+    h += '<div class="fm-row">' +
       '<span>📁</span><span class="fm-name">' + f.name + '</span>' +
-      '<span class="fm-cnt">' + cnt + '</span>' +
-      '<span class="fm-btn fm-rename">✏️</span>' +
-      '<span class="fm-btn fm-del">🗑️</span></div>';
+      '<span class="fm-cnt">' + cnt + '素材</span>' +
+      '<span class="fm-btn fm-rename" onclick="fmRename(' + sid + ',\'' + snm + '\')">✏️ 重命名</span>' +
+      '<span class="fm-btn fm-del" onclick="fmDelete(' + sid + ')">🗑️ 删除</span></div>';
   }
   if (h === '') h = '<div class="fm-empty">暂无文件夹</div>';
   el.innerHTML = h;
 }
-
-// 文件夹管理弹窗事件委托
-document.getElementById('fmModal').addEventListener('click', function(e) {
-  var row = e.target.closest('.fm-row');
-  if (!row) return;
-  var id = parseInt(row.getAttribute('data-id'));
-  var name = row.getAttribute('data-name');
-  
-  if (e.target.classList.contains('fm-rename')) {
-    var n = prompt('新名称:', name);
-    if (!n || !n.trim() || n.trim() === name) return;
-    n = n.trim();
-    for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === n) { alert('已存在同名文件夹'); return; } }
-    for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].id === id) { msFolders[i].name = n; break; } }
-    renderFMList(); renderFolderBar();
-  }
-  
-  if (e.target.classList.contains('fm-del')) {
-    if (!confirm('确定删除该文件夹吗？')) return;
-    for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === id) msMaterials[j].folderId = 0; }
-    msFolders = msFolders.filter(function(x) { return x.id !== id; });
-    if (selFolder === id) selFolder = null;
-    renderFMList(); renderFolderBar(); renderMsGrid();
-  }
-});
+function fmRename(id, name) {
+  var n = prompt('新名称:', name);
+  if (!n || !n.trim() || n.trim() === name) return;
+  n = n.trim();
+  for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === n) { alert('已存在同名文件夹'); return; } }
+  for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].id === id) { msFolders[i].name = n; break; } }
+  renderFMList(); renderFolderBar();
+}
+function fmDelete(id) {
+  if (!confirm('确定删除该文件夹吗？')) return;
+  for (var j = 0; j < msMaterials.length; j++) { if (msMaterials[j].folderId === id) msMaterials[j].folderId = 0; }
+  msFolders = msFolders.filter(function(x) { return x.id !== id; });
+  if (selFolder === id) selFolder = null;
+  renderFMList(); renderFolderBar(); renderMsGrid();
+}
 function fmCreate() {
   var name = document.getElementById('fmInput').value.trim();
   if (!name) { alert('请输入名称'); return; }
