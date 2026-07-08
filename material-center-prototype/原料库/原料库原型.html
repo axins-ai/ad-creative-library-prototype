@@ -1160,7 +1160,7 @@ function renderFSTree() {
       var isSelected = gFSSelectedId === f.id;
       var padding = 12 + depth * 20;
       
-      html += '<div class="fs-row' + (isSelected ? ' fs-selected' : '') + '" data-fid="' + f.id + '" style="display:flex;align-items:center;gap:4px;padding:6px ' + padding + 'px 6px 8px;cursor:pointer;border-radius:4px;transition:background .1s;' + (isSelected ? 'background:var(--primary-light)' : '') + '" onclick="fsSelect(' + f.id + ')">';
+      html += '<div class="fs-row' + (isSelected ? ' fs-selected' : '') + '" data-fid="' + f.id + '" style="display:flex;align-items:center;gap:4px;padding:6px 8px 6px ' + padding + 'px;cursor:pointer;border-radius:4px;transition:background .1s;' + (isSelected ? 'background:var(--primary-light)' : '') + '" onclick="fsSelect(' + f.id + ')">';
       
       if (hasChildren) {
         html += '<span onclick="event.stopPropagation();fsToggleExpand(' + f.id + ')" style="cursor:pointer;font-size:9px;width:14px;text-align:center;transition:transform .15s;display:inline-block;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
@@ -1168,7 +1168,7 @@ function renderFSTree() {
         html += '<span style="width:14px;display:inline-block"></span>';
       }
       
-      html += '<span>📁</span><span style="flex:1;font-size:13px">' + f.name + '</span>' +
+      html += '<span>📁</span><span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.name + '</span>' +
         (depth < 3 ? '<span style="font-size:11px;color:var(--text-3);cursor:pointer;padding:2px 6px;border-radius:4px" onclick="event.stopPropagation();fsCreateSubFolder(' + f.id + ')" title="新建子文件夹">➕</span>' : '') +
         '<span style="font-size:11px;color:var(--text-3);cursor:pointer;padding:2px 6px;border-radius:4px" onclick="event.stopPropagation();fsRenameFolder(' + f.id + ')" title="重命名">✏️</span>' +
         '<span style="font-size:11px;color:var(--danger);cursor:pointer;padding:2px 6px;border-radius:4px" onclick="event.stopPropagation();fsDeleteFolder(' + f.id + ')" title="删除">🗑️</span>' +
