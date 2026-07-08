@@ -171,6 +171,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .upload-body .fm-group label .req{color:var(--danger);margin-left:2px}
 .upload-body .fm-group input,.upload-body .fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
 .upload-body .fm-group input:focus,.upload-body .fm-group select:focus{border-color:var(--primary)}
+/* 文件夹选择行：标签和按钮同行 */
+.upload-body .fm-group-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.upload-body .fm-group-row label{font-size:12px;font-weight:500;color:var(--text-2);white-space:nowrap;margin:0;flex-shrink:0}
+.upload-body .fm-group-row .folder-select-btn{flex:1}
 .upload-actions{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--border-light);flex-shrink:0;}
 
 /* Filter card style */
@@ -517,9 +521,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           <option>头条</option>
         </select>
       </div>
-      <div class="fm-group">
+      <div class="fm-group fm-group-row">
         <label>保存到文件夹</label>
-        <div id="msUploadFolderDisplay" class="folder-select-btn" onclick="openFolderSelectModal()">未分类</div>
+        <div id="msUploadFolderDisplay" class="folder-select-btn" onclick="openFolderSelectModal()">未分类 <span class="arrow">▸</span></div>
         <input type="hidden" id="msUploadFolder" value="">
       </div>
       <div class="fm-group">
@@ -1052,11 +1056,11 @@ function fsConfirmSelect() {
   if (gFSSelectedId) {
     inp.value = gFSSelectedId;
     for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].id === gFSSelectedId) { display.textContent = msFolders[i].name; break; }
+      if (msFolders[i].id === gFSSelectedId) { display.innerHTML = msFolders[i].name + ' <span class="arrow">▸</span>'; break; }
     }
   } else {
     inp.value = '';
-    display.textContent = '未分类';
+    display.innerHTML = '未分类 <span class="arrow">▸</span>';
   }
   closeFolderSelectModal();
 }
@@ -1158,10 +1162,11 @@ function updateUploadFolderDisplay() {
   if (!inp || !display) return;
   if (inp.value) {
     for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].id === parseInt(inp.value)) { display.textContent = msFolders[i].name; return; }
+      if (msFolders[i].id === parseInt(inp.value)) { display.textContent = msFolders[i].name; display.innerHTML = msFolders[i].name + ' <span class="arrow">▸</span>'; return; }
     }
   }
   display.textContent = '未分类';
+  display.innerHTML = '未分类 <span class="arrow">▸</span>';
 }
 
 function getFilteredMsMaterials() {
