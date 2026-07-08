@@ -1163,19 +1163,12 @@ function renderMsGrid() {
 }
 
 // 文件夹列表视图
-var gCardShowCreate = false;
-var gCardCreateParentId = null;
-
-function showCardCreateRow() { gCardShowCreate = true; renderMsGrid(); }
-function cancelCardCreate() { gCardShowCreate = false; renderMsGrid(); }
-function confirmCardCreate() {
-  var inp = document.getElementById('cardCreateInput');
-  if (!inp) return;
-  var name = inp.value.trim();
-  if (!name) { alert('请输入文件夹名称'); return; }
+function cardCreateFolder(parentId) {
+  var name = prompt('请输入文件夹名称：');
+  if (!name || !name.trim()) return;
+  name = name.trim();
   for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === name) { alert('已存在同名文件夹'); return; } }
-  msFolders.push({id: Date.now(), name: name, parentId: gCardCreateParentId || null});
-  gCardShowCreate = false;
+  msFolders.push({id: Date.now(), name: name, parentId: parentId || null});
   renderMsGrid(); renderFolderBar();
 }
 
@@ -1212,22 +1205,12 @@ function renderFolderList(el, parentId) {
       '</div>';
   }
   
-  // 内联新建行或新建卡片
-  if (gCardShowCreate) {
-    html += '<div class="folder-card folder-card-add" style="padding:16px 24px;cursor:default;border-color:var(--primary)">' +
-      '<div style="display:flex;align-items:center;gap:8px;width:100%">' +
-      '<span>📁</span>' +
-      '<input type="text" id="cardCreateInput" placeholder="输入文件夹名称..." style="flex:1;height:36px;border:1px solid var(--primary);border-radius:6px;padding:0 10px;font-size:13px;outline:none" onkeydown="if(event.key===\'Enter\')confirmCardCreate()" autofocus>' +
-      '<span class="btn-icon" onclick="confirmCardCreate()" style="font-size:18px;cursor:pointer">✅</span>' +
-      '<span class="btn-icon" onclick="cancelCardCreate()" style="font-size:18px;cursor:pointer">❌</span>' +
-      '</div></div>';
-  } else {
-    html += '<div class="folder-card folder-card-add" onclick="gCardCreateParentId=' + (parentId !== null ? '' + parentId : 'null') + ';showCardCreateRow()" style="cursor:pointer">' +
-      '<div class="folder-icon" style="font-size:36px;color:var(--text-3)">+</div>' +
-      '<div class="folder-name" style="color:var(--text-3)">新建文件夹</div>' +
-      '<div class="folder-count" style="color:var(--text-3)">点击创建</div>' +
-      '</div>';
-  }
+  // 新建文件夹卡片 — 点击后弹窗输入名称
+  html += '<div class="folder-card folder-card-add" onclick="cardCreateFolder(' + (parentId !== null ? '' + parentId : 'null') + ')" style="cursor:pointer">' +
+    '<div class="folder-icon" style="font-size:36px;color:var(--text-3)">+</div>' +
+    '<div class="folder-name" style="color:var(--text-3)">新建文件夹</div>' +
+    '<div class="folder-count" style="color:var(--text-3)">点击创建</div>' +
+    '</div>';
   if (html === '' || html.indexOf('folder-card') === -1) {
     if (parentId !== null) {
       el.innerHTML = html; // 只有返回按钮，没有子文件夹
@@ -1468,7 +1451,7 @@ function renderFMList() {
       html += '<span>📁</span>' +
         '<span class="fm-name">' + f.name + '</span>' +
         '<span class="fm-cnt">' + cnt + '素材</span>' +
-        (depth < 2 ? '<span class="fm-btn fm-add-sub" onclick="event.stopPropagation();showFMCreateRow(' + f.id + ')" style="font-size:11px">➕ 子文件夹</span>' : '') +
+        (depth < 1 ? '<span class="fm-btn fm-add-sub" onclick="event.stopPropagation();showFMCreateRow(' + f.id + ')" style="font-size:11px">➕ 子文件夹</span>' : '') +
         '<span class="fm-btn fm-rename">✏️ 重命名</span>' +
         '<span class="fm-btn fm-del">🗑️ 删除</span></div>';
       
