@@ -1461,10 +1461,23 @@ function openModal(lockType, slotIdx) {
   // 初始化文件夹下拉
   var folderSel = document.getElementById('modalFolderFilter');
   if (folderSel && folderSel.options.length <= 1) {
+    // 计算文件夹层级深度
+    function getFolderDepth(folderId) {
+      var depth = 0, cur = folderId;
+      while (true) {
+        var p = null;
+        for (var fi = 0; fi < msFolders.length; fi++) { if (msFolders[fi].id === cur) { p = msFolders[fi].parentId; break; } }
+        if (p === null || p === undefined) break;
+        depth++; cur = p;
+      }
+      return depth;
+    }
     for (var fi = 0; fi < msFolders.length; fi++) {
       var opt = document.createElement('option');
       opt.value = msFolders[fi].id;
-      var prefix = msFolders[fi].parentId ? '  ' : '';
+      var indent = getFolderDepth(msFolders[fi].id);
+      var prefix = '';
+      for (var di = 0; di < indent; di++) prefix += '  ';
       opt.textContent = prefix + msFolders[fi].name;
       folderSel.appendChild(opt);
     }
