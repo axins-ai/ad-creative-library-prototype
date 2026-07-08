@@ -286,7 +286,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .overlay.show{opacity:1;pointer-events:auto}
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;display:none;align-items:center;justify-content:center}
 .modal-overlay.active{display:flex}
-.modal-overlay .modal{width:520px;max-height:80vh}
+.modal-overlay .modal{width:560px;max-height:80vh;overflow:hidden}
 .modal{
   background:var(--bg-card);border-radius:var(--radius-l);
   box-shadow:var(--shadow-l);width:760px;max-height:85vh;
@@ -701,7 +701,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 
 <!-- 文件夹选择弹窗（生产工作台） -->
 <div class="modal-overlay" id="pwbFolderSelectOverlay">
-  <div class="modal" style="width:520px">
+  <div class="modal" style="width:560px">
     <div class="modal-header" style="padding:14px 20px">
       <h3>📁 选择文件夹</h3>
       <button class="close-btn" onclick="closePwbFolderSelect()">✕</button>
@@ -1557,13 +1557,13 @@ function renderPwbFsTree() {
       var indent = getDepth(f.id);
       var padding = 12 + indent * 20;
       
-      html += '<div class="fs-row" style="display:flex;align-items:center;gap:4px;padding:5px ' + padding + 'px 5px 8px;cursor:pointer;border-radius:4px;transition:background .1s;white-space:nowrap;overflow:hidden;' + (isSelected ? 'background:var(--primary-light)' : '') + '" onclick="pwbFsSelect(' + f.id + ')">';
+      html += '<div class="fs-row" style="display:flex;align-items:center;gap:4px;padding:5px 8px 5px ' + padding + 'px;cursor:pointer;border-radius:4px;transition:background .1s;' + (isSelected ? 'background:var(--primary-light)' : '') + '" onclick="pwbFsSelect(' + f.id + ')">';
       if (hasChildren) {
         html += '<span onclick="event.stopPropagation();pwbFsToggleExpand(' + f.id + ')" style="cursor:pointer;font-size:9px;width:14px;text-align:center;transition:transform .15s;display:inline-block;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
       } else {
         html += '<span style="width:14px;display:inline-block"></span>';
       }
-      html += '<span>📁</span><span style="flex:1;font-size:13px">' + f.name + '</span></div>';
+      html += '<span>📁</span><span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.name + '</span></div>';
       if (isExpanded) html += renderTree(f.id);
     }
     return html;
