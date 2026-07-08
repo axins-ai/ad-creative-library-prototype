@@ -171,10 +171,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .upload-body .fm-group label .req{color:var(--danger);margin-left:2px}
 .upload-body .fm-group input,.upload-body .fm-group select{width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);outline:none;transition:border .2s;font-family:var(--font);}
 .upload-body .fm-group input:focus,.upload-body .fm-group select:focus{border-color:var(--primary)}
-/* 文件夹选择行：标签和按钮同行 */
-.upload-body .fm-group-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.upload-body .fm-group-row label{font-size:12px;font-weight:500;color:var(--text-2);white-space:nowrap;margin:0;flex-shrink:0}
-.upload-body .fm-group-row .folder-select-btn{flex:1}
+/* 两列布局 */
+.upload-body .fm-row-group{display:flex;gap:12px;margin-bottom:14px}
+.upload-body .fm-row-group .fm-group{flex:1;margin-bottom:0}
 .upload-actions{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--border-light);flex-shrink:0;}
 
 /* Filter card style */
@@ -498,58 +497,62 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
       <input type="file" id="msUploadFileInput" multiple accept="video/*,image/*" style="display:none" onchange="handleMsUploadFileSelect(event)">
       <div id="msUploadFileList" class="file-list" style="display:none"></div>
-      <div class="fm-group">
-        <label>素材类型 <span class="req">*</span></label>
-        <select id="msUploadFileType" onchange="onMsUploadTypeChange()">
-          <option>前贴</option>
-          <option>中段</option>
-          <option>尾帧</option>
-          <option>中后段</option>
-        </select>
-      </div>
-      <div class="fm-group">
-        <label>业务归属</label>
-        <select id="msUploadBiz">
-          <option>存量</option>
-          <option>权益</option>
-        </select>
-      </div>
-      <div class="fm-group">
-        <label>渠道</label>
-        <select id="msUploadChannel">
-          <option>广点通</option>
-          <option>头条</option>
-        </select>
-      </div>
-      <div class="fm-group fm-group-row">
-        <label>保存到文件夹</label>
-        <div id="msUploadFolderDisplay" class="folder-select-btn" onclick="openFolderSelectModal()">未分类 <span class="arrow">▸</span></div>
-        <input type="hidden" id="msUploadFolder" value="">
-      </div>
-      <div class="fm-group">
-        <label>优化师</label>
-        <div class="search-select" id="msUploadOptimizerWrap">
-          <select id="msUploadOptimizer">
-            <option value="">请选择</option>
-            <option>崔志恒</option>
-            <option>黄佩贤</option>
-            <option>黎舒晴</option>
-            <option>李雨航</option>
-            <option>谭嘉颖</option>
-            <option>林金维</option>
-            <option>陈羽思</option>
-            <option>叶首龙</option>
-            <option>赖嘉俊</option>
-            <option>戚嘉豪</option>
-            <option>黄雄伟</option>
-            <option>姚丰育</option>
-            <option>卢俭聪</option>
+      <div class="fm-row-group">
+        <div class="fm-group">
+          <label>素材类型 <span class="req">*</span></label>
+          <select id="msUploadFileType" onchange="onMsUploadTypeChange()">
+            <option>前贴</option>
+            <option>中段</option>
+            <option>尾帧</option>
+            <option>中后段</option>
           </select>
-          <div class="select-arrow">▼</div>
-          <div class="search-select-dropdown" id="msUploadOptimizerDropdown">
-            <input type="text" class="search-input" placeholder="搜索优化师..." oninput="filterMsOptimizerOptions(this.value, 'msUploadOptimizer', 'msUploadOptimizerDropdown')">
+        </div>
+        <div class="fm-group">
+          <label>业务归属</label>
+          <select id="msUploadBiz">
+            <option>存量</option>
+            <option>权益</option>
+          </select>
+        </div>
+      </div>
+      <div class="fm-row-group">
+        <div class="fm-group">
+          <label>渠道</label>
+          <select id="msUploadChannel">
+            <option>广点通</option>
+            <option>头条</option>
+          </select>
+        </div>
+        <div class="fm-group">
+          <label>优化师</label>
+          <div class="search-select" id="msUploadOptimizerWrap">
+            <select id="msUploadOptimizer">
+              <option value="">请选择</option>
+              <option>崔志恒</option>
+              <option>黄佩贤</option>
+              <option>黎舒晴</option>
+              <option>李雨航</option>
+              <option>谭嘉颖</option>
+              <option>林金维</option>
+              <option>陈羽思</option>
+              <option>叶首龙</option>
+              <option>赖嘉俊</option>
+              <option>戚嘉豪</option>
+              <option>黄雄伟</option>
+              <option>姚丰育</option>
+              <option>卢俭聪</option>
+            </select>
+            <div class="select-arrow">▼</div>
+            <div class="search-select-dropdown" id="msUploadOptimizerDropdown">
+              <input type="text" class="search-input" placeholder="搜索优化师..." oninput="filterMsOptimizerOptions(this.value, 'msUploadOptimizer', 'msUploadOptimizerDropdown')">
+            </div>
           </div>
         </div>
+      </div>
+      <div class="fm-group" style="margin-bottom:10px">
+        <label>保存到文件夹</label>
+        <div id="msUploadFolderDisplay" class="folder-select-btn" onclick="openFolderSelectModal()" style="max-width:280px">未分类 <span class="arrow">▸</span></div>
+        <input type="hidden" id="msUploadFolder" value="">
       </div>
       <div style="border-top:1px solid var(--border-light);margin-top:12px;padding-top:10px">
         <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px">🏷️ 标签配置 <span style="font-size:11px;color:var(--danger);font-weight:400">* 全部必填</span></div>
@@ -850,16 +853,23 @@ function renderMsUploadContentTagFields() {
   var fileType = document.getElementById("msUploadFileType").value;
   var config = getMsContentTagConfig(fileType);
   var html = '<div class="fm-group"><label>内容标签 <span class="req">*</span></label></div>';
-  for (var k in config) {
-    if (!config.hasOwnProperty(k)) continue;
-    html += '<div class="fm-group">' +
-      '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px">' + k + '</div>' +
-      '<select class="upload-content-tag" data-type="' + k + '">' +
+  // 每行3个
+  var keys = [];
+  for (var k in config) { if (config.hasOwnProperty(k)) keys.push(k); }
+  for (var ri = 0; ri < keys.length; ri += 3) {
+    html += '<div class="fm-row-group" style="margin-bottom:10px">';
+    for (var ci = 0; ci < 3 && ri + ci < keys.length; ci++) {
+      var key = keys[ri + ci];
+      html += '<div class="fm-group">' +
+        '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px">' + key + '</div>' +
+        '<select class="upload-content-tag" data-type="' + key + '" style="width:100%">' +
         '<option value="">请选择</option>';
-    for (var i = 0; i < config[k].length; i++) {
-      html += '<option>' + config[k][i] + '</option>';
+      for (var i = 0; i < config[key].length; i++) {
+        html += '<option>' + config[key][i] + '</option>';
+      }
+      html += '</select></div>';
     }
-    html += '</select></div>';
+    html += '</div>';
   }
   wrap.innerHTML = html;
 }
