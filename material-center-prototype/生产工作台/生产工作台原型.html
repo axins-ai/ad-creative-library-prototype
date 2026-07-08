@@ -716,6 +716,17 @@ var msFolders = [
   {id:14, name:'会员日', parentId: 12},
 ];
 
+// 递归获取文件夹及其所有子文件夹的ID
+function getFolderAndChildrenIds(folderId) {
+  var ids = [folderId];
+  for (var i = 0; i < msFolders.length; i++) {
+    if (msFolders[i].parentId === folderId) {
+      ids = ids.concat(getFolderAndChildrenIds(msFolders[i].id));
+    }
+  }
+  return ids;
+}
+
 var MATERIALS_DB = [
   // ===== 前贴（开场动画合集） =====
   {id:1, folderId:1, name:"开场动画A",       type:"前贴", biz:"存量", channel:"广点通", optimizer:"张三", date:"2026-06-20", duration:"00:15", size:"12.3 MB", source:"自动入库"},
@@ -1558,7 +1569,8 @@ function renderModalList() {
     var folderVal = document.getElementById('modalFolderFilter').value;
     if (folderVal) {
       var folderId = parseInt(folderVal);
-      if (m.folderId !== folderId) continue;
+      var allowedIds = getFolderAndChildrenIds(folderId);
+      if (allowedIds.indexOf(m.folderId) === -1) continue;
     }
     result.push(m);
   }
@@ -1642,9 +1654,10 @@ function selectAllFromFolder() {
   }
   // 直接从数据源筛选
   gModal.tempSel = [];
+  var allowedIds = getFolderAndChildrenIds(folderId);
   for (var i = 0; i < MATERIALS_DB.length; i++) {
     var m = MATERIALS_DB[i];
-    if (m.folderId !== folderId) continue;
+    if (allowedIds.indexOf(m.folderId) === -1) continue;
     if (filterType && m.type !== filterType) continue;
     // 基础属性筛选
     if (gBasicAttrs.biz && m.biz !== gBasicAttrs.biz) continue;
