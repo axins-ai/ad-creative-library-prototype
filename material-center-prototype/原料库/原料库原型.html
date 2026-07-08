@@ -60,9 +60,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .folder-card-add:hover{border-color:var(--primary) !important;background:var(--primary-light) !important}
 .folder-card-add:hover .folder-icon,.folder-card-add:hover .folder-name,.folder-card-add:hover .folder-count{color:var(--primary) !important}
 
-/* 返回上级按钮 */
-.folder-back-bar{padding:10px 16px;margin-bottom:12px;background:var(--bg-hover);border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--primary);border:1px dashed var(--border);transition:all .15s;text-align:center}
-.folder-back-bar:hover{background:var(--primary-light);border-color:var(--primary)}
+/* 返回上级按钮 - 与文件夹卡片风格一致 */
+.folder-back-bar{padding:16px 24px;margin-bottom:12px;background:var(--bg-hover);border-radius:var(--radius-l);cursor:pointer;font-size:13px;color:var(--primary);border:2px dashed var(--border);transition:all .15s;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px}
+.folder-back-bar:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
 .tag-filter-row{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .tag-filter-row .filter-group{margin-bottom:0}
 .tag-filter-row .filter-group label{font-size:11px;color:var(--text-3);font-weight:500;white-space:nowrap;margin-bottom:3px}
@@ -1163,6 +1163,22 @@ function renderMsGrid() {
 }
 
 // 文件夹列表视图
+var gCardShowCreate = false;
+var gCardCreateParentId = null;
+
+function showCardCreateRow() { gCardShowCreate = true; renderMsGrid(); }
+function cancelCardCreate() { gCardShowCreate = false; renderMsGrid(); }
+function confirmCardCreate() {
+  var inp = document.getElementById('cardCreateInput');
+  if (!inp) return;
+  var name = inp.value.trim();
+  if (!name) { alert('请输入文件夹名称'); return; }
+  for (var i = 0; i < msFolders.length; i++) { if (msFolders[i].name === name) { alert('已存在同名文件夹'); return; } }
+  msFolders.push({id: Date.now(), name: name, parentId: gCardCreateParentId || null});
+  gCardShowCreate = false;
+  renderMsGrid(); renderFolderBar();
+}
+
 function renderFolderList(el, parentId) {
   var html = '';
   var folders = [];
@@ -1173,11 +1189,10 @@ function renderFolderList(el, parentId) {
   // 返回上级按钮（非根目录时）
   if (parentId !== null) {
     var parentName = '';
-    var backId = 'null'; // 默认回到根目录
+    var backId = 'null';
     for (var pi = 0; pi < msFolders.length; pi++) {
       if (msFolders[pi].id === parentId) {
         parentName = msFolders[pi].name;
-        // 如果当前文件夹有上级，返回上级；否则返回根目录
         if (msFolders[pi].parentId !== null && msFolders[pi].parentId !== undefined) {
           backId = '' + msFolders[pi].parentId;
         }
@@ -1196,12 +1211,23 @@ function renderFolderList(el, parentId) {
       '<div class="folder-count">' + cnt + ' 个素材</div>' +
       '</div>';
   }
-  // 新增文件夹卡片 — 传入当前视图层级
-  html += '<div class="folder-card folder-card-add" onclick="openFolderManager(' + (parentId !== null ? '' + parentId : 'null') + ')">' +
-    '<div class="folder-icon" style="font-size:36px;color:var(--text-3)">+</div>' +
-    '<div class="folder-name" style="color:var(--text-3)">新建文件夹</div>' +
-    '<div class="folder-count" style="color:var(--text-3)">点击创建</div>' +
-    '</div>';
+  
+  // 内联新建行或新建卡片
+  if (gCardShowCreate) {
+    html += '<div class="folder-card folder-card-add" style="padding:16px 24px;cursor:default;border-color:var(--primary)">' +
+      '<div style="display:flex;align-items:center;gap:8px;width:100%">' +
+      '<span>📁</span>' +
+      '<input type="text" id="cardCreateInput" placeholder="输入文件夹名称..." style="flex:1;height:36px;border:1px solid var(--primary);border-radius:6px;padding:0 10px;font-size:13px;outline:none" onkeydown="if(event.key===\'Enter\')confirmCardCreate()" autofocus>' +
+      '<span class="btn-icon" onclick="confirmCardCreate()" style="font-size:18px;cursor:pointer">✅</span>' +
+      '<span class="btn-icon" onclick="cancelCardCreate()" style="font-size:18px;cursor:pointer">❌</span>' +
+      '</div></div>';
+  } else {
+    html += '<div class="folder-card folder-card-add" onclick="gCardCreateParentId=' + (parentId !== null ? '' + parentId : 'null') + ';showCardCreateRow()" style="cursor:pointer">' +
+      '<div class="folder-icon" style="font-size:36px;color:var(--text-3)">+</div>' +
+      '<div class="folder-name" style="color:var(--text-3)">新建文件夹</div>' +
+      '<div class="folder-count" style="color:var(--text-3)">点击创建</div>' +
+      '</div>';
+  }
   if (html === '' || html.indexOf('folder-card') === -1) {
     if (parentId !== null) {
       el.innerHTML = html; // 只有返回按钮，没有子文件夹
@@ -1385,43 +1411,38 @@ try { renderMsGrid(); } catch(e) { console.error("renderMsGrid init failed:", e)
 // 文件夹管理弹窗
 var gFMShowCreate = false;
 var gFMParentId = null; // 新建文件夹的上级，null=一级
+var gFMExpandedIds = []; // 已展开的文件夹ID列表
 
 function openFolderManager(initParentId) {
   document.getElementById('fmModal').classList.add('active');
   document.body.style.overflow = 'hidden';
   gFMShowCreate = false;
   gFMParentId = initParentId !== undefined ? initParentId : null;
+  gFMExpandedIds = [];
   renderFMList();
 }
 function closeFM() { document.getElementById('fmModal').classList.remove('active'); document.body.style.overflow = ''; }
+
+function toggleExpand(folderId) {
+  var idx = gFMExpandedIds.indexOf(folderId);
+  if (idx === -1) { gFMExpandedIds.push(folderId); } else { gFMExpandedIds.splice(idx, 1); }
+  renderFMList();
+}
+
 function showFMCreateRow(parentId) {
   gFMParentId = parentId !== undefined ? parentId : gFMParentId;
   gFMShowCreate = true;
   renderFMList();
 }
 
-// 展开树渲染（始终显示所有层级，无折叠）
+// 文件夹树渲染（折叠/展开模式）
 function renderFMList() {
   var el = document.getElementById('fmList'); if (!el) return;
-  
-  // 获取当前父级名称
-  var parentLabel = '根目录（一级）';
-  if (gFMParentId) {
-    for (var pi = 0; pi < msFolders.length; pi++) {
-      if (msFolders[pi].id === gFMParentId) { parentLabel = msFolders[pi].name; break; }
-    }
-  }
-  
   var h = '';
-  // 当前位置 + 快捷回到根目录
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:6px 10px;background:var(--bg-hover);border-radius:6px;font-size:12px">' +
-    '<span style="color:var(--text-2)">📁 当前位置：<strong>' + parentLabel + '</strong></span>' +
-    (gFMParentId ? '<span class="fm-btn fm-up" onclick="gFMParentId=null;gFMShowCreate=false;renderFMList()" style="font-size:11px">⬆ 回到根目录</span>' : '') +
-    '</div>';
   
-  // 将文件夹按层级排序（先用递归获取有序列表）
-  function buildFlatList(parentId, depth, result) {
-    if (depth >= 3) return;
+  // 递归渲染树
+  function renderTree(parentId, depth) {
+    var html = '';
     for (var i = 0; i < msFolders.length; i++) {
       var f = msFolders[i];
       if (f.parentId !== parentId) continue;
@@ -1431,49 +1452,56 @@ function renderFMList() {
         if (allIds.indexOf(msMaterials[j].folderId) !== -1) cnt++;
       }
       var hasChildren = getChildFolders(f.id).length > 0;
-      var isSelected = gFMParentId === f.id;
+      var isExpanded = gFMExpandedIds.indexOf(f.id) !== -1;
+      var isCreateContext = gFMParentId === f.id && gFMShowCreate;
       var padding = 20 + depth * 24;
       
-      result.push({
-        id: f.id,
-        name: f.name,
-        padding: padding,
-        cnt: cnt,
-        hasChildren: hasChildren,
-        isSelected: isSelected,
-        depth: depth
-      });
-      buildFlatList(f.id, depth + 1, result);
+      html += '<div class="fm-row' + (gFMParentId === f.id ? ' fm-row-selected' : '') + '" data-fid="' + f.id + '" data-fname="' + f.name.replace(/"/g,'').replace(/'/g,'') + '" style="padding-left:' + padding + 'px">';
+      
+      // 展开/折叠箭头
+      if (hasChildren) {
+        html += '<span class="fm-tree-toggle" onclick="event.stopPropagation();toggleExpand(' + f.id + ')" style="cursor:pointer;font-size:10px;margin-right:2px;transition:transform .15s;display:inline-block;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
+      } else {
+        html += '<span style="width:12px;display:inline-block"></span>';
+      }
+      
+      html += '<span>📁</span>' +
+        '<span class="fm-name">' + f.name + '</span>' +
+        '<span class="fm-cnt">' + cnt + '素材</span>' +
+        (depth < 2 ? '<span class="fm-btn fm-add-sub" onclick="event.stopPropagation();showFMCreateRow(' + f.id + ')" style="font-size:11px">➕ 子文件夹</span>' : '') +
+        '<span class="fm-btn fm-rename">✏️ 重命名</span>' +
+        '<span class="fm-btn fm-del">🗑️ 删除</span></div>';
+      
+      // 展开状态下渲染子文件夹
+      if (isExpanded) {
+        html += renderTree(f.id, depth + 1);
+      }
     }
+    return html;
   }
   
-  var flatList = [];
-  buildFlatList(null, 0, flatList);
+  h += renderTree(null, 0);
   
-  for (var i = 0; i < flatList.length; i++) {
-    var item = flatList[i];
-    h += '<div class="fm-row' + (item.isSelected ? ' fm-row-selected' : '') + '" data-fid="' + item.id + '" data-fname="' + item.name.replace(/"/g,'').replace(/'/g,'') + '" style="padding-left:' + item.padding + 'px">' +
-      '<span style="width:12px;display:inline-block">' + (item.hasChildren ? '▾' : '') + '</span>' +
-      '<span>📁</span>' +
-      '<span class="fm-name" onclick="gFMParentId=' + item.id + ';gFMShowCreate=false;renderFMList()" style="cursor:pointer">' + item.name + '</span>' +
-      '<span class="fm-cnt">' + item.cnt + '素材</span>' +
-      (item.depth < 2 ? '<span class="fm-btn fm-add-sub" onclick="event.stopPropagation();showFMCreateRow(' + item.id + ')" style="font-size:11px">➕ 子文件夹</span>' : '') +
-      '<span class="fm-btn fm-rename">✏️ 重命名</span>' +
-      '<span class="fm-btn fm-del">🗑️ 删除</span></div>';
+  if (h === '') { 
+    h = '<div class="fm-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">暂无文件夹</div>'; 
   }
   
-  if (flatList.length === 0) { 
-    h += '<div class="fm-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">暂无文件夹</div>'; 
-  }
-  
-  // 内联新建行
+  // 内联新建行（在选中文件夹下方）
   if (gFMShowCreate) {
-    h += '<div class="fm-row fm-create-row">' +
+    var ctxName = '根目录';
+    if (gFMParentId) {
+      for (var pi = 0; pi < msFolders.length; pi++) {
+        if (msFolders[pi].id === gFMParentId) { ctxName = msFolders[pi].name; break; }
+      }
+    }
+    h += '<div class="fm-create-row-wrap" style="padding:10px 20px;margin-top:4px;background:var(--primary-light);border-radius:6px">' +
+      '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px">在 <strong>' + ctxName + '</strong> 下新建：</div>' +
+      '<div style="display:flex;align-items:center;gap:6px">' +
       '<span>📁</span>' +
-      '<input type="text" id="fmInlineInput" placeholder="输入文件夹名称..." style="flex:1;height:32px;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:13px;outline:none" onkeydown="if(event.key===\'Enter\')fmInlineCreate()">' +
-      '<span class="fm-btn fm-create-confirm" title="确认" style="font-size:16px">✅</span>' +
-      '<span class="fm-btn fm-create-cancel" title="取消" style="font-size:16px">❌</span>' +
-      '</div>';
+      '<input type="text" id="fmInlineInput" placeholder="输入文件夹名称..." style="flex:1;height:32px;border:1px solid var(--primary);border-radius:6px;padding:0 10px;font-size:13px;outline:none" onkeydown="if(event.key===\'Enter\')fmInlineCreate()">' +
+      '<span class="fm-btn fm-create-confirm" style="font-size:18px;cursor:pointer" onclick="fmInlineCreate()">✅</span>' +
+      '<span class="fm-btn fm-create-cancel" style="font-size:18px;cursor:pointer" onclick="fmInlineCancel()">❌</span>' +
+      '</div></div>';
   }
   el.innerHTML = h;
   if (gFMShowCreate) {
@@ -1577,7 +1605,7 @@ function fmInlineCancel() {
     <div class="modal-header">
       <h3>📁 文件夹管理</h3>
       <div style="display:flex;align-items:center;gap:6px">
-        <button class="btn btn-sm btn-primary" onclick="showFMCreateRow(gFMParentId)" style="height:28px;padding:0 10px;font-size:12px">+ 新建</button>
+        <button class="btn btn-sm btn-primary" onclick="gFMParentId=null;gFMShowCreate=true;renderFMList()" style="height:28px;padding:0 10px;font-size:12px">+ 新建一级文件夹</button>
         <button class="close-btn" onclick="closeFM()">✕</button>
       </div>
     </div>
