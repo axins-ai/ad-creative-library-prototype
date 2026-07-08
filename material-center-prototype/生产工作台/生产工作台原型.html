@@ -284,9 +284,19 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   transition:opacity .2s;
 }
 .overlay.show{opacity:1;pointer-events:auto}
-.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;display:none;align-items:center;justify-content:center}
-.modal-overlay.active{display:flex}
-.modal-overlay .modal{width:560px;max-height:80vh}
+/* 选择原料弹窗 - 内嵌文件夹面板 */
+.folder-panel{
+  background:var(--bg-page);border-bottom:1px solid var(--border-light);
+  padding:8px 20px;max-height:240px;overflow-y:auto;display:none;
+}
+.folder-panel.open{display:block}
+.folder-panel .fp-row{
+  display:flex;align-items:center;gap:4px;padding:5px 8px 5px 8px;
+  cursor:pointer;border-radius:4px;transition:background .1s;font-size:13px;
+  white-space:nowrap;
+}
+.folder-panel .fp-row:hover{background:var(--bg-hover)}
+.folder-panel .fp-row.selected{background:var(--primary-light);color:var(--primary);font-weight:500}
 .modal{
   background:var(--bg-card);border-radius:var(--radius-l);
   box-shadow:var(--shadow-l);width:760px;max-height:85vh;
@@ -684,10 +694,12 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <option value="自动入库">自动入库</option>
         <option value="手动上传">手动上传</option>
       </select>
-      <div id="pwbFolderDisplay" class="pwb-folder-btn" onclick="openPwbFolderSelect()" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap">全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
+      <div id="pwbFolderDisplay" class="pwb-folder-btn" onclick="togglePwbFsPanel()" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap">全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
       <select id="modalFolderFilter" style="display:none"><option value="">全部文件夹</option></select>
       <button class="btn btn-default" onclick="selectAllFromFolder()" style="height:30px;font-size:11px;padding:0 10px">📁 全选当前文件夹</button>
     </div>
+    <!-- 内嵌文件夹选择面板 -->
+    <div class="folder-panel" id="pwbFsPanel"></div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-ft">
       <span class="sel-info" id="selInfo">已选 0 个</span>
@@ -695,24 +707,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <button class="ft-btn" onclick="clearSel()">清空</button>
         <button class="ft-btn primary" onclick="confirmSel()">确认选择</button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- 文件夹选择弹窗（生产工作台） -->
-<div class="modal-overlay" id="pwbFolderSelectOverlay">
-  <div class="modal" style="width:560px">
-    <div class="modal-header" style="padding:14px 20px">
-      <h3>📁 选择文件夹</h3>
-      <button class="close-btn" onclick="closePwbFolderSelect()">✕</button>
-    </div>
-    <div style="padding:0 20px 14px">
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">当前选择：<strong id="pwbFsLabel">全部文件夹</strong></div>
-      <div id="pwbFsTree" style="max-height:300px;overflow-y:auto;border:1px solid var(--border-light);border-radius:6px;padding:6px 0;font-size:13px"></div>
-    </div>
-    <div class="modal-footer" style="justify-content:space-between">
-      <button class="btn" onclick="closePwbFolderSelect()" style="background:#fff;color:var(--text-2);border:1px solid var(--border)">取消</button>
-      <button class="btn btn-primary" onclick="pwbFsConfirm()">确认选择</button>
     </div>
   </div>
 </div>
@@ -1478,7 +1472,9 @@ function openModal(lockType, slotIdx) {
   document.getElementById("sourceFilter").value = "";
 
   renderModalList();
-  updatePwbFolderDisplay();
+  // 重置文件夹显示
+  document.getElementById('pwbFolderDisplay').innerHTML = '全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span>';
+  document.getElementById('modalFolderFilter').value = '';
   document.getElementById("overlay").classList.add("show");
 }
 
@@ -1491,48 +1487,55 @@ function handleOverlayClick(e) {
   if (e.target === document.getElementById("overlay")) closeModal();
 }
 
-// ===== 文件夹选择弹窗 =====
+// ===== 内嵌文件夹选择面板 =====
 var gPwbFsId = null;
 var gPwbFsExpanded = [];
+var gPwbFsPanelOpen = false;
 
-function openPwbFolderSelect() {
-  gPwbFsId = null;
-  gPwbFsExpanded = [];
-  document.getElementById('pwbFolderSelectOverlay').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  renderPwbFsTree();
+function togglePwbFsPanel() {
+  gPwbFsPanelOpen = !gPwbFsPanelOpen;
+  var panel = document.getElementById('pwbFsPanel');
+  if (gPwbFsPanelOpen) {
+    gPwbFsId = document.getElementById('modalFolderFilter').value || null;
+    gPwbFsExpanded = [];
+    panel.classList.add('open');
+    renderPwbFsTree();
+  } else {
+    panel.classList.remove('open');
+  }
 }
-function closePwbFolderSelect() {
-  document.getElementById('pwbFolderSelectOverlay').classList.remove('active');
-  document.body.style.overflow = '';
+
+function closePwbFsPanel() {
+  gPwbFsPanelOpen = false;
+  document.getElementById('pwbFsPanel').classList.remove('open');
 }
+
 function pwbFsToggleExpand(id) {
   var idx = gPwbFsExpanded.indexOf(id);
   if (idx === -1) { gPwbFsExpanded.push(id); } else { gPwbFsExpanded.splice(idx, 1); }
   renderPwbFsTree();
 }
+
 function pwbFsSelect(id) {
   gPwbFsId = id;
-  renderPwbFsTree();
-}
-function pwbFsConfirm() {
+  // 立即应用选择
   var sel = document.getElementById('modalFolderFilter');
   var display = document.getElementById('pwbFolderDisplay');
-  if (gPwbFsId) {
-    sel.value = gPwbFsId;
+  if (id) {
+    sel.value = id;
     for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].id === gPwbFsId) { display.innerHTML = msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>'; break; }
+      if (msFolders[i].id === id) { display.innerHTML = msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>'; break; }
     }
   } else {
     sel.value = '';
     display.innerHTML = '全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span>';
   }
-  closePwbFolderSelect();
+  closePwbFsPanel();
   renderModalList();
 }
 
 function renderPwbFsTree() {
-  var el = document.getElementById('pwbFsTree');
+  var el = document.getElementById('pwbFsPanel');
   if (!el) return;
   function getDepth(fid) {
     var d = 0, cur = fid;
@@ -1555,15 +1558,15 @@ function renderPwbFsTree() {
       var isExpanded = gPwbFsExpanded.indexOf(f.id) !== -1;
       var isSelected = gPwbFsId === f.id;
       var indent = getDepth(f.id);
-      var padding = 12 + indent * 20;
+      var leftPad = 8 + indent * 20;
       
-      html += '<div class="fs-row" style="display:flex;align-items:center;gap:4px;padding:5px ' + padding + 'px 5px 8px;cursor:pointer;border-radius:4px;transition:background .1s;white-space:nowrap;overflow:hidden;' + (isSelected ? 'background:var(--primary-light)' : '') + '" onclick="pwbFsSelect(' + f.id + ')">';
+      html += '<div class="fp-row' + (isSelected ? ' selected' : '') + '" style="padding-left:' + leftPad + 'px" onclick="pwbFsSelect(' + f.id + ')">';
       if (hasChildren) {
-        html += '<span onclick="event.stopPropagation();pwbFsToggleExpand(' + f.id + ')" style="cursor:pointer;font-size:9px;width:14px;text-align:center;transition:transform .15s;display:inline-block;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
+        html += '<span onclick="event.stopPropagation();pwbFsToggleExpand(' + f.id + ')" style="cursor:pointer;font-size:9px;width:14px;text-align:center;display:inline-block;transition:transform .15s;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
       } else {
         html += '<span style="width:14px;display:inline-block"></span>';
       }
-      html += '<span>📁</span><span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.name + '</span></div>';
+      html += '<span>📁</span><span>' + f.name + '</span></div>';
       if (isExpanded) html += renderTree(f.id);
     }
     return html;
@@ -1571,18 +1574,6 @@ function renderPwbFsTree() {
   h += renderTree(null);
   if (!h) h = '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">暂无文件夹</div>';
   el.innerHTML = h;
-}
-
-function updatePwbFolderDisplay() {
-  var sel = document.getElementById('modalFolderFilter');
-  var display = document.getElementById('pwbFolderDisplay');
-  if (!sel || !display) return;
-  if (sel.value) {
-    for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].id === parseInt(sel.value)) { display.innerHTML = msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>'; return; }
-    }
-  }
-  display.innerHTML = '全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span>';
 }
 
 function unlockType() {
