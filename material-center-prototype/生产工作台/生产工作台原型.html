@@ -284,19 +284,44 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   transition:opacity .2s;
 }
 .overlay.show{opacity:1;pointer-events:auto}
-/* 选择原料弹窗 - 内嵌文件夹面板 */
-.folder-panel{
-  background:var(--bg-page);border-bottom:1px solid var(--border-light);
-  padding:8px 20px;max-height:240px;overflow-y:auto;display:none;
+/* 文件夹选择弹窗（独立样式，不依赖 .modal 类） */
+.fs-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2100;
+  display:none;align-items:center;justify-content:center;
 }
-.folder-panel.open{display:block}
-.folder-panel .fp-row{
-  display:flex;align-items:center;gap:4px;padding:5px 8px 5px 8px;
+.fs-overlay.open{display:flex}
+.fs-overlay .fs-modal{
+  background:#fff;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);
+  width:540px;max-height:80vh;overflow:hidden;
+}
+.fs-modal .fs-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid #f0f0f0;
+}
+.fs-modal .fs-hd h3{font-size:15px;font-weight:600;color:var(--text-1);margin:0}
+.fs-modal .close-btn{
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;cursor:pointer;border-radius:6px;
+  color:var(--text-3);font-size:18px;transition:all .15s;
+}
+.fs-modal .close-btn:hover{background:var(--bg-hover);color:var(--text-1)}
+.fs-modal .fs-body{
+  padding:12px 20px;max-height:50vh;overflow-y:auto;
+}
+.fs-modal .fs-ft{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 20px;border-top:1px solid #f0f0f0;
+}
+.fs-modal .fs-ft .fs-info{font-size:12px;color:var(--text-3)}
+.fs-modal .fs-ft .fs-btns{display:flex;gap:8px}
+.fs-row{
+  display:flex;align-items:center;gap:4px;padding:6px 8px;
   cursor:pointer;border-radius:4px;transition:background .1s;font-size:13px;
-  white-space:nowrap;
 }
-.folder-panel .fp-row:hover{background:var(--bg-hover)}
-.folder-panel .fp-row.selected{background:var(--primary-light);color:var(--primary);font-weight:500}
+.fs-row:hover{background:var(--bg-hover)}
+.fs-row.fs-sel{background:var(--primary-light);color:var(--primary);font-weight:500}
+.fs-row .fs-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-1)}
+.fs-row.fs-sel .fs-name{color:var(--primary)}
 .modal{
   background:var(--bg-card);border-radius:var(--radius-l);
   box-shadow:var(--shadow-l);width:760px;max-height:85vh;
@@ -694,12 +719,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <option value="自动入库">自动入库</option>
         <option value="手动上传">手动上传</option>
       </select>
-      <div id="pwbFolderDisplay" class="pwb-folder-btn" onclick="togglePwbFsPanel()" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap">全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
+      <div id="pwbFolderDisplay" class="pwb-folder-btn" onclick="openFsModal()" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap">全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
       <select id="modalFolderFilter" style="display:none"><option value="">全部文件夹</option></select>
       <button class="btn btn-default" onclick="selectAllFromFolder()" style="height:30px;font-size:11px;padding:0 10px">📁 全选当前文件夹</button>
     </div>
-    <!-- 内嵌文件夹选择面板 -->
-    <div class="folder-panel" id="pwbFsPanel"></div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-ft">
       <span class="sel-info" id="selInfo">已选 0 个</span>
@@ -712,6 +735,24 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 </div>
 
 <div class="toast-wrap" id="toastWrap"></div>
+
+<!-- 文件夹选择弹窗（独立样式） -->
+<div class="fs-overlay" id="fsOverlay" onclick="if(event.target===this)closeFsModal()">
+  <div class="fs-modal">
+    <div class="fs-hd">
+      <h3>📁 选择文件夹</h3>
+      <button class="close-btn" onclick="closeFsModal()">✕</button>
+    </div>
+    <div class="fs-body" id="fsTree"></div>
+    <div class="fs-ft">
+      <span class="fs-info" id="fsInfo">当前选择：全部文件夹</span>
+      <div class="fs-btns">
+        <button class="ft-btn" onclick="closeFsModal()" style="padding:6px 16px">取消</button>
+        <button class="ft-btn primary" onclick="fsConfirm()">确认选择</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ===== 原料数据 =====
@@ -1487,55 +1528,62 @@ function handleOverlayClick(e) {
   if (e.target === document.getElementById("overlay")) closeModal();
 }
 
-// ===== 内嵌文件夹选择面板 =====
-var gPwbFsId = null;
-var gPwbFsExpanded = [];
-var gPwbFsPanelOpen = false;
+// ===== 文件夹选择弹窗（独立样式） =====
+var gFsId = null;
+var gFsExpanded = [];
 
-function togglePwbFsPanel() {
-  gPwbFsPanelOpen = !gPwbFsPanelOpen;
-  var panel = document.getElementById('pwbFsPanel');
-  if (gPwbFsPanelOpen) {
-    gPwbFsId = document.getElementById('modalFolderFilter').value || null;
-    gPwbFsExpanded = [];
-    panel.classList.add('open');
-    renderPwbFsTree();
-  } else {
-    panel.classList.remove('open');
+function openFsModal() {
+  gFsId = document.getElementById('modalFolderFilter').value || null;
+  gFsExpanded = [];
+  document.getElementById('fsOverlay').classList.add('open');
+  renderFsTree();
+  updateFsInfo();
+}
+
+function closeFsModal() {
+  document.getElementById('fsOverlay').classList.remove('open');
+}
+
+function fsToggleExpand(id) {
+  var idx = gFsExpanded.indexOf(id);
+  if (idx === -1) { gFsExpanded.push(id); } else { gFsExpanded.splice(idx, 1); }
+  renderFsTree();
+}
+
+function fsSelect(id) {
+  gFsId = id;
+  renderFsTree();
+  updateFsInfo();
+}
+
+function updateFsInfo() {
+  var info = document.getElementById('fsInfo');
+  if (gFsId) {
+    for (var i = 0; i < msFolders.length; i++) {
+      if (msFolders[i].id === gFsId) { info.textContent = '当前选择：' + msFolders[i].name; return; }
+    }
   }
+  info.textContent = '当前选择：全部文件夹';
 }
 
-function closePwbFsPanel() {
-  gPwbFsPanelOpen = false;
-  document.getElementById('pwbFsPanel').classList.remove('open');
-}
-
-function pwbFsToggleExpand(id) {
-  var idx = gPwbFsExpanded.indexOf(id);
-  if (idx === -1) { gPwbFsExpanded.push(id); } else { gPwbFsExpanded.splice(idx, 1); }
-  renderPwbFsTree();
-}
-
-function pwbFsSelect(id) {
-  gPwbFsId = id;
-  // 立即应用选择
+function fsConfirm() {
   var sel = document.getElementById('modalFolderFilter');
   var display = document.getElementById('pwbFolderDisplay');
-  if (id) {
-    sel.value = id;
+  if (gFsId) {
+    sel.value = gFsId;
     for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].id === id) { display.innerHTML = msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>'; break; }
+      if (msFolders[i].id === gFsId) { display.innerHTML = msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>'; break; }
     }
   } else {
     sel.value = '';
     display.innerHTML = '全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span>';
   }
-  closePwbFsPanel();
+  closeFsModal();
   renderModalList();
 }
 
-function renderPwbFsTree() {
-  var el = document.getElementById('pwbFsPanel');
+function renderFsTree() {
+  var el = document.getElementById('fsTree');
   if (!el) return;
   function getDepth(fid) {
     var d = 0, cur = fid;
@@ -1555,18 +1603,17 @@ function renderPwbFsTree() {
       if (f.parentId !== parentId) continue;
       var hasChildren = false;
       for (var j = 0; j < msFolders.length; j++) { if (msFolders[j].parentId === f.id) { hasChildren = true; break; } }
-      var isExpanded = gPwbFsExpanded.indexOf(f.id) !== -1;
-      var isSelected = gPwbFsId === f.id;
+      var isExpanded = gFsExpanded.indexOf(f.id) !== -1;
+      var isSelected = gFsId === f.id;
       var indent = getDepth(f.id);
-      var leftPad = 8 + indent * 20;
       
-      html += '<div class="fp-row' + (isSelected ? ' selected' : '') + '" style="padding-left:' + leftPad + 'px" onclick="pwbFsSelect(' + f.id + ')">';
+      html += '<div class="fs-row' + (isSelected ? ' fs-sel' : '') + '" style="padding-left:' + (8 + indent * 20) + 'px" onclick="fsSelect(' + f.id + ')">';
       if (hasChildren) {
-        html += '<span onclick="event.stopPropagation();pwbFsToggleExpand(' + f.id + ')" style="cursor:pointer;font-size:9px;width:14px;text-align:center;display:inline-block;transition:transform .15s;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
+        html += '<span onclick="event.stopPropagation();fsToggleExpand(' + f.id + ')" style="cursor:pointer;font-size:9px;width:14px;text-align:center;display:inline-block;transition:transform .15s;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
       } else {
         html += '<span style="width:14px;display:inline-block"></span>';
       }
-      html += '<span>📁</span><span>' + f.name + '</span></div>';
+      html += '<span>📁</span><span class="fs-name">' + f.name + '</span></div>';
       if (isExpanded) html += renderTree(f.id);
     }
     return html;
