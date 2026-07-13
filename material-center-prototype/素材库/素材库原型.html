@@ -439,15 +439,6 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <input type="file" id="uploadFileInput" multiple accept="video/*,image/*" style="display:none" onchange="handleUploadFileSelect(event)">
       <div id="uploadFileList" class="file-list" style="display:none"></div>
       <div class="fm-group">
-        <label>素材类型 <span class="req">*</span></label>
-        <select id="uploadFileType">
-          <option>前贴</option>
-          <option>中段</option>
-          <option>尾帧</option>
-          <option>中后段</option>
-        </select>
-      </div>
-      <div class="fm-group">
         <label>业务归属</label>
         <select id="uploadBiz">
           <option>存量</option>
@@ -1032,7 +1023,6 @@ function renderUploadFileList() {
 
 function submitUpload() {
   if (uploadSelectedFiles.length === 0) { showMsgModal("请先选择素材文件"); return; }
-  var fileType = document.getElementById("uploadFileType").value;
   var biz = document.getElementById("uploadBiz").value;
   var channel = document.getElementById("uploadChannel").value;
   var optimizer = document.getElementById("uploadOptimizer").value || "未设置";
@@ -1062,10 +1052,12 @@ function submitUpload() {
       failNames.push(file.name);
     } else {
       success++;
+      var ext = file.name.split('.').pop().toLowerCase();
+      var detectedType = (ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'gif' || ext === 'webp' || ext === 'bmp') ? '图片' : '视频';
       materialData.push({
         id: Date.now() + Math.random(),
         name: file.name,
-        type: fileType,
+        type: detectedType,
         biz: biz,
         channel: channel,
         optimizer: optimizer,
