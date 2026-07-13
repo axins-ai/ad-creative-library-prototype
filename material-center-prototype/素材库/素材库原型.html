@@ -484,7 +484,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </div>
       </div>
       <div style="border-top:1px solid var(--border-light);margin-top:12px;padding-top:10px">
-        <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px">🏷️ 标签配置 <span style="font-size:11px;color:var(--danger);font-weight:400">* 全部必填</span></div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+          <span>🏷️ 标签配置</span>
+          <span style="font-size:11px;color:var(--text-3);font-weight:400;background:var(--bg-page);padding:3px 8px;border-radius:4px">💡 视频素材标签为必配项，图片素材为选配项</span>
+        </div>
         <div class="fm-group">
           <label>用户标签 <span class="req">*</span></label>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -719,7 +722,6 @@ function renderUploadContentTagFields() {
   var wrap = document.getElementById("uploadContentTagsWrap");
   var html = '<div class="fm-group">' +
     '<label>内容标签</label>' +
-    '<div style="font-size:11px;color:var(--text-3);margin-top:2px;padding:4px 8px;background:var(--bg-page);border-radius:4px">💡 视频素材标签为必配项，图片素材为选配项</div>' +
     '</div>' +
     '<div style="display:flex;flex-wrap:wrap;gap:8px">';
   for (var k in CONTENT_TAG_CONFIG_ZHONGHOU) {
