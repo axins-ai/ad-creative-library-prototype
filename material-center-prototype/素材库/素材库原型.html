@@ -720,18 +720,20 @@ function renderUploadContentTagFields() {
   var html = '<div class="fm-group">' +
     '<label>内容标签</label>' +
     '<div style="font-size:11px;color:var(--text-3);margin-top:2px;padding:4px 8px;background:var(--bg-page);border-radius:4px">💡 视频素材标签为必配项，图片素材为选配项</div>' +
-    '</div>';
+    '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px">';
   for (var k in CONTENT_TAG_CONFIG_ZHONGHOU) {
     if (!CONTENT_TAG_CONFIG_ZHONGHOU.hasOwnProperty(k)) continue;
-    html += '<div class="fm-group">' +
+    html += '<div style="flex:0 0 calc(33.33% - 6px);min-width:0">' +
       '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px">' + k + '</div>' +
-      '<select class="upload-content-tag" data-type="' + k + '">' +
+      '<select class="upload-content-tag" data-type="' + k + '" style="width:100%;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;outline:none;font-family:var(--font);background:#fff;color:var(--text-1);cursor:pointer">' +
         '<option value="">请选择</option>';
     for (var i = 0; i < CONTENT_TAG_CONFIG_ZHONGHOU[k].length; i++) {
       html += '<option>' + CONTENT_TAG_CONFIG_ZHONGHOU[k][i] + '</option>';
     }
     html += '</select></div>';
   }
+  html += '</div>';
   wrap.innerHTML = html;
 }
 
