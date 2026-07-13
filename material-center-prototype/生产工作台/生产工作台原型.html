@@ -673,7 +673,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         </div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px 14px;background:var(--bg-page);border-radius:var(--radius)">
+      <div id="savePathRow" style="display:none;align-items:center;gap:12px;margin-top:14px;padding:10px 14px;background:var(--bg-page);border-radius:var(--radius)">
         <span style="font-size:13px;font-weight:500;color:var(--text-2);white-space:nowrap">📂 保存路径</span>
         <div id="savePathDisplay" class="pwb-folder-btn" onclick="openSavePathModal()" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap;flex:1">未分类 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
       </div>
@@ -2020,15 +2020,18 @@ function toggleSaveLib() {
   var cb = document.getElementById("saveAsMaterial");
   var wrap = document.getElementById("saveLibTypeWrap");
   var block = document.getElementById("saveLibBlock");
+  var savePathRow = document.getElementById("savePathRow");
   
   if (cb.checked) {
     wrap.style.display = "flex";
     block.style.borderColor = "#d3adf7";
     block.style.background = "#f5f0ff";
+    savePathRow.style.display = "flex";
   } else {
     wrap.style.display = "none";
     block.style.borderColor = "var(--border-light)";
     block.style.background = "";
+    savePathRow.style.display = "none";
   }
 }
 
