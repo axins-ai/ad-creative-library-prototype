@@ -495,9 +495,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <div class="file-drop" id="msUploadFileDrop" onclick="document.getElementById('msUploadFileInput').click()">
         <div style="font-size:48px;margin-bottom:12px">📁</div>
         <div style="font-weight:500;color:var(--text-2)">点击选择文件，或拖拽文件到此处</div>
-        <div style="font-size:11px;margin-top:4px;opacity:.6">支持 MP4 / MOV / JPG / PNG 格式，支持多选</div>
+        <div style="font-size:11px;margin-top:4px;opacity:.6">仅支持视频文件（不限格式），单个 ≤ 200MB，单次最多 50 个</div>
       </div>
-      <input type="file" id="msUploadFileInput" multiple accept="video/*,image/*" style="display:none" onchange="handleMsUploadFileSelect(event)">
+      <input type="file" id="msUploadFileInput" multiple accept="video/*" style="display:none" onchange="handleMsUploadFileSelect(event)">
       <div id="msUploadFileList" class="file-list" style="display:none"></div>
       <div class="fm-row-group">
         <div class="fm-group">
@@ -1160,7 +1160,7 @@ function renderFSTree() {
       var isSelected = gFSSelectedId === f.id;
       var padding = 12 + depth * 20;
       
-      html += '<div class="fs-row' + (isSelected ? ' fs-selected' : '') + '" data-fid="' + f.id + '" style="display:flex;align-items:center;gap:4px;padding:6px 8px 6px ' + padding + 'px;cursor:pointer;border-radius:4px;transition:background .1s;' + (isSelected ? 'background:var(--primary-light)' : '') + '" onclick="fsSelect(' + f.id + ')">';
+      html += '<div class="fs-row' + (isSelected ? ' fs-selected' : '') + '" data-fid="' + f.id + '" style="display:flex;align-items:center;gap:4px;padding:6px ' + padding + 'px 6px 8px;cursor:pointer;border-radius:4px;transition:background .1s;' + (isSelected ? 'background:var(--primary-light)' : '') + '" onclick="fsSelect(' + f.id + ')">';
       
       if (hasChildren) {
         html += '<span onclick="event.stopPropagation();fsToggleExpand(' + f.id + ')" style="cursor:pointer;font-size:9px;width:14px;text-align:center;transition:transform .15s;display:inline-block;' + (isExpanded ? 'transform:rotate(90deg)' : '') + '">▶</span>';
@@ -1168,7 +1168,7 @@ function renderFSTree() {
         html += '<span style="width:14px;display:inline-block"></span>';
       }
       
-      html += '<span>📁</span><span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.name + '</span>' +
+      html += '<span>📁</span><span style="flex:1;font-size:13px">' + f.name + '</span>' +
         (depth < 3 ? '<span style="font-size:11px;color:var(--text-3);cursor:pointer;padding:2px 6px;border-radius:4px" onclick="event.stopPropagation();fsCreateSubFolder(' + f.id + ')" title="新建子文件夹">➕</span>' : '') +
         '<span style="font-size:11px;color:var(--text-3);cursor:pointer;padding:2px 6px;border-radius:4px" onclick="event.stopPropagation();fsRenameFolder(' + f.id + ')" title="重命名">✏️</span>' +
         '<span style="font-size:11px;color:var(--danger);cursor:pointer;padding:2px 6px;border-radius:4px" onclick="event.stopPropagation();fsDeleteFolder(' + f.id + ')" title="删除">🗑️</span>' +
@@ -1475,10 +1475,29 @@ function closeMsUploadModal() {
   document.body.style.overflow = "";
 }
 
+var MS_UPLOAD_MAX_COUNT = 50;
+var MS_UPLOAD_MAX_SIZE = 200 * 1024 * 1024;
+var MS_VIDEO_EXT = /\.(mp4|mov|avi|mkv|flv|wmv|webm|m4v|mpg|mpeg|3gp|ts|mts|m2ts|ogv|rm|rmvb|vob)$/i;
+function isVideoFile(f) {
+  if (f.type && f.type.indexOf("video/") === 0) return true;
+  return MS_VIDEO_EXT.test(f.name);
+}
+function addMsUploadFiles(files) {
+  var rejected = [];
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (uploadSelectedFiles.length >= MS_UPLOAD_MAX_COUNT) { rejected.push(f.name + "（超出单次 50 个上限）"); continue; }
+    if (!isVideoFile(f)) { rejected.push(f.name + "（仅支持视频文件）"); continue; }
+    if (f.size > MS_UPLOAD_MAX_SIZE) { rejected.push(f.name + "（超过 200MB）"); continue; }
+    uploadSelectedFiles.push(f);
+  }
+  if (rejected.length) showMsgModal("以下文件未添加：\n" + rejected.join("\n"));
+  renderMsUploadFileList();
+}
 function handleMsUploadFileSelect(e) {
   var files = Array.from(e.target.files);
-  uploadSelectedFiles = uploadSelectedFiles.concat(files);
-  renderMsUploadFileList();
+  addMsUploadFiles(files);
+  e.target.value = "";
 }
 
 function renderMsUploadFileList() {
@@ -1557,8 +1576,7 @@ if (dropArea) {
     e.preventDefault();
     dropArea.classList.remove("drag-over");
     var files = Array.from(e.dataTransfer.files);
-    uploadSelectedFiles = uploadSelectedFiles.concat(files);
-    renderMsUploadFileList();
+    addMsUploadFiles(files);
   });
 }
 
