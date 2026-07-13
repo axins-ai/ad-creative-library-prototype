@@ -434,7 +434,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <div class="file-drop" id="uploadFileDrop" onclick="document.getElementById('uploadFileInput').click()">
         <div style="font-size:48px;margin-bottom:12px">📁</div>
         <div style="font-weight:500;color:var(--text-2)">点击选择文件，或拖拽文件到此处</div>
-        <div style="font-size:11px;margin-top:4px;opacity:.6">支持 MP4 / MOV / JPG / PNG 格式，支持多选</div>
+        <div style="font-size:11px;margin-top:4px;opacity:.6">支持视频/图片（不限格式）；视频单个 ≤200MB（单次最多50个），图片单个 ≤10MB（单次最多500个）；单次上传仅允许同一类素材</div>
       </div>
       <input type="file" id="uploadFileInput" multiple accept="video/*,image/*" style="display:none" onchange="handleUploadFileSelect(event)">
       <div id="uploadFileList" class="file-list" style="display:none"></div>
@@ -1019,12 +1019,41 @@ function closeUploadModal() {
   document.body.style.overflow = "";
 }
 
+var UPLOAD_VIDEO_MAX_SIZE = 200 * 1024 * 1024;
+var UPLOAD_IMAGE_MAX_SIZE = 10 * 1024 * 1024;
+var UPLOAD_VIDEO_MAX_COUNT = 50;
+var UPLOAD_IMAGE_MAX_COUNT = 500;
+function detectFileType(file) {
+  var ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'gif' || ext === 'webp' || ext === 'bmp') return '图片';
+  return '视频';
+}
+function addUploadFiles(files) {
+  var rejected = [];
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    var type = detectFileType(f);
+    if (uploadSelectedFiles.length > 0) {
+      var firstType = detectFileType(uploadSelectedFiles[0]);
+      if (type !== firstType) { rejected.push(f.name + "（单次仅允许" + firstType + "一类素材）"); continue; }
+    }
+    if (type === '视频') {
+      if (uploadSelectedFiles.length >= UPLOAD_VIDEO_MAX_COUNT) { rejected.push(f.name + "（视频单次最多 50 个）"); continue; }
+      if (f.size > UPLOAD_VIDEO_MAX_SIZE) { rejected.push(f.name + "（视频超过 200MB）"); continue; }
+    } else {
+      if (uploadSelectedFiles.length >= UPLOAD_IMAGE_MAX_COUNT) { rejected.push(f.name + "（图片单次最多 500 个）"); continue; }
+      if (f.size > UPLOAD_IMAGE_MAX_SIZE) { rejected.push(f.name + "（图片超过 10MB）"); continue; }
+    }
+    uploadSelectedFiles.push(f);
+  }
+  if (rejected.length) showMsgModal("以下文件未添加：\n" + rejected.join("\n"));
+  renderUploadFileList();
+  updateUploadTypeDisplay();
+}
 function handleUploadFileSelect(e) {
   var files = Array.from(e.target.files);
-  uploadSelectedFiles = uploadSelectedFiles.concat(files);
-  renderUploadFileList();
-  // 根据第一个文件更新素材类型显示
-  updateUploadTypeDisplay();
+  addUploadFiles(files);
+  e.target.value = "";
 }
 
 function renderUploadFileList() {
@@ -1119,8 +1148,7 @@ if (dropArea) {
     e.preventDefault();
     dropArea.classList.remove("drag-over");
     var files = Array.from(e.dataTransfer.files);
-    uploadSelectedFiles = uploadSelectedFiles.concat(files);
-    renderUploadFileList();
+    addUploadFiles(files);
   });
 }
 
