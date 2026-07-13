@@ -671,9 +671,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           <span style="color:var(--primary);font-weight:600">中后段</span>
           <span style="font-size:11px;color:var(--text-3)">（保存后的素材将归类到中后段原料）</span>
         </div>
-        <select id="saveLibFolder" style="height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;display:none">
-          <option value="">未分类</option>
-        </select>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px 14px;background:var(--bg-page);border-radius:var(--radius)">
+        <span style="font-size:13px;font-weight:500;color:var(--text-2);white-space:nowrap">📂 保存路径</span>
+        <div id="savePathDisplay" class="pwb-folder-btn" onclick="openSavePathModal()" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap;flex:1">未分类 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
       </div>
 
       <button class="start-btn" id="startBtn" onclick="startProduction()">⚙ 开始生产并保存任务</button>
@@ -719,7 +721,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
         <option value="自动入库">自动入库</option>
         <option value="手动上传">手动上传</option>
       </select>
-      <div id="pwbFolderDisplay" class="pwb-folder-btn" onclick="openFsModal()" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap">全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
+      <div id="pwbFolderDisplay" class="pwb-folder-btn" onclick="openFsModal(fsFilterCallback)" style="display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap">全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span></div>
       <select id="modalFolderFilter" style="display:none"><option value="">全部文件夹</option></select>
       <button class="btn btn-default" onclick="selectAllFromFolder()" style="height:30px;font-size:11px;padding:0 10px">📁 全选当前文件夹</button>
     </div>
@@ -1528,12 +1530,49 @@ function handleOverlayClick(e) {
   if (e.target === document.getElementById("overlay")) closeModal();
 }
 
-// ===== 文件夹选择弹窗（独立样式） =====
+// ===== 文件夹选择弹窗回调 =====
+// 选择原料弹窗的文件夹筛选回调
+function fsFilterCallback(folderId) {
+  var sel = document.getElementById('modalFolderFilter');
+  var display = document.getElementById('pwbFolderDisplay');
+  if (folderId) {
+    sel.value = folderId;
+    for (var i = 0; i < msFolders.length; i++) {
+      if (msFolders[i].id === folderId) { display.innerHTML = msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>'; break; }
+    }
+  } else {
+    sel.value = '';
+    display.innerHTML = '全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span>';
+  }
+  renderModalList();
+}
+
+// 保存路径选择回调
+function openSavePathModal() {
+  openFsModal(function(folderId) {
+    var display = document.getElementById('savePathDisplay');
+    if (folderId) {
+      for (var i = 0; i < msFolders.length; i++) {
+        if (msFolders[i].id === folderId) {
+          display.innerHTML = '📁 ' + msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>';
+          display.setAttribute('data-folder-id', folderId);
+          return;
+        }
+      }
+    }
+    display.innerHTML = '未分类 <span style="font-size:10px;color:var(--text-3)">▸</span>';
+    display.removeAttribute('data-folder-id');
+  });
+}
+
+// ===== 文件夹选择弹窗（独立样式，支持回调） =====
 var gFsId = null;
 var gFsExpanded = [];
+var gFsCallback = null;
 
-function openFsModal() {
-  gFsId = document.getElementById('modalFolderFilter').value || null;
+function openFsModal(callback) {
+  gFsCallback = callback || null;
+  gFsId = null;
   gFsExpanded = [];
   document.getElementById('fsOverlay').classList.add('open');
   renderFsTree();
@@ -1542,6 +1581,7 @@ function openFsModal() {
 
 function closeFsModal() {
   document.getElementById('fsOverlay').classList.remove('open');
+  gFsCallback = null;
 }
 
 function fsToggleExpand(id) {
@@ -1567,19 +1607,10 @@ function updateFsInfo() {
 }
 
 function fsConfirm() {
-  var sel = document.getElementById('modalFolderFilter');
-  var display = document.getElementById('pwbFolderDisplay');
-  if (gFsId) {
-    sel.value = gFsId;
-    for (var i = 0; i < msFolders.length; i++) {
-      if (msFolders[i].id === gFsId) { display.innerHTML = msFolders[i].name + ' <span style="font-size:10px;color:var(--text-3)">▸</span>'; break; }
-    }
-  } else {
-    sel.value = '';
-    display.innerHTML = '全部文件夹 <span style="font-size:10px;color:var(--text-3)">▸</span>';
+  if (typeof gFsCallback === 'function') {
+    gFsCallback(gFsId);
   }
   closeFsModal();
-  renderModalList();
 }
 
 function renderFsTree() {
@@ -1988,27 +2019,14 @@ function updateSaveLibCheckbox() {
 function toggleSaveLib() {
   var cb = document.getElementById("saveAsMaterial");
   var wrap = document.getElementById("saveLibTypeWrap");
-  var folderSel = document.getElementById("saveLibFolder");
   var block = document.getElementById("saveLibBlock");
-  
-  // 初始化文件夹选项
-  if (folderSel.options.length <= 1) {
-    for (var i = 0; i < msFolders.length; i++) {
-      var opt = document.createElement('option');
-      opt.value = msFolders[i].id;
-      opt.textContent = msFolders[i].name;
-      folderSel.appendChild(opt);
-    }
-  }
   
   if (cb.checked) {
     wrap.style.display = "flex";
-    folderSel.style.display = "inline-block";
     block.style.borderColor = "#d3adf7";
     block.style.background = "#f5f0ff";
   } else {
     wrap.style.display = "none";
-    folderSel.style.display = "none";
     block.style.borderColor = "var(--border-light)";
     block.style.background = "";
   }
