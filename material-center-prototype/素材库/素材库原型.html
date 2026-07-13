@@ -439,6 +439,12 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <input type="file" id="uploadFileInput" multiple accept="video/*,image/*" style="display:none" onchange="handleUploadFileSelect(event)">
       <div id="uploadFileList" class="file-list" style="display:none"></div>
       <div class="fm-group">
+        <label>素材类型</label>
+        <div id="uploadTypeDisplay" style="padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:var(--bg-page);color:var(--text-2)">
+          <span style="color:var(--text-3)">选择文件后自动识别</span>
+        </div>
+      </div>
+      <div class="fm-group">
         <label>业务归属</label>
         <select id="uploadBiz">
           <option>存量</option>
@@ -711,7 +717,11 @@ function initTagFilters() {
 
 function renderUploadContentTagFields() {
   var wrap = document.getElementById("uploadContentTagsWrap");
-  var html = '<div class="fm-group"><label>内容标签 <span class="req">*</span></label></div>';
+  var html = '<div class="fm-group">' +
+    '<label>内容标签</label>' +
+    '<div style="font-size:11px;color:var(--text-3);margin-top:2px;padding:4px 8px;background:var(--bg-page);border-radius:4px">💡 视频素材标签为必配项，图片素材为选配项</div>' +
+    '</div>';
+  for (var k in CONTENT_TAG_CONFIG_ZHONGHOU) {
   for (var k in CONTENT_TAG_CONFIG_ZHONGHOU) {
     if (!CONTENT_TAG_CONFIG_ZHONGHOU.hasOwnProperty(k)) continue;
     html += '<div class="fm-group">' +
@@ -997,6 +1007,8 @@ function openUploadModal() {
   document.getElementById("uploadUserGender").value = "";
   document.getElementById("uploadProductTag").value = "";
   renderUploadContentTagFields();
+  // 重置素材类型显示
+  document.getElementById("uploadTypeDisplay").innerHTML = '<span style="color:var(--text-3)">选择文件后自动识别</span>';
 }
 
 function closeUploadModal() {
@@ -1008,6 +1020,8 @@ function handleUploadFileSelect(e) {
   var files = Array.from(e.target.files);
   uploadSelectedFiles = uploadSelectedFiles.concat(files);
   renderUploadFileList();
+  // 根据第一个文件更新素材类型显示
+  updateUploadTypeDisplay();
 }
 
 function renderUploadFileList() {
@@ -1021,8 +1035,27 @@ function renderUploadFileList() {
   el.innerHTML = "📎 已选 " + uploadSelectedFiles.length + " 个文件：" + tags;
 }
 
+// 从文件扩展名检测素材类型（视频/图片）
+function detectFileTypeFromName(fileName) {
+  var ext = fileName.split('.').pop().toLowerCase();
+  return (ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'gif' || ext === 'webp' || ext === 'bmp') ? '图片' : '视频';
+}
+
+// 更新上传弹窗的素材类型显示
+function updateUploadTypeDisplay() {
+  var display = document.getElementById("uploadTypeDisplay");
+  if (uploadSelectedFiles.length === 0) {
+    display.innerHTML = '<span style="color:var(--text-3)">选择文件后自动识别</span>';
+    return;
+  }
+  var fileType = detectFileTypeFromName(uploadSelectedFiles[0].name);
+  var icon = fileType === '视频' ? '🎬' : '🖼️';
+  display.innerHTML = icon + ' ' + fileType;
+}
+
 function submitUpload() {
   if (uploadSelectedFiles.length === 0) { showMsgModal("请先选择素材文件"); return; }
+  var fileType = detectFileTypeFromName(uploadSelectedFiles[0].name);
   var biz = document.getElementById("uploadBiz").value;
   var channel = document.getElementById("uploadChannel").value;
   var optimizer = document.getElementById("uploadOptimizer").value || "未设置";
@@ -1033,12 +1066,14 @@ function submitUpload() {
   if (!userRegion || !userAge || !userGender) { showMsgModal("请完整填写用户标签（地区、年龄、性别）"); return; }
   if (!productTag) { showMsgModal("请选择产品标签"); return; }
   var contentTags = {};
+  // 视频素材标签为必配项，图片素材为选配项
+  var isVideo = fileType === '视频';
   var ctgSelects = document.querySelectorAll(".upload-content-tag");
   for (var i = 0; i < ctgSelects.length; i++) {
     var s = ctgSelects[i];
     var k = s.getAttribute("data-type");
     var v = s.value;
-    if (!v) { showMsgModal("请填写完整的内容标签"); return; }
+    if (isVideo && !v) { showMsgModal("视频素材需填写完整的内容标签（" + k + "）"); return; }
     contentTags[k] = v;
   }
   var total = uploadSelectedFiles.length;
@@ -1052,12 +1087,10 @@ function submitUpload() {
       failNames.push(file.name);
     } else {
       success++;
-      var ext = file.name.split('.').pop().toLowerCase();
-      var detectedType = (ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'gif' || ext === 'webp' || ext === 'bmp') ? '图片' : '视频';
       materialData.push({
         id: Date.now() + Math.random(),
         name: file.name,
-        type: detectedType,
+        type: fileType,
         biz: biz,
         channel: channel,
         optimizer: optimizer,
