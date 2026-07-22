@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>双系统切换原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn .28s ease; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- 错误兜底: 任何加载/运行错误都显示出来, 不再白屏 -->
+  <script>
+    window.addEventListener('error', function (e) {
+      var root = document.getElementById('root');
+      if (root && root.childElementCount === 0) {
+        root.innerHTML = '<div style="padding:24px;max-width:680px;margin:40px auto;font-family:sans-serif;color:#b91c1c">' +
+          '<h2 style="margin:0 0 8px">原型加载失败</h2>' +
+          '<pre style="white-space:pre-wrap;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px">' +
+          (e && e.message ? e.message : e) + '</pre>' +
+          '<p style="color:#374151;font-size:14px">若是 CDN 资源未加载,请确认网络可访问 unpkg.com 与 cdn.tailwindcss.com。</p></div>';
+      }
+    });
+    if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+      window.addEventListener('load', function () {
+        var root = document.getElementById('root');
+        if (root && root.childElementCount === 0) {
+          root.innerHTML = '<div style="padding:24px;max-width:680px;margin:40px auto;font-family:sans-serif;color:#b91c1c">' +
+            '<h2 style="margin:0 0 8px">React 未加载</h2>' +
+            '<p style="color:#374151;font-size:14px">请确认网络可访问 unpkg.com(加载 React / ReactDOM)。当前为离线或 CDN 被拦截。</p></div>';
+        }
+      });
+    }
+  </script>
+
+  <script>
+const {
+  useState,
+  useEffect,
+  useRef
+} = React;
+
+/* ---------- 图标库 (Lucide 风格内联 SVG) ---------- */
+const ICONS = {
+  waffle: /*#__PURE__*/React.createElement("svg", {
+    width: "20",
+    height: "20",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "5",
+    cy: "5",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "5",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "19",
+    cy: "5",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "5",
+    cy: "12",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "19",
+    cy: "12",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "5",
+    cy: "19",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "19",
+    r: "1.6"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "19",
+    cy: "19",
+    r: "1.6"
+  })),
+  ad: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M3 11l18-5v12L3 14v-3z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M11.6 16.8a3 3 0 11-5.8-1.6"
+  })),
+  material: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "3",
+    width: "7",
+    height: "7",
+    rx: "1"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "14",
+    y: "3",
+    width: "7",
+    height: "7",
+    rx: "1"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "14",
+    width: "7",
+    height: "7",
+    rx: "1"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "14",
+    y: "14",
+    width: "7",
+    height: "7",
+    rx: "1"
+  })),
+  overview: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "3",
+    width: "7",
+    height: "9"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "14",
+    y: "3",
+    width: "7",
+    height: "5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "14",
+    y: "12",
+    width: "7",
+    height: "9"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "16",
+    width: "7",
+    height: "5"
+  })),
+  plan: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M9 11l3 3L22 4"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"
+  })),
+  group: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "9",
+    cy: "7",
+    r: "4"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M23 21v-2a4 4 0 00-3-3.87"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M16 3.13a4 4 0 010 7.75"
+  })),
+  creative: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "3",
+    width: "18",
+    height: "18",
+    rx: "2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "9",
+    cy: "9",
+    r: "2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M21 15l-5-5L5 21"
+  })),
+  chart: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "18",
+    y1: "20",
+    x2: "18",
+    y2: "10"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "20",
+    x2: "12",
+    y2: "4"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "6",
+    y1: "20",
+    x2: "6",
+    y2: "14"
+  })),
+  settings: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "3"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"
+  })),
+  raw: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "14 2 14 8 20 8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "16",
+    y1: "13",
+    x2: "8",
+    y2: "13"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "16",
+    y1: "17",
+    x2: "8",
+    y2: "17"
+  })),
+  assets: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "3.27 6.96 12 12.01 20.73 6.96"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "22.08",
+    x2: "12",
+    y2: "12"
+  })),
+  studio: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 19l7-7 3 3-7 7-3-3z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M2 2l7.586 7.586"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "11",
+    cy: "11",
+    r: "2"
+  })),
+  tag: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "7",
+    y1: "7",
+    x2: "7.01",
+    y2: "7"
+  })),
+  search: /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "11",
+    cy: "11",
+    r: "8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "21",
+    y1: "21",
+    x2: "16.65",
+    y2: "16.65"
+  })),
+  bell: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M13.73 21a2 2 0 01-3.46 0"
+  })),
+  arrow: /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: "9 18 15 12 9 6"
+  })),
+  chevron: /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: "15 18 9 12 15 6"
+  }))
+};
+function Icon({
+  name,
+  className = ""
+}) {
+  return /*#__PURE__*/React.createElement("span", {
+    className: "inline-flex " + className
+  }, ICONS[name] || null);
+}
+
+/* ---------- 两套「系统」定义 ---------- */
+const SYSTEMS = {
+  ad: {
+    id: "ad",
+    name: "投放管理平台",
+    desc: "广告投放、计划管理与效果分析",
+    icon: "ad",
+    menu: [{
+      id: "ad-center",
+      name: "投放中心",
+      icon: "plan"
+    }, {
+      id: "media-account",
+      name: "媒介账户管理",
+      icon: "group"
+    }, {
+      id: "report-mgmt",
+      name: "数据报表管理",
+      icon: "chart"
+    }, {
+      id: "landing-page",
+      name: "落地页中心",
+      icon: "creative"
+    }]
+  },
+  material: {
+    id: "material",
+    name: "素材中心",
+    desc: "素材团队的独立资产管理后台",
+    icon: "material",
+    menu: [{
+      id: "m-overview",
+      name: "素材概览",
+      icon: "overview"
+    }, {
+      id: "raw",
+      name: "原料库",
+      icon: "raw"
+    }, {
+      id: "assets",
+      name: "素材库",
+      icon: "assets"
+    }, {
+      id: "creative-assets",
+      name: "创意资产库",
+      icon: "creative"
+    }, {
+      id: "studio",
+      name: "生产工作台",
+      icon: "studio"
+    }, {
+      id: "tags",
+      name: "标签库",
+      icon: "tag"
+    }]
+  }
+};
+
+/* 主题色(全部字面量,供 Tailwind Play CDN 识别) */
+const THEMES = {
+  ad: {
+    primary: "bg-blue-600",
+    primaryHover: "hover:bg-blue-700",
+    primaryText: "text-blue-600",
+    primaryLight: "bg-blue-50",
+    primaryBorder: "border-blue-200",
+    ring: "ring-blue-500",
+    activeBg: "bg-blue-50",
+    activeText: "text-blue-700",
+    activeBar: "bg-blue-600",
+    gradient: "from-blue-600 to-blue-700",
+    soft: "bg-blue-100 text-blue-700"
+  },
+  material: {
+    primary: "bg-violet-600",
+    primaryHover: "hover:bg-violet-700",
+    primaryText: "text-violet-600",
+    primaryLight: "bg-violet-50",
+    primaryBorder: "border-violet-200",
+    ring: "ring-violet-500",
+    activeBg: "bg-violet-50",
+    activeText: "text-violet-700",
+    activeBar: "bg-violet-600",
+    gradient: "from-violet-600 to-violet-700",
+    soft: "bg-violet-100 text-violet-700"
+  }
+};
+
+/* ---------- Mock 数据 ---------- */
+const AD_CAMPAIGNS = [{
+  name: "618 大促-信息流",
+  status: "投放中",
+  cost: "¥128,400",
+  conv: "2,341",
+  roas: "3.8"
+}, {
+  name: "品牌曝光-开屏",
+  status: "投放中",
+  cost: "¥86,200",
+  conv: "1,108",
+  roas: "2.1"
+}, {
+  name: "新客拉新-搜索",
+  status: "审核中",
+  cost: "¥0",
+  conv: "0",
+  roas: "-"
+}, {
+  name: "老客召回-私域",
+  status: "已暂停",
+  cost: "¥42,900",
+  conv: "890",
+  roas: "4.2"
+}];
+const MATERIALS = [{
+  name: "母婴礼盒主图_v3",
+  type: "图片",
+  tags: ["母婴", "促销"],
+  status: "已审核"
+}, {
+  name: "夏日清凉短视频_15s",
+  type: "视频",
+  tags: ["清凉", "UGC"],
+  status: "制作中"
+}, {
+  name: "品牌Slogan文案包",
+  type: "文案",
+  tags: ["品牌"],
+  status: "已审核"
+}, {
+  name: "节日banner_通用",
+  type: "图片",
+  tags: ["节日", "通用"],
+  status: "待审核"
+}, {
+  name: "达人种草图集",
+  type: "图片",
+  tags: ["种草", "达人"],
+  status: "已审核"
+}];
+
+/* ---------- 侧边栏(支持折叠) ---------- */
+function Sidebar({
+  system,
+  theme,
+  active,
+  onSelect,
+  collapsed,
+  onToggle
+}) {
+  return /*#__PURE__*/React.createElement("aside", {
+    className: (collapsed ? "w-16" : "w-60") + " shrink-0 bg-white border-r border-gray-200 h-[calc(100vh-3.5rem)] flex flex-col transition-all duration-200"
+  }, /*#__PURE__*/React.createElement("nav", {
+    className: "flex-1 overflow-y-auto px-2 pt-3 space-y-1"
+  }, system.menu.map(m => {
+    const isActive = m.id === active;
+    return /*#__PURE__*/React.createElement("button", {
+      key: m.id,
+      title: m.name,
+      onClick: () => onSelect(m.id),
+      className: "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition relative " + (collapsed ? "justify-center" : "") + " " + (isActive ? theme.activeBg + " " + theme.activeText + " font-semibold" : "text-gray-600 hover:bg-gray-50")
+    }, isActive && !collapsed && /*#__PURE__*/React.createElement("span", {
+      className: "absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r " + theme.activeBar
+    }), /*#__PURE__*/React.createElement(Icon, {
+      name: m.icon
+    }), !collapsed && /*#__PURE__*/React.createElement("span", null, m.name));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center px-3 py-3 border-t border-gray-100 " + (collapsed ? "justify-center" : "justify-end")
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onToggle,
+    className: "p-1.5 rounded-lg hover:bg-gray-100 text-gray-500",
+    title: collapsed ? "展开菜单" : "收起菜单"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "chevron",
+    className: collapsed ? "rotate-180" : ""
+  }))));
+}
+
+/* ---------- 内容区 ---------- */
+function MetricCard({
+  label,
+  value,
+  delta,
+  up
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-xl border border-gray-100 p-4 shadow-sm"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-500"
+  }, label), /*#__PURE__*/React.createElement("p", {
+    className: "text-2xl font-bold text-gray-800 mt-1"
+  }, value), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs mt-1 " + (up ? "text-green-600" : "text-red-500")
+  }, up ? "▲" : "▼", " ", delta, " 较上周"));
+}
+function AdOverview() {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+  }, /*#__PURE__*/React.createElement(MetricCard, {
+    label: "总消耗",
+    value: "¥257,500",
+    delta: "12%",
+    up: true
+  }), /*#__PURE__*/React.createElement(MetricCard, {
+    label: "总曝光",
+    value: "4.2亿",
+    delta: "8%",
+    up: true
+  }), /*#__PURE__*/React.createElement(MetricCard, {
+    label: "点击率",
+    value: "3.6%",
+    delta: "0.4%",
+    up: true
+  }), /*#__PURE__*/React.createElement(MetricCard, {
+    label: "平均 ROAS",
+    value: "3.2",
+    delta: "0.3",
+    up: false
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-xl border border-gray-100 shadow-sm"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "px-4 py-3 border-b border-gray-100 font-semibold text-gray-800"
+  }, "进行中的推广计划"), /*#__PURE__*/React.createElement("table", {
+    className: "w-full text-sm"
+  }, /*#__PURE__*/React.createElement("thead", {
+    className: "text-gray-400 text-xs"
+  }, /*#__PURE__*/React.createElement("tr", {
+    className: "text-left"
+  }, /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "计划名称"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "状态"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "消耗"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "转化"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "ROAS"))), /*#__PURE__*/React.createElement("tbody", null, AD_CAMPAIGNS.map((c, i) => /*#__PURE__*/React.createElement("tr", {
+    key: i,
+    className: "border-t border-gray-50 hover:bg-gray-50"
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3 text-gray-800"
+  }, c.name), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "px-2 py-0.5 rounded-full text-xs " + (c.status === "投放中" ? "bg-green-100 text-green-700" : c.status === "审核中" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500")
+  }, c.status)), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3 text-gray-600"
+  }, c.cost), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3 text-gray-600"
+  }, c.conv), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3 text-gray-800 font-medium"
+  }, c.roas)))))));
+}
+function MaterialOverview() {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+  }, /*#__PURE__*/React.createElement(MetricCard, {
+    label: "素材总量",
+    value: "1,284",
+    delta: "9%",
+    up: true
+  }), /*#__PURE__*/React.createElement(MetricCard, {
+    label: "原料数",
+    value: "362",
+    delta: "5%",
+    up: true
+  }), /*#__PURE__*/React.createElement(MetricCard, {
+    label: "待生产",
+    value: "18",
+    delta: "3",
+    up: false
+  }), /*#__PURE__*/React.createElement(MetricCard, {
+    label: "本周新增",
+    value: "76",
+    delta: "21%",
+    up: true
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-xl border border-gray-100 shadow-sm p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "font-semibold text-gray-800 mb-3"
+  }, "最近更新的素材"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+  }, MATERIALS.map((m, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "rounded-lg border border-gray-100 overflow-hidden hover:shadow-md transition"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-20 bg-gradient-to-br from-violet-100 to-violet-200 flex items-center justify-center text-violet-500"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: m.type === "视频" ? "creative" : "assets"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "p-2.5"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-medium text-gray-800 truncate"
+  }, m.name), /*#__PURE__*/React.createElement("div", {
+    className: "mt-1.5 flex flex-wrap gap-1"
+  }, m.tags.map((t, j) => /*#__PURE__*/React.createElement("span", {
+    key: j,
+    className: "text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded"
+  }, t)))))))));
+}
+function AssetsPage() {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in bg-white rounded-xl border border-gray-100 shadow-sm"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "px-4 py-3 border-b border-gray-100 flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "font-semibold text-gray-800"
+  }, "素材库"), /*#__PURE__*/React.createElement("button", {
+    className: "bg-violet-600 hover:bg-violet-700 text-white text-sm px-3 py-1.5 rounded-lg"
+  }, "+ 上传素材")), /*#__PURE__*/React.createElement("table", {
+    className: "w-full text-sm"
+  }, /*#__PURE__*/React.createElement("thead", {
+    className: "text-gray-400 text-xs"
+  }, /*#__PURE__*/React.createElement("tr", {
+    className: "text-left"
+  }, /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "素材名称"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "类型"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "标签"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-2"
+  }, "状态"))), /*#__PURE__*/React.createElement("tbody", null, MATERIALS.map((m, i) => /*#__PURE__*/React.createElement("tr", {
+    key: i,
+    className: "border-t border-gray-50 hover:bg-gray-50"
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3 text-gray-800"
+  }, m.name), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3 text-gray-600"
+  }, m.type), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3"
+  }, m.tags.map((t, j) => /*#__PURE__*/React.createElement("span", {
+    key: j,
+    className: "text-[11px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded mr-1"
+  }, t))), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "px-2 py-0.5 rounded-full text-xs " + (m.status === "已审核" ? "bg-green-100 text-green-700" : m.status === "制作中" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700")
+  }, m.status)))))));
+}
+function PlaceholderPage({
+  title,
+  theme
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in bg-white rounded-xl border border-dashed border-gray-200 shadow-sm h-80 flex flex-col items-center justify-center text-gray-400"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "overview",
+    className: "text-gray-300"
+  }), /*#__PURE__*/React.createElement("p", {
+    className: "mt-3 text-sm"
+  }, title, " · 页面原型占位"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs " + theme.primaryText
+  }, "该菜单属于「", title, "」独立工作台"));
+}
+function PageContent({
+  system,
+  pageId,
+  theme
+}) {
+  if (system.id === "ad") {
+    if (pageId === "ad-center") return /*#__PURE__*/React.createElement(AdOverview, null);
+    const m = system.menu.find(x => x.id === pageId);
+    return /*#__PURE__*/React.createElement(PlaceholderPage, {
+      title: m ? m.name : "",
+      theme: theme
+    });
+  }
+  if (pageId === "m-overview") return /*#__PURE__*/React.createElement(MaterialOverview, null);
+  if (pageId === "assets") return /*#__PURE__*/React.createElement(AssetsPage, null);
+  const m = system.menu.find(x => x.id === pageId);
+  return /*#__PURE__*/React.createElement(PlaceholderPage, {
+    title: m ? m.name : "",
+    theme: theme
+  });
+}
+
+/* ---------- 顶栏(含九宫格切换器, 已移除搜索框) ---------- */
+function TopBar({
+  system,
+  theme,
+  launcherOpen,
+  setLauncherOpen,
+  anchorRef,
+  onSwitch
+}) {
+  return /*#__PURE__*/React.createElement("header", {
+    className: "h-14 bg-white border-b border-gray-200 flex items-center justify-between px-3 sticky top-0 z-40"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "relative"
+  }, /*#__PURE__*/React.createElement("button", {
+    ref: anchorRef,
+    onClick: () => setLauncherOpen(!launcherOpen),
+    className: "flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-100 text-gray-700",
+    title: "切换后台"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "waffle"
+  })), launcherOpen && /*#__PURE__*/React.createElement("div", {
+    className: "fade-in absolute left-0 top-12 z-50 w-[420px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-3"
+  }, Object.values(SYSTEMS).map(sys => {
+    const t = THEMES[sys.id];
+    const isCurrent = sys.id === system.id;
+    return /*#__PURE__*/React.createElement("button", {
+      key: sys.id,
+      onClick: () => {
+        onSwitch(sys.id);
+        setLauncherOpen(false);
+      },
+      className: "text-left rounded-xl border p-4 transition hover:shadow-md " + (isCurrent ? "border-2 " + t.primaryBorder + " " + t.primaryLight : "border-gray-200")
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "w-10 h-10 rounded-lg flex items-center justify-center text-white " + t.primary
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: sys.icon
+    })), /*#__PURE__*/React.createElement("p", {
+      className: "mt-3 text-sm font-semibold text-gray-800"
+    }, sys.name), /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 text-xs text-gray-500 leading-relaxed h-8"
+    }, sys.desc), /*#__PURE__*/React.createElement("div", {
+      className: "mt-2"
+    }, isCurrent ? /*#__PURE__*/React.createElement("span", {
+      className: "inline-flex items-center text-xs font-medium px-2 py-1 rounded " + t.soft
+    }, "● 使用中") : /*#__PURE__*/React.createElement("span", {
+      className: "inline-flex items-center text-xs font-medium px-2 py-1 rounded border border-gray-200 " + t.primaryText
+    }, "进入 →")));
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 pl-1 pr-3 mr-2 border-r border-gray-200"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-7 h-7 rounded-lg flex items-center justify-center text-white " + theme.primary
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: system.icon
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "font-semibold text-gray-800 text-[15px]"
+  }, system.name))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "relative p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "bell"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 pl-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-sm font-medium"
+  }, "运"), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-700 hidden sm:block"
+  }, "运营同学"))));
+}
+
+/* ---------- 主应用 ---------- */
+function App() {
+  const saved = typeof localStorage !== "undefined" && localStorage.getItem("proto_system") || "ad";
+  const [current, setCurrent] = useState(SYSTEMS[saved] ? saved : "ad");
+  const [activeMenus, setActiveMenus] = useState({
+    ad: "ad-center",
+    material: "m-overview"
+  });
+  const [launcherOpen, setLauncherOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const anchorRef = useRef(null);
+  useEffect(() => {
+    if (typeof localStorage !== "undefined") localStorage.setItem("proto_system", current);
+  }, [current]);
+  const system = SYSTEMS[current];
+  const theme = THEMES[current];
+  const active = activeMenus[current];
+  function switchSystem(id) {
+    setCurrent(id);
+  }
+  function selectMenu(id) {
+    setActiveMenus(p => ({
+      ...p,
+      [current]: id
+    }));
+  }
+  function toggleCollapse() {
+    setCollapsed(c => !c);
+  }
+  const activeMenuObj = system.menu.find(m => m.id === active);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col h-screen bg-gray-50 text-gray-800"
+  }, /*#__PURE__*/React.createElement(TopBar, {
+    system: system,
+    theme: theme,
+    launcherOpen: launcherOpen,
+    setLauncherOpen: setLauncherOpen,
+    anchorRef: anchorRef,
+    onSwitch: switchSystem
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-1 overflow-hidden"
+  }, /*#__PURE__*/React.createElement(Sidebar, {
+    system: system,
+    theme: theme,
+    active: active,
+    onSelect: selectMenu,
+    collapsed: collapsed,
+    onToggle: toggleCollapse
+  }), /*#__PURE__*/React.createElement("main", {
+    className: "flex-1 overflow-y-auto p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 text-sm text-gray-400 mb-1"
+  }, /*#__PURE__*/React.createElement("span", null, system.name), /*#__PURE__*/React.createElement(Icon, {
+    name: "arrow",
+    className: "text-gray-300"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-600"
+  }, activeMenuObj ? activeMenuObj.name : "")), /*#__PURE__*/React.createElement("h1", {
+    className: "text-xl font-bold text-gray-800 mb-5"
+  }, activeMenuObj ? activeMenuObj.name : ""), /*#__PURE__*/React.createElement(PageContent, {
+    system: system,
+    pageId: active,
+    theme: theme
+  }))));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
+  </script>
+</body>
+</html>
