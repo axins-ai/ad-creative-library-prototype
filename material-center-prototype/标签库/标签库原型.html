@@ -285,7 +285,7 @@ function renderUserTable() {
     if (!TAGS.user.hasOwnProperty(k)) continue;
     has = true;
     var opts = TAGS.user[k].map(function(o, idx){
-      return '<span class="tag-pill">' + o + ' <a href="javascript:void(0)" onclick="deleteUserOption(\'' + k + '\',' + idx + ')" style="color:var(--danger);margin-left:2px;text-decoration:none">×</a></span>';
+      return '<span class="tag-pill">' + o + '</span>';
     }).join('');
     html += '<tr>' +
       '<td><strong>' + k + '</strong></td>' +
@@ -293,7 +293,6 @@ function renderUserTable() {
       '<td>' +
         '<div style="display:flex;gap:6px">' +
         '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editUserTag(\'' + k + '\')">编辑</button>' +
-        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px" onclick="deleteUserTag(\'' + k + '\')">删除</button>' +
         '</div>' +
       '</td>' +
       '</tr>';
@@ -385,7 +384,6 @@ function renderProductTable() {
       '<td>' +
         '<div style="display:flex;gap:6px">' +
         '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editProductOption(' + i + ')">编辑</button>' +
-        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px" onclick="deleteProductOption(' + i + ')">删除</button>' +
         '</div>' +
       '</td>' +
       '</tr>';
@@ -455,7 +453,7 @@ function renderContentTable() {
     if (!cfg.hasOwnProperty(k)) continue;
     has = true;
     var opts = cfg[k].map(function(o, idx){
-      return '<span class="tag-pill">' + o + ' <a href="javascript:void(0)" onclick="deleteContentOption(\'' + contentKey + '\',\'' + k + '\',' + idx + ')" style="color:var(--danger);margin-left:2px;text-decoration:none">×</a></span>';
+      return '<span class="tag-pill">' + o + '</span>';
     }).join('');
     html += '<tr>' +
       '<td><strong>' + k + '</strong></td>' +
@@ -463,7 +461,6 @@ function renderContentTable() {
       '<td>' +
         '<div style="display:flex;gap:6px">' +
         '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editContentType(\'' + contentKey + '\',\'' + k + '\')">编辑</button>' +
-        '<button class="ms-btn ms-btn-danger" style="height:26px;padding:0 8px" onclick="deleteContentType(\'' + contentKey + '\',\'' + k + '\')">删除</button>' +
         '</div>' +
       '</td>' +
       '</tr>';
