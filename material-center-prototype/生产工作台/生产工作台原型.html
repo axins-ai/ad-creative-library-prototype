@@ -91,6 +91,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .status-draft{background:#f5f5f5;color:var(--text-3)}
 .status-processing{background:#e8f1ff;color:var(--primary)}
 .status-done{background:#f6ffed;color:var(--success)}
+.status-failed{background:#fff1f0;color:var(--danger)}
 .action-btns{display:flex;gap:6px}
 .action-btn{
   padding:4px 10px;border-radius:var(--radius-s);font-size:12px;
@@ -510,6 +511,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           <option value="draft">⏳ 草稿</option>
           <option value="processing">⚙ 生产中</option>
           <option value="done">✅ 已完成</option>
+          <option value="failed">❌ 生产失败</option>
         </select>
         <select id="filterTaskType" onchange="renderTaskList()" style="height:34px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:#fff;color:var(--text-2);outline:none;cursor:pointer">
           <option value="">全部类型</option>
@@ -875,6 +877,14 @@ var gTasks = [
     namingParams: ["原料名称","日期","优化师","序号"],
     outputs: []
   },
+  {
+    id: 4, name: "双十一预热素材（失败重做）", creator: "杨鑫",
+    createTime: "2026-06-24 11:20", status: "failed",
+    materials: { "前贴":[], "中段":[], "尾帧":[] },
+    params: { resolution:"1080p", framerate:"30fps", bitrate:"6 Mbps", format:"MP4" },
+    namingParams: ["原料名称","日期","序号"],
+    outputs: []
+  },
 ];
 
 function initTaskMaterials() {
@@ -889,7 +899,8 @@ function initTaskMaterials() {
 }
 initTaskMaterials();
 
-var gNextTaskId = 4;
+var gNextTaskId = 5;
+var gPendingDelId = null; // 待删除任务 ID（删除二次确认弹窗）
 var gEditingTaskId = null;
 var gBatchSelected = [];
 var gSortOrder = ""; // 创建时间排序: "", "asc", "desc"
@@ -972,8 +983,8 @@ function renderTaskList() {
       if (t.materials[keys[k]]) mc += t.materials[keys[k]].length;
     }
     var oc = t.outputs ? t.outputs.length : 0;
-    var sc = t.status === "draft" ? "status-draft" : t.status === "processing" ? "status-processing" : "status-done";
-    var st = t.status === "draft" ? "⏳ 草稿" : t.status === "processing" ? "⚙ 生产中" : "✅ 已完成";
+    var sc = t.status === "draft" ? "status-draft" : t.status === "processing" ? "status-processing" : t.status === "failed" ? "status-failed" : "status-done";
+    var st = t.status === "draft" ? "⏳ 草稿" : t.status === "processing" ? "⚙ 生产中" : t.status === "failed" ? "❌ 生产失败" : "✅ 已完成";
     html += "<tr class=\"" + (isSel ? "selected" : "") + "\" onclick=\"openTask(" + t.id + ")\">" +
       "<td onclick=\"event.stopPropagation()\"><input type=\"checkbox\" class=\"task-cb\" " + (isSel ? "checked" : "") + " onchange=\"toggleBatchSelect(" + t.id + ", this)\"></td>" +
       "<td style=\"font-size:12px;color:var(--text-3);font-weight:500\">" + t.id + "</td>" +
@@ -985,9 +996,12 @@ function renderTaskList() {
       "<td>" + oc + " 个</td>" +
       "<td style=\"color:var(--text-3);font-size:12px;white-space:nowrap\">" + t.createTime + "</td>" +
       "<td onclick=\"event.stopPropagation()\"><div class=\"action-btns\">" +
-        (t.status === "done" ? "<button class=\"action-btn export-btn\" onclick=\"exportTask(" + t.id + ")\">⬇ 导出</button>" : "") +
-        "<button class=\"action-btn\" onclick=\"openTask(" + t.id + ")\">编辑</button>" +
-        "<button class=\"action-btn del-btn\" onclick=\"deleteTask(" + t.id + ")\">删除</button>" +
+        (t.status === "done"
+          ? "<button class=\"action-btn export-btn\" onclick=\"exportTask(" + t.id + ")\">⬇ 导出</button><button class=\"action-btn\" onclick=\"openTask(" + t.id + ")\">编辑</button><button class=\"action-btn del-btn\" onclick=\"deleteTask(" + t.id + ")\">删除</button>"
+          : (t.status === "draft" || t.status === "failed")
+            ? "<button class=\"action-btn\" onclick=\"openTask(" + t.id + ")\">编辑</button><button class=\"action-btn del-btn\" onclick=\"deleteTask(" + t.id + ")\">删除</button>"
+            : "<span style=\"font-size:12px;color:var(--text-3)\">生产中，暂不可操作</span>"
+        ) +
       "</div></td>" +
       "</tr>";
   }
@@ -1265,12 +1279,27 @@ function goBackToList() {
 }
 
 function deleteTask(id) {
-  if (!confirm("确定删除该任务吗？")) return;
+  var t = null;
+  for (var i = 0; i < gTasks.length; i++) { if (gTasks[i].id === id) { t = gTasks[i]; break; } }
+  var name = t ? t.name : "该任务";
+  document.getElementById("delModalBody").innerHTML = "确定要删除任务 <b style=\"color:var(--text-1)\">「" + esc(name) + "」</b> 吗？删除后不可恢复。";
+  document.getElementById("delModal").classList.add("show");
+  gPendingDelId = id;
+}
+
+function closeDelModal() {
+  document.getElementById("delModal").classList.remove("show");
+  gPendingDelId = null;
+}
+
+function doDeleteTask() {
+  if (gPendingDelId == null) return;
   for (var i = 0; i < gTasks.length; i++) {
-    if (gTasks[i].id === id) { gTasks.splice(i, 1); break; }
+    if (gTasks[i].id === gPendingDelId) { gTasks.splice(i, 1); break; }
   }
-  var idx = gBatchSelected.indexOf(id);
+  var idx = gBatchSelected.indexOf(gPendingDelId);
   if (idx !== -1) gBatchSelected.splice(idx, 1);
+  closeDelModal();
   renderTaskList();
   showToast("任务已删除", "s");
 }
@@ -2182,6 +2211,23 @@ document.addEventListener("DOMContentLoaded", function() {
   switchView('list');
 });
 </script>
+
+<!-- 删除二次确认弹窗 -->
+<div class="overlay" id="delModal" onclick="if(event.target===this)closeDelModal()">
+  <div class="modal" style="width:400px" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <h3>删除确认</h3>
+      <button class="close-btn" onclick="closeDelModal()">×</button>
+    </div>
+    <div class="modal-body" id="delModalBody" style="color:var(--text-2)"></div>
+    <div class="modal-ft">
+      <div class="btns">
+        <button class="ft-btn" onclick="closeDelModal()">取消</button>
+        <button class="ft-btn primary" style="background:var(--danger);border-color:var(--danger)" onclick="doDeleteTask()">确认删除</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 校验提醒弹窗 -->
 <div class="validate-modal-overlay" id="validateModal" style="display:none" onclick="if(event.target===this)closeValidateModal()">
