@@ -112,8 +112,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <!-- 图片标签 -->
     <div class="tag-section" id="sec-image">
       <div class="tag-toolbar">
-        <div><div class="title">图片标签</div><div class="desc">与视频标签独立，仅用于图片库素材</div></div>
-        <button class="ms-btn ms-btn-primary" onclick="openImageModal()">+ 新增标签类型</button>
+        <div><div class="title">图片标签</div><div class="desc">与视频标签独立，仅用于图片库素材（按 用户维度 / 产品标签 / 内容标签 组织）</div></div>
       </div>
       <div id="imageTableWrap"></div>
     </div>
@@ -161,7 +160,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <div class="ms-modal-bd">
       <div class="ms-fm-group">
         <label>标签类型名称</label>
-        <input type="text" id="imageModalName" placeholder="例如：图片尺寸">
+        <input type="text" id="imageModalName" placeholder="例如：地区">
       </div>
     </div>
     <div class="ms-modal-ft">
@@ -263,14 +262,35 @@ var DEFAULT_TAGS = {
     }
   },
   image: {
-    "图片尺寸": ["1:1 方图", "9:16 竖图", "16:9 横图", "4:3", "750x300 Banner", "1200x628 信息流"],
-    "图片版式": ["单图", "拼接图", "长图", "九宫格", "轮播图"],
-    "图片风格": ["扁平", "写实", "电商白底", "插画", "3D", "拟物"],
-    "图片色调": ["暖色", "冷色", "高饱和", "莫兰迪", "黑白"],
-    "图片主体": ["产品特写", "人物", "场景", "图文混排", "Logo"],
-    "图片用途": ["信息流大图", "落地页", "朋友圈", "开屏", "详情页"]
+    "用户维度": {
+      "地区": ["一线城市", "二线城市", "三四线城市", "小城镇及农村", "通投"],
+      "年龄": ["18-24", "25-34", "35-44", "45+", "通投"],
+      "性别": ["男", "女", "通投"]
+    },
+    "产品标签": {
+      "业务": ["存量", "三方", "保险", "银联"],
+      "支付渠道": ["手机号", "银行卡", "微信支付", "京东支付"]
+    },
+    "内容标签": {
+      "类型": ["仿原生", "利益点", "纯诱导"],
+      "内容": ["猎奇", "风景", "家庭", "动物", "养生"]
+    }
   }
 };
+
+function isNestedImage(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  for (var d in obj) {
+    if (!obj.hasOwnProperty(d)) continue;
+    var dim = obj[d];
+    if (!dim || typeof dim !== 'object') return false;
+    for (var t in dim) {
+      if (!dim.hasOwnProperty(t)) continue;
+      if (!Array.isArray(dim[t])) return false;
+    }
+  }
+  return true;
+}
 
 function loadTags() {
   try {
@@ -297,6 +317,10 @@ function loadTags() {
         delete tags.content["中段"];
         delete tags.content["尾帧"];
         delete tags.content["中后段"];
+      }
+      // 数据迁移：图片标签重构为「维度 > 类型 > 选项」结构
+      if (!tags.image || !isNestedImage(tags.image)) {
+        tags.image = JSON.parse(JSON.stringify(DEFAULT_TAGS.image));
       }
       return tags;
     }
@@ -604,33 +628,47 @@ function deleteContentOption(contentKey, typeName, idx) {
 function renderImageTable() {
   var wrap = document.getElementById('imageTableWrap');
   if (!TAGS.image) TAGS.image = {};
-  var html = '<table class="tag-table"><thead><tr><th style="width:160px">标签类型</th><th>选项</th><th style="width:140px">操作</th></tr></thead><tbody>';
-  var has = false;
-  for (var k in TAGS.image) {
-    if (!TAGS.image.hasOwnProperty(k)) continue;
-    has = true;
-    var opts = (TAGS.image[k] || []).map(function(o){
-      return '<span class="tag-pill">' + o + '</span>';
-    }).join('');
-    html += '<tr>' +
-      '<td><strong>' + k + '</strong></td>' +
-      '<td>' + opts + ' <button class="ms-btn ms-btn-outline" style="height:22px;padding:0 6px;font-size:11px" onclick="openImageOptionModal(\'' + k + '\')">+</button></td>' +
-      '<td>' +
-        '<div style="display:flex;gap:6px">' +
-        '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editImageTag(\'' + k + '\')">编辑</button>' +
-        '</div>' +
-      '</td>' +
-      '</tr>';
+  var dims = ["用户维度", "产品标签", "内容标签"];
+  for (var d = 0; d < dims.length; d++) { if (!TAGS.image[dims[d]]) TAGS.image[dims[d]] = {}; }
+  var html = '';
+  for (var d = 0; d < dims.length; d++) {
+    var dim = dims[d];
+    var cfg = TAGS.image[dim] || {};
+    var typeKeys = [];
+    for (var k in cfg) { if (cfg.hasOwnProperty(k)) typeKeys.push(k); }
+    html += '<div style="margin-bottom:18px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--text-1)">' + dim + '</div>' +
+        '<button class="ms-btn ms-btn-primary" style="height:26px;padding:0 10px" onclick="openImageModal(\'' + dim + '\')">+ 新增类型</button>' +
+      '</div>';
+    if (typeKeys.length === 0) {
+      html += '<div style="font-size:12px;color:var(--text-3);padding:6px 0">暂无类型，请点击右上角新增</div>';
+    } else {
+      html += '<table class="tag-table"><thead><tr><th style="width:160px">标签类型</th><th>选项</th><th style="width:140px">操作</th></tr></thead><tbody>';
+      for (var i = 0; i < typeKeys.length; i++) {
+        var k = typeKeys[i];
+        var opts = (cfg[k] || []).map(function(o){ return '<span class="tag-pill">' + o + '</span>'; }).join('');
+        html += '<tr>' +
+          '<td><strong>' + k + '</strong></td>' +
+          '<td>' + opts + ' <button class="ms-btn ms-btn-outline" style="height:22px;padding:0 6px;font-size:11px" onclick="openImageOptionModal(\'' + dim + '\',\'' + k + '\')">+</button></td>' +
+          '<td><div style="display:flex;gap:6px"><button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editImageTag(\'' + dim + '\',\'' + k + '\')">编辑</button></div></td>' +
+          '</tr>';
+      }
+      html += '</tbody></table>';
+    }
+    html += '</div>';
   }
-  html += '</tbody></table>';
-  if (!has) html = '<div class="tag-empty">暂无图片标签，请点击右上角新增</div>';
   wrap.innerHTML = html;
 }
 
-var imageEditingKey = null;
-function openImageModal() {
-  imageEditingKey = null;
-  document.getElementById('imageModalTitle').textContent = '新增标签类型';
+var imageEditingDim = null;
+var imageEditingType = null;
+var imageOptionDim = null;
+var imageOptionType = null;
+function openImageModal(dim) {
+  imageEditingDim = dim;
+  imageEditingType = null;
+  document.getElementById('imageModalTitle').textContent = '新增「' + dim + '」下的标签类型';
   document.getElementById('imageModalName').value = '';
   document.getElementById('imageModalOverlay').style.display = 'flex';
   setTimeout(function(){ document.getElementById('imageModalName').focus(); }, 50);
@@ -639,34 +677,36 @@ function closeImageModal(e) {
   if (e && e.target && e.target.id !== 'imageModalOverlay') return;
   document.getElementById('imageModalOverlay').style.display = 'none';
 }
-function editImageTag(key) {
-  imageEditingKey = key;
+function editImageTag(dim, type) {
+  imageEditingDim = dim;
+  imageEditingType = type;
   document.getElementById('imageModalTitle').textContent = '编辑标签类型';
-  document.getElementById('imageModalName').value = key;
+  document.getElementById('imageModalName').value = type;
   document.getElementById('imageModalOverlay').style.display = 'flex';
   setTimeout(function(){ document.getElementById('imageModalName').focus(); }, 50);
 }
 function saveImageTag() {
   var name = document.getElementById('imageModalName').value.trim();
-  if (!name) { showToast('请输入标签类型名称', 'error'); return; }
-  if (imageEditingKey) {
-    if (imageEditingKey !== name) {
-      TAGS.image[name] = TAGS.image[imageEditingKey];
-      delete TAGS.image[imageEditingKey];
+  if (!name) { showToast('请输入标签类型名称', 'warning'); return; }
+  if (!imageEditingDim) imageEditingDim = '用户维度';
+  if (!TAGS.image[imageEditingDim]) TAGS.image[imageEditingDim] = {};
+  if (imageEditingType) {
+    if (imageEditingType !== name) {
+      TAGS.image[imageEditingDim][name] = TAGS.image[imageEditingDim][imageEditingType];
+      delete TAGS.image[imageEditingDim][imageEditingType];
     }
   } else {
-    if (!TAGS.image[name]) TAGS.image[name] = [];
+    if (!TAGS.image[imageEditingDim][name]) TAGS.image[imageEditingDim][name] = [];
   }
   saveTags();
   closeImageModal();
   renderImageTable();
   showToast('保存成功', 'success');
 }
-
-var imageOptionType = null;
-function openImageOptionModal(typeName) {
-  imageOptionType = typeName;
-  document.getElementById('imageOptionModalTitle').textContent = '新增选项 - ' + typeName;
+function openImageOptionModal(dim, type) {
+  imageOptionDim = dim;
+  imageOptionType = type;
+  document.getElementById('imageOptionModalTitle').textContent = '新增选项 - ' + type;
   document.getElementById('imageOptionInput').value = '';
   document.getElementById('imageOptionModalOverlay').style.display = 'flex';
   setTimeout(function(){ document.getElementById('imageOptionInput').focus(); }, 50);
@@ -677,9 +717,10 @@ function closeImageOptionModal(e) {
 }
 function saveImageOption() {
   var v = document.getElementById('imageOptionInput').value.trim();
-  if (!v) { showToast('请输入选项名称', 'error'); return; }
-  if (!TAGS.image[imageOptionType]) TAGS.image[imageOptionType] = [];
-  if (TAGS.image[imageOptionType].indexOf(v) === -1) TAGS.image[imageOptionType].push(v);
+  if (!v) { showToast('请输入选项名称', 'warning'); return; }
+  if (!TAGS.image[imageOptionDim]) TAGS.image[imageOptionDim] = {};
+  if (!TAGS.image[imageOptionDim][imageOptionType]) TAGS.image[imageOptionDim][imageOptionType] = [];
+  if (TAGS.image[imageOptionDim][imageOptionType].indexOf(v) === -1) TAGS.image[imageOptionDim][imageOptionType].push(v);
   saveTags();
   closeImageOptionModal();
   renderImageTable();

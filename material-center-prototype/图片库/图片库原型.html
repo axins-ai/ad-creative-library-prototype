@@ -196,6 +196,23 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .card-check{position:absolute;top:8px;left:8px;width:18px;height:18px;z-index:6;cursor:pointer}
 .btn-danger{background:var(--danger);color:#fff;border:1px solid var(--danger)}
 .btn-danger:hover{opacity:.9}
+.folder-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1500;display:none;align-items:center;justify-content:center;animation:fadeIn .2s}
+.folder-modal-overlay.show{display:flex}
+.folder-modal{background:#fff;border-radius:var(--radius-l);width:420px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-m);animation:slideUp .25s}
+.folder-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-light)}
+.folder-modal-hd h3{font-size:15px;font-weight:600}
+.folder-modal-hd .close-btn{width:30px;height:30px;border:none;background:transparent;cursor:pointer;border-radius:var(--radius-s);color:var(--text-3);font-size:20px;transition:background .15s}
+.folder-modal-hd .close-btn:hover{background:var(--bg-hover)}
+.folder-modal-bd{padding:16px 20px;overflow-y:auto;flex:1}
+.folder-add-row{display:flex;gap:8px;margin-bottom:14px}
+.folder-add-row input{flex:1;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:13px;outline:none}
+.folder-add-row input:focus{border-color:var(--primary)}
+.folder-manager-list{display:flex;flex-direction:column;gap:6px}
+.folder-manager-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border-light);border-radius:var(--radius-s);font-size:13px}
+.folder-manager-item .fm-name{display:flex;align-items:center;gap:6px}
+.folder-manager-item .fm-del{color:var(--danger);border:1px solid #ffccc7;background:#fff;height:26px;padding:0 8px;border-radius:var(--radius-s);cursor:pointer;font-size:12px}
+.folder-manager-item .fm-del:hover{background:#fff1f0}
+.folder-modal-ft{display:flex;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--border-light)}
 </style>
 </head>
 <body>
@@ -732,7 +749,8 @@ function initTagFilters() {
     }
   }
   // 产品标签（固定值，已在HTML中）
-  
+}
+
 /* ===== 视频库/图片库 类型拆分（单类型库，已移除类型筛选） ===== */
 materialData = materialData.filter(function(m){ return m.type === "图片"; });
 materialData.forEach(function(m, i){ if (m.folderId === undefined) m.folderId = (i % 4) + 1; });
@@ -758,7 +776,49 @@ function renderSidebar(){
   for (var i=0;i<msFolders.length;i++){ var f = msFolders[i]; if (f.parentId) continue; var cnt = countFolderMaterials(f.id); h += '<div class="sidebar-item' + (selFolder === f.id ? ' active' : '') + '" onclick="selFolder=' + f.id + ';renderAll()"><span class="si-icon">📁</span><span class="si-name">' + f.name + '</span><span class="si-count">' + cnt + '</span></div>'; }
   list.innerHTML = h;
 }
-function openFolderManager(){ showMsgModal('文件夹管理（原型演示）\n当前共 ' + msFolders.length + ' 个文件夹。\n点击左侧任意文件夹即可进入对应视图；新建/重命名/删除文件夹的写入能力在正式版接入。'); }
+function openFolderManager(){
+  renderFolderManager();
+  document.getElementById('folderManagerOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeFolderManager(){
+  document.getElementById('folderManagerOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function renderFolderManager(){
+  var list = document.getElementById('folderManagerList'); if (!list) return;
+  var h = '';
+  for (var i=0;i<msFolders.length;i++){
+    var f = msFolders[i]; if (f.parentId) continue;
+    var cnt = countFolderMaterials(f.id);
+    h += '<div class="folder-manager-item">' +
+      '<span class="fm-name">📁 ' + f.name + ' <span style="color:var(--text-3);font-size:11px">(' + cnt + ')</span></span>' +
+      '<button class="fm-del" onclick="deleteFolder(' + f.id + ')">删除</button>' +
+      '</div>';
+  }
+  if (!h) h = '<div class="tag-empty">暂无文件夹，请在上方输入框新增</div>';
+  list.innerHTML = h;
+}
+function addFolder(){
+  var inp = document.getElementById('newFolderName');
+  var name = inp.value.trim();
+  if (!name){ showMsgModal('请输入文件夹名称'); return; }
+  for (var i=0;i<msFolders.length;i++){ if (msFolders[i].name === name){ showMsgModal('已存在同名文件夹'); return; } }
+  var maxId = 0; for (var j=0;j<msFolders.length;j++){ if (msFolders[j].id>maxId) maxId=msFolders[j].id; }
+  msFolders.push({id:maxId+1, name:name, parentId:null});
+  inp.value = '';
+  showMsgModal('已新增文件夹「' + name + '」');
+  renderFolderManager();
+  renderAll();
+}
+function deleteFolder(id){
+  if (!confirm('确定删除该文件夹？文件夹内的素材将变为「未分类」')) return;
+  for (var i=0;i<msFolders.length;i++){ if (msFolders[i].id===id){ msFolders.splice(i,1); break; } }
+  for (var k=0;k<materialData.length;k++){ if (materialData[k].folderId===id) materialData[k].folderId=undefined; }
+  if (selFolder===id) selFolder=null;
+  renderFolderManager();
+  renderAll();
+}
 function renderAll(){ renderSidebar(); renderGrid(); }
 function toggleCardCheck(id, el){ if (el.checked) batchSel[id] = true; else delete batchSel[id]; updateBatchBar(); }
 function getCurrentIds(){ var d = getFilteredData(); var ids = []; for (var i=0;i<d.length;i++) ids.push(d[i].id); return ids; }
@@ -800,7 +860,6 @@ function batchDelete(){
       sel.innerHTML += '<option>' + values[j] + '</option>';
     }
   }
-}
 
 // onUploadUserTag1Change removed - user tags now 3 independent selects
 
@@ -1252,6 +1311,26 @@ try { initTagFilters(); } catch(e) { console.error("initTagFilters failed:", e);
 try { renderUploadContentTagFields(); } catch(e) { console.error("renderUploadContentTagFields failed:", e); }
 try { renderAll(); } catch(e) { console.error("renderAll init failed:", e); }
 </script>
+
+<!-- 文件夹管理弹窗 -->
+<div class="folder-modal-overlay" id="folderManagerOverlay" onclick="if(event.target===this)closeFolderManager()">
+  <div class="folder-modal">
+    <div class="folder-modal-hd">
+      <h3>📁 文件夹管理</h3>
+      <button class="close-btn" onclick="closeFolderManager()">×</button>
+    </div>
+    <div class="folder-modal-bd">
+      <div class="folder-add-row">
+        <input type="text" id="newFolderName" placeholder="输入新文件夹名称，回车或点新增" onkeydown="if(event.key==='Enter')addFolder()">
+        <button class="btn btn-primary" onclick="addFolder()">+ 新增</button>
+      </div>
+      <div id="folderManagerList" class="folder-manager-list"></div>
+    </div>
+    <div class="folder-modal-ft">
+      <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="closeFolderManager()">关闭</button>
+    </div>
+  </div>
+</div>
 
 <!-- 消息弹窗 -->
 <div class="msg-modal-overlay" id="msgModalOverlay">
