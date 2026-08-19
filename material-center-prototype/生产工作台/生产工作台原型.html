@@ -1910,9 +1910,9 @@ function updateCount() {
   document.getElementById("countFormula").textContent = formula;
   document.getElementById("countResult").innerHTML = total + " <span>个素材</span>";
   
-  // 素材数量校验：单次上限1000个
-  if (total > 1000) {
-    showToast("⚠️ 素材数量不能超过1000个，当前为 " + total + " 个，请减少原料选择", "w");
+  // 素材数量校验：单次上限500个
+  if (total > 500) {
+    showToast("⚠️ 素材数量不能超过500个，当前为 " + total + " 个，请减少原料选择", "w");
     document.getElementById("countResult").style.color = "var(--danger)";
   } else {
     document.getElementById("countResult").style.color = "";
