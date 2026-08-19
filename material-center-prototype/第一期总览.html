@@ -87,7 +87,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 
 <div class="header">
   <h1>📦 素材中心 · 第一期原型总览</h1>
-  <div class="sub">原型版本 v17 ｜ 2026-06-29 ｜ 原料库 + 生产工作台 + 素材库</div>
+  <div class="sub">素材中心原型总览 ｜ 原料库 + 生产工作台 + 视频库 + 图片库 + 标签库</div>
 </div>
 
 <div class="main">
@@ -100,10 +100,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
       <div class="flow-arrow">→</div>
       <div class="flow-item"><span class="fi-icon">🎬</span><span class="fi-name">生产工作台</span><span class="fi-desc">新建任务&生产</span></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-item"><span class="fi-icon">📁</span><span class="fi-name">素材库</span><span class="fi-desc">预览成品素材</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item"><span class="fi-icon">🎬</span><span class="fi-name">视频库</span><span class="fi-desc">预览视频成品</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-item"><span class="fi-icon">🖼️</span><span class="fi-name">图片库</span><span class="fi-desc">预览图片成品</span></div>
     </div>
     <div class="flow-note">
-      <strong>流程说明：</strong>设计师在「原料库」上传视频原料（前贴/中段/尾帧）→ 在「生产工作台」新建生产任务、选择原料、配置参数、开始生产 → 成品自动入库到「素材库」，设计师可在线预览素材。
+      <strong>流程说明：</strong>设计师在「原料库」上传视频原料（前贴/中段/尾帧）→ 在「生产工作台」新建生产任务、选择原料、配置参数、开始生产 → 成品按素材类型自动入库到「视频库」或「图片库」，设计师可在线预览素材。
     </div>
   </div>
 
@@ -144,20 +147,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
         <span class="card-btn">打开生产工作台原型 →</span>
       </a>
 
-      <!-- 素材库 -->
-      <a class="module-card" href="素材库/素材库原型.html" target="_blank">
-        <span class="card-icon">📁</span>
-        <div class="card-name">素材库 <span class="ver">v10</span></div>
+      <!-- 视频库 -->
+      <a class="module-card" href="视频库/视频库原型.html" target="_blank">
+        <span class="card-icon">🎬</span>
+        <div class="card-name">视频库 <span class="ver">v18</span></div>
         <div class="card-desc">
-          成品素材在线预览。网格/列表视图浏览，支持点击预览（视频/图片），手动上传素材，自动展示生产工作台入库的成品。<br>
+          视频成品在线预览。网格视图浏览，支持点击预览视频、手动上传视频、文件夹归类、批量移动/删除，自动展示生产工作台入库的视频成品。<br>
           <span style="color:#999;font-size:12px">不含：下载功能</span>
         </div>
         <div class="card-features">
           <span class="feat feat-green">在线预览</span>
-          <span class="feat feat-blue">网格/列表视图</span>
-          <span class="feat feat-orange">自动入库</span>
+          <span class="feat feat-blue">文件夹归类</span>
+          <span class="feat feat-orange">批量操作</span>
         </div>
-        <span class="card-btn">打开素材库原型 →</span>
+        <span class="card-btn">打开视频库原型 →</span>
+      </a>
+
+      <!-- 图片库 -->
+      <a class="module-card" href="图片库/图片库原型.html" target="_blank">
+        <span class="card-icon">🖼️</span>
+        <div class="card-name">图片库 <span class="ver">v18</span></div>
+        <div class="card-desc">
+          图片成品在线预览。网格视图浏览，支持点击预览图片、手动上传图片、文件夹归类、批量移动/删除，自动展示生产工作台入库的图片成品。<br>
+          <span style="color:#999;font-size:12px">不含：下载功能</span>
+        </div>
+        <div class="card-features">
+          <span class="feat feat-green">在线预览</span>
+          <span class="feat feat-blue">文件夹归类</span>
+          <span class="feat feat-orange">批量操作</span>
+        </div>
+        <span class="card-btn">打开图片库原型 →</span>
       </a>
 
     </div>
