@@ -133,6 +133,11 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .search-select-dropdown .option-item.selected{background:var(--primary-light);color:var(--primary);font-weight:500;}
 
 .ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:4px 16px 0}
+.card-check{position:absolute;top:8px;left:8px;width:18px;height:18px;z-index:6;cursor:pointer}
+.batch-bar{display:none;align-items:center;gap:12px;margin:0 16px 12px;padding:8px 14px;background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-s)}
+.batch-bar.show{display:flex}
+.batch-bar .batch-info{font-size:13px;color:var(--primary);font-weight:500}
+.batch-bar .batch-actions{margin-left:auto;display:flex;gap:8px}
 .ms-card{background:var(--bg-card);border-radius:var(--radius-l);overflow:hidden;box-shadow:var(--shadow-s);border:1px solid var(--border-light);transition:transform .2s,box-shadow .2s;cursor:pointer;position:relative;}
 .ms-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-m)}
 .ms-card .thumb{width:100%;aspect-ratio:16/9;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:48px;color:#ccc;position:relative;overflow:hidden;}
@@ -434,6 +439,14 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="batch-bar" id="batchBar">
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="msBatchSelectAll" onchange="toggleSelectAllMs(this)"> 全选</label>
+    <span class="batch-info" id="msBatchInfo">已选 0 项</span>
+    <div class="batch-actions">
+      <button class="btn btn-default" onclick="batchMoveMs()">📂 批量移动</button>
+      <button class="btn btn-danger" onclick="batchDeleteMs()">🗑 批量删除</button>
     </div>
   </div>
   <div class="ms-grid" id="msGrid"></div>
@@ -1452,12 +1465,14 @@ function renderMsGrid() {
   
   // 未选择文件夹时，展示根文件夹列表
   if (selFolder === null) {
+    batchSel = {}; updateBatchBar();
     renderFolderList(el, null);
     return;
   }
   
   // 选择了含子文件夹的文件夹：显示子文件夹卡片（最多4级，深度<3的可进入）
   if (selFolder > 0 && getFolderDepth(selFolder) < 3) {
+    batchSel = {}; updateBatchBar();
     renderFolderList(el, selFolder);
     return;
   }
@@ -1482,12 +1497,13 @@ function renderMsGrid() {
       tagPills += '<span class="tag-pill">' + tagValues[t] + '</span>';
     }
     if (tagValues.length > 5) tagPills += '<span class="tag-pill">+' + (tagValues.length - 5) + '</span>';
-    html += '<div class="ms-card" onclick="openMsPreview(' + m.id + ')">' +
-      '<div class="thumb" style="background:' + bg + '">' +
+    html += '<div class="ms-card">' +
+      '<input type="checkbox" class="card-check" onclick="event.stopPropagation();toggleCardCheck(' + m.id + ', this)"' + (batchSel[m.id] ? ' checked' : '') + '>' +
+      '<div class="thumb" style="background:' + bg + '" onclick="openMsPreview(' + m.id + ')">' +
         '<div style="color:rgba(255,255,255,.3);font-size:36px">' + (m.type === "图片" ? "🖼️" : "🎬") + '</div>' +
         '<div class="play-overlay"><div class="play-btn">▶</div></div>' +
       '</div>' +
-      '<div class="info">' +
+      '<div class="info" onclick="openMsPreview(' + m.id + ')">' +
         '<div class="name">' + m.name + '</div>' +
         '<div class="meta"><span class="badge ' + badgeCls + '">' + m.type + '</span>' +
         '<span class="badge ' + sourceCls + '">' + m.source + '</span></div>' +
@@ -1495,6 +1511,7 @@ function renderMsGrid() {
       '</div></div>';
   }
   el.innerHTML = html;
+  updateBatchBar();
   var countEl = document.getElementById("msCountInline");
   if (countEl) countEl.textContent = "共 " + data.length + " 个原料";
   } catch(e) {
@@ -1503,6 +1520,28 @@ function renderMsGrid() {
     if (el2) el2.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div class="title">渲染出错</div><div class="desc">' + e.message + '</div></div>';
   }
   renderSidebar();
+}
+
+// ===== 批量操作（移动/删除） =====
+var batchSel = {};
+function toggleCardCheck(id, el){ if (el.checked) batchSel[id] = true; else delete batchSel[id]; updateBatchBar(); }
+function getCurrentMsIds(){ var d = getFilteredMsMaterials(); var ids = []; for (var i=0;i<d.length;i++) ids.push(d[i].id); return ids; }
+function toggleSelectAllMs(el){ var ids = getCurrentMsIds(); if (el.checked) { for (var i=0;i<ids.length;i++) batchSel[ids[i]] = true; } else { batchSel = {}; } renderMsGrid(); }
+function updateBatchBar(){ var bar = document.getElementById('batchBar'); if (!bar) return; var n = Object.keys(batchSel).length; if (n > 0) bar.classList.add('show'); else bar.classList.remove('show'); var info = document.getElementById('msBatchInfo'); if (info) info.textContent = '已选 ' + n + ' 项'; }
+function batchMoveMs(){
+  var ids = Object.keys(batchSel); if (!ids.length) { showMsgModal('请先勾选原料'); return; }
+  var msg = '移动到文件夹：\n'; for (var i=0;i<msFolders.length;i++){ if (!msFolders[i].parentId) msg += (i+1) + '. ' + msFolders[i].name + '\n'; }
+  var choice = prompt(msg + '输入序号：'); if (choice === null) return;
+  var idx = parseInt(choice) - 1; if (isNaN(idx) || !msFolders[idx] || msFolders[idx].parentId) { showMsgModal('输入无效'); return; }
+  var fid = msFolders[idx].id;
+  for (var k=0;k<ids.length;k++){ for (var j=0;j<msMaterials.length;j++){ if (msMaterials[j].id == ids[k]) { msMaterials[j].folderId = fid; break; } } }
+  batchSel = {}; showMsgModal('已移动 ' + ids.length + ' 个原料到「' + msFolders[idx].name + '」'); renderMsGrid();
+}
+function batchDeleteMs(){
+  var ids = Object.keys(batchSel); if (!ids.length) { showMsgModal('请先勾选原料'); return; }
+  if (!confirm('确定删除选中的 ' + ids.length + ' 个原料？此操作不可恢复')) return;
+  for (var k=0;k<ids.length;k++){ for (var j=0;j<msMaterials.length;j++){ if (msMaterials[j].id == ids[k]) { msMaterials.splice(j, 1); break; } } }
+  batchSel = {}; showMsgModal('已删除 ' + ids.length + ' 个原料'); renderMsGrid();
 }
 
 // 文件夹列表视图
