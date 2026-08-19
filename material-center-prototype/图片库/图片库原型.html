@@ -180,6 +180,8 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border-light);font-size:13px;font-weight:600;color:var(--text-1);flex-shrink:0}
 .sidebar-header .sidebar-toggle{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;font-size:11px;color:var(--text-3);transition:all .15s;display:flex;align-items:center;justify-content:center;line-height:1}
 .sidebar-header .sidebar-toggle:hover{background:var(--bg-hover);color:var(--primary);border-color:var(--primary)}
+.sidebar-header .sidebar-add{margin-left:auto;margin-right:6px;height:26px;padding:0 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;font-size:11px;color:var(--text-2);transition:all .15s;display:flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap}
+.sidebar-header .sidebar-add:hover{background:var(--bg-hover);color:var(--primary);border-color:var(--primary)}
 .sidebar-list{flex:1;overflow-y:auto;padding:4px 0}
 .sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 12px;cursor:pointer;font-size:12px;color:var(--text-2);transition:background .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-item:hover{background:var(--bg-hover);color:var(--text-1)}
@@ -212,6 +214,9 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
 .folder-manager-item .fm-name{display:flex;align-items:center;gap:6px}
 .folder-manager-item .fm-del{color:var(--danger);border:1px solid #ffccc7;background:#fff;height:26px;padding:0 8px;border-radius:var(--radius-s);cursor:pointer;font-size:12px}
 .folder-manager-item .fm-del:hover{background:#fff1f0}
+.folder-manager-item .fm-arrow{color:var(--text-3);font-size:12px}
+.folder-manager-item.move-item{cursor:pointer}
+.folder-manager-item.move-item:hover{background:var(--bg-hover);border-color:var(--primary)}
 .folder-modal-ft{display:flex;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--border-light)}
 </style>
 </head>
@@ -221,6 +226,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
   <div class="folder-sidebar" id="folderSidebar">
     <div class="sidebar-header">
       <span>📁 文件夹</span>
+      <button class="sidebar-add" onclick="openFolderManager()" title="新建文件夹">＋ 新建</button>
       <button class="sidebar-toggle" onclick="toggleSidebar()" title="收起侧栏">◀</button>
     </div>
     <div class="sidebar-list" id="sidebarList"></div>
@@ -234,6 +240,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="batchSelectAll" onchange="toggleSelectAll(this)"> 全选</label>
     <span class="batch-info" id="batchInfo">已选 0 项</span>
     <div class="batch-actions">
+      <button class="btn btn-default" onclick="clearBatchSelection()">✕ 取消选择</button>
       <button class="btn btn-default" onclick="batchMove()">📂 批量移动</button>
       <button class="btn btn-danger" onclick="batchDelete()">🗑 批量删除</button>
     </div>
@@ -494,10 +501,10 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <input type="file" id="uploadFileInput" multiple accept="image/*" style="display:none" onchange="handleUploadFileSelect(event)">
       <div id="uploadFileList" class="file-list" style="display:none"></div>
       <div class="fm-group">
-        <label>素材类型</label>
-        <div id="uploadTypeDisplay" style="padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);background:var(--bg-page);color:var(--text-2)">
-          <span style="color:var(--text-3)">选择文件后自动识别</span>
-        </div>
+        <label>保存文件夹</label>
+        <select id="uploadFolder">
+          <option value="">未分类</option>
+        </select>
       </div>
       <div class="fm-group">
         <label>业务归属</label>
@@ -780,6 +787,7 @@ function openFolderManager(){
   renderFolderManager();
   document.getElementById('folderManagerOverlay').classList.add('show');
   document.body.style.overflow = 'hidden';
+  setTimeout(function(){ var inp = document.getElementById('newFolderName'); if (inp) inp.focus(); }, 80);
 }
 function closeFolderManager(){
   document.getElementById('folderManagerOverlay').classList.remove('show');
@@ -826,12 +834,35 @@ function toggleSelectAll(el){ var ids = getCurrentIds(); if (el.checked) { for (
 function updateBatchBar(){ var bar = document.getElementById('batchBar'); var n = Object.keys(batchSel).length; if (n > 0) bar.classList.add('show'); else bar.classList.remove('show'); document.getElementById('batchInfo').textContent = '已选 ' + n + ' 项'; }
 function batchMove(){
   var ids = Object.keys(batchSel); if (!ids.length) { showMsgModal('请先勾选素材'); return; }
-  var msg = '移动到文件夹：\n'; for (var i=0;i<msFolders.length;i++){ if (!msFolders[i].parentId) msg += (i+1) + '. ' + msFolders[i].name + '\n'; }
-  var choice = prompt(msg + '输入序号：'); if (choice === null) return;
-  var idx = parseInt(choice) - 1; if (isNaN(idx) || !msFolders[idx] || msFolders[idx].parentId) { showMsgModal('输入无效'); return; }
-  var fid = msFolders[idx].id;
-  for (var k=0;k<ids.length;k++){ for (var j=0;j<materialData.length;j++){ if (materialData[j].id == ids[k]) { materialData[j].folderId = fid; break; } } }
-  batchSel = {}; showMsgModal('已移动 ' + ids.length + ' 个素材到「' + msFolders[idx].name + '」'); renderAll();
+  openMoveFolderModal();
+}
+function openMoveFolderModal(){
+  var list = document.getElementById('moveFolderList'); if (!list) return;
+  var h = '';
+  h += '<div class="folder-manager-item move-item" onclick="confirmMoveToFolder(0)"><span class="fm-name">📋 未分类</span><span class="fm-arrow">→</span></div>';
+  for (var i=0;i<msFolders.length;i++){
+    var f = msFolders[i]; if (f.parentId) continue;
+    var cnt = countFolderMaterials(f.id);
+    h += '<div class="folder-manager-item move-item" onclick="confirmMoveToFolder(' + f.id + ')"><span class="fm-name">📁 ' + f.name + ' <span style="color:var(--text-3);font-size:11px">(' + cnt + ')</span></span><span class="fm-arrow">→</span></div>';
+  }
+  list.innerHTML = h;
+  document.getElementById('moveFolderModalOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeMoveFolderModal(){
+  document.getElementById('moveFolderModalOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function confirmMoveToFolder(fid){
+  var ids = Object.keys(batchSel);
+  var folderName = fid === 0 ? '未分类' : '';
+  for (var k=0;k<ids.length;k++){ for (var j=0;j<materialData.length;j++){ if (materialData[j].id == ids[k]) { materialData[j].folderId = fid === 0 ? undefined : fid; break; } } }
+  if (fid !== 0) { for (var i=0;i<msFolders.length;i++){ if (msFolders[i].id === fid) { folderName = msFolders[i].name; break; } } }
+  batchSel = {};
+  updateBatchBar();
+  closeMoveFolderModal();
+  showMsgModal('已移动 ' + ids.length + ' 个素材到「' + folderName + '」');
+  renderAll();
 }
 function batchDelete(){
   var ids = Object.keys(batchSel); if (!ids.length) { showMsgModal('请先勾选素材'); return; }
@@ -839,6 +870,12 @@ function batchDelete(){
   for (var k=0;k<ids.length;k++){ for (var j=0;j<materialData.length;j++){ if (materialData[j].id == ids[k]) { materialData.splice(j, 1); break; } } }
   batchSel = {}; showMsgModal('已删除 ' + ids.length + ' 个素材'); renderAll();
 }
+function clearBatchSelection(){
+  batchSel = {};
+  updateBatchBar();
+  renderGrid();
+}
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') clearBatchSelection(); });
 
 // 内容标签 - 按类型分拆
   var contentTypes = ["文案", "宣传卖点", "场景", "对话", "口播", "内容"];
@@ -1155,8 +1192,7 @@ function openUploadModal() {
   document.getElementById("uploadUserGender").value = "";
   document.getElementById("uploadProductTag").value = "";
   renderUploadContentTagFields();
-  // 重置素材类型显示
-  document.getElementById("uploadTypeDisplay").innerHTML = '<span style="color:var(--text-3)">选择文件后自动识别</span>';
+  renderUploadFolderOptions();
 }
 
 function closeUploadModal() {
@@ -1194,7 +1230,6 @@ function addUploadFiles(files) {
   }
   if (rejected.length) showMsgModal("以下文件未添加：\n" + rejected.join("\n"));
   renderUploadFileList();
-  updateUploadTypeDisplay();
 }
 function handleUploadFileSelect(e) {
   var files = Array.from(e.target.files);
@@ -1219,16 +1254,17 @@ function detectFileTypeFromName(fileName) {
   return (ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'gif' || ext === 'webp' || ext === 'bmp') ? '图片' : '视频';
 }
 
-// 更新上传弹窗的素材类型显示
-function updateUploadTypeDisplay() {
-  var display = document.getElementById("uploadTypeDisplay");
-  if (uploadSelectedFiles.length === 0) {
-    display.innerHTML = '<span style="color:var(--text-3)">选择文件后自动识别</span>';
-    return;
+// 渲染上传弹窗的保存文件夹选项
+function renderUploadFolderOptions() {
+  var sel = document.getElementById("uploadFolder");
+  if (!sel) return;
+  var html = '<option value="">未分类</option>';
+  for (var i = 0; i < msFolders.length; i++) {
+    var f = msFolders[i];
+    if (f.parentId) continue;
+    html += '<option value="' + f.id + '">' + f.name + '</option>';
   }
-  var fileType = detectFileTypeFromName(uploadSelectedFiles[0].name);
-  var icon = fileType === '视频' ? '🎬' : '🖼️';
-  display.innerHTML = icon + ' ' + fileType;
+  sel.innerHTML = html;
 }
 
 function submitUpload() {
@@ -1258,6 +1294,8 @@ function submitUpload() {
   var success = 0;
   var fail = 0;
   var failNames = [];
+  var folderSel = document.getElementById("uploadFolder").value;
+  var folderId = folderSel ? parseInt(folderSel) : undefined;
   for (var i = 0; i < uploadSelectedFiles.length; i++) {
     var file = uploadSelectedFiles[i];
     if (file.name.indexOf("fail") !== -1) {
@@ -1269,6 +1307,7 @@ function submitUpload() {
         id: Date.now() + Math.random(),
         name: file.name,
         type: fileType,
+        folderId: folderId,
         biz: biz,
         channel: channel,
         optimizer: optimizer,
@@ -1328,6 +1367,22 @@ try { renderAll(); } catch(e) { console.error("renderAll init failed:", e); }
     </div>
     <div class="folder-modal-ft">
       <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="closeFolderManager()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 批量移动 - 选择目标文件夹 -->
+<div class="folder-modal-overlay" id="moveFolderModalOverlay" onclick="if(event.target===this)closeMoveFolderModal()">
+  <div class="folder-modal">
+    <div class="folder-modal-hd">
+      <h3>📂 移动到文件夹</h3>
+      <button class="close-btn" onclick="closeMoveFolderModal()">×</button>
+    </div>
+    <div class="folder-modal-bd">
+      <div id="moveFolderList" class="folder-manager-list"></div>
+    </div>
+    <div class="folder-modal-ft">
+      <button class="btn" style="background:#fff;color:var(--text-2);border:1px solid var(--border)" onclick="closeMoveFolderModal()">取消</button>
     </div>
   </div>
 </div>
