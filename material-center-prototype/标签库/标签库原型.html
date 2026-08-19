@@ -73,6 +73,7 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       <button class="tag-tab active" data-tab="user" onclick="switchTab('user')">用户标签</button>
       <button class="tag-tab" data-tab="product" onclick="switchTab('product')">产品标签</button>
       <button class="tag-tab" data-tab="content" onclick="switchTab('content')">内容标签</button>
+      <button class="tag-tab" data-tab="image" onclick="switchTab('image')">图片标签</button>
     </div>
 
     <!-- 用户标签 -->
@@ -107,6 +108,15 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
       </div>
       <div id="contentTableWrap"></div>
     </div>
+
+    <!-- 图片标签 -->
+    <div class="tag-section" id="sec-image">
+      <div class="tag-toolbar">
+        <div><div class="title">图片标签</div><div class="desc">与视频标签独立，仅用于图片库素材</div></div>
+        <button class="ms-btn ms-btn-primary" onclick="openImageModal()">+ 新增标签类型</button>
+      </div>
+      <div id="imageTableWrap"></div>
+    </div>
   </div>
 </main>
 
@@ -140,6 +150,40 @@ body{font-family:var(--font);background:var(--bg-page);color:var(--text-1);line-
     <div class="ms-modal-ft">
       <button class="ms-btn ms-btn-outline" onclick="closeUserOptionModal()">取消</button>
       <button class="ms-btn ms-btn-primary" onclick="saveUserOption()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 图片标签类型弹窗（新增/编辑标签类型名称） -->
+<div class="ms-modal-overlay" id="imageModalOverlay" onclick="closeImageModal(event)">
+  <div class="ms-modal" onclick="event.stopPropagation()">
+    <div class="ms-modal-hd"><h3 id="imageModalTitle">新增标签类型</h3><button class="close-btn" onclick="closeImageModal()">×</button></div>
+    <div class="ms-modal-bd">
+      <div class="ms-fm-group">
+        <label>标签类型名称</label>
+        <input type="text" id="imageModalName" placeholder="例如：图片尺寸">
+      </div>
+    </div>
+    <div class="ms-modal-ft">
+      <button class="ms-btn ms-btn-outline" onclick="closeImageModal()">取消</button>
+      <button class="ms-btn ms-btn-primary" onclick="saveImageTag()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 图片标签选项弹窗（新增选项） -->
+<div class="ms-modal-overlay" id="imageOptionModalOverlay" onclick="closeImageOptionModal(event)">
+  <div class="ms-modal" onclick="event.stopPropagation()">
+    <div class="ms-modal-hd"><h3 id="imageOptionModalTitle">新增选项</h3><button class="close-btn" onclick="closeImageOptionModal()">×</button></div>
+    <div class="ms-modal-bd">
+      <div class="ms-fm-group">
+        <label>选项名称</label>
+        <input type="text" id="imageOptionInput" placeholder="例如：9:16 竖图">
+      </div>
+    </div>
+    <div class="ms-modal-ft">
+      <button class="ms-btn ms-btn-outline" onclick="closeImageOptionModal()">取消</button>
+      <button class="ms-btn ms-btn-primary" onclick="saveImageOption()">保存</button>
     </div>
   </div>
 </div>
@@ -217,6 +261,14 @@ var DEFAULT_TAGS = {
       "对话": ["老年男人", "老年女人"],
       "口播": ["口播女", "口播男"]
     }
+  },
+  image: {
+    "图片尺寸": ["1:1 方图", "9:16 竖图", "16:9 横图", "4:3", "750x300 Banner", "1200x628 信息流"],
+    "图片版式": ["单图", "拼接图", "长图", "九宫格", "轮播图"],
+    "图片风格": ["扁平", "写实", "电商白底", "插画", "3D", "拟物"],
+    "图片色调": ["暖色", "冷色", "高饱和", "莫兰迪", "黑白"],
+    "图片主体": ["产品特写", "人物", "场景", "图文混排", "Logo"],
+    "图片用途": ["信息流大图", "落地页", "朋友圈", "开屏", "详情页"]
   }
 };
 
@@ -274,6 +326,7 @@ function switchTab(tab) {
   if (tab === 'user') renderUserTable();
   if (tab === 'product') renderProductTable();
   if (tab === 'content') renderContentTable();
+  if (tab === 'image') renderImageTable();
 }
 
 /* ===== 用户标签 ===== */
@@ -545,6 +598,92 @@ function deleteContentOption(contentKey, typeName, idx) {
   saveTags();
   renderContentTable();
   showToast('删除成功', 'success');
+}
+
+/* ===== 图片标签 ===== */
+function renderImageTable() {
+  var wrap = document.getElementById('imageTableWrap');
+  if (!TAGS.image) TAGS.image = {};
+  var html = '<table class="tag-table"><thead><tr><th style="width:160px">标签类型</th><th>选项</th><th style="width:140px">操作</th></tr></thead><tbody>';
+  var has = false;
+  for (var k in TAGS.image) {
+    if (!TAGS.image.hasOwnProperty(k)) continue;
+    has = true;
+    var opts = (TAGS.image[k] || []).map(function(o){
+      return '<span class="tag-pill">' + o + '</span>';
+    }).join('');
+    html += '<tr>' +
+      '<td><strong>' + k + '</strong></td>' +
+      '<td>' + opts + ' <button class="ms-btn ms-btn-outline" style="height:22px;padding:0 6px;font-size:11px" onclick="openImageOptionModal(\'' + k + '\')">+</button></td>' +
+      '<td>' +
+        '<div style="display:flex;gap:6px">' +
+        '<button class="ms-btn ms-btn-outline" style="height:26px;padding:0 8px" onclick="editImageTag(\'' + k + '\')">编辑</button>' +
+        '</div>' +
+      '</td>' +
+      '</tr>';
+  }
+  html += '</tbody></table>';
+  if (!has) html = '<div class="tag-empty">暂无图片标签，请点击右上角新增</div>';
+  wrap.innerHTML = html;
+}
+
+var imageEditingKey = null;
+function openImageModal() {
+  imageEditingKey = null;
+  document.getElementById('imageModalTitle').textContent = '新增标签类型';
+  document.getElementById('imageModalName').value = '';
+  document.getElementById('imageModalOverlay').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('imageModalName').focus(); }, 50);
+}
+function closeImageModal(e) {
+  if (e && e.target && e.target.id !== 'imageModalOverlay') return;
+  document.getElementById('imageModalOverlay').style.display = 'none';
+}
+function editImageTag(key) {
+  imageEditingKey = key;
+  document.getElementById('imageModalTitle').textContent = '编辑标签类型';
+  document.getElementById('imageModalName').value = key;
+  document.getElementById('imageModalOverlay').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('imageModalName').focus(); }, 50);
+}
+function saveImageTag() {
+  var name = document.getElementById('imageModalName').value.trim();
+  if (!name) { showToast('请输入标签类型名称', 'error'); return; }
+  if (imageEditingKey) {
+    if (imageEditingKey !== name) {
+      TAGS.image[name] = TAGS.image[imageEditingKey];
+      delete TAGS.image[imageEditingKey];
+    }
+  } else {
+    if (!TAGS.image[name]) TAGS.image[name] = [];
+  }
+  saveTags();
+  closeImageModal();
+  renderImageTable();
+  showToast('保存成功', 'success');
+}
+
+var imageOptionType = null;
+function openImageOptionModal(typeName) {
+  imageOptionType = typeName;
+  document.getElementById('imageOptionModalTitle').textContent = '新增选项 - ' + typeName;
+  document.getElementById('imageOptionInput').value = '';
+  document.getElementById('imageOptionModalOverlay').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('imageOptionInput').focus(); }, 50);
+}
+function closeImageOptionModal(e) {
+  if (e && e.target && e.target.id !== 'imageOptionModalOverlay') return;
+  document.getElementById('imageOptionModalOverlay').style.display = 'none';
+}
+function saveImageOption() {
+  var v = document.getElementById('imageOptionInput').value.trim();
+  if (!v) { showToast('请输入选项名称', 'error'); return; }
+  if (!TAGS.image[imageOptionType]) TAGS.image[imageOptionType] = [];
+  if (TAGS.image[imageOptionType].indexOf(v) === -1) TAGS.image[imageOptionType].push(v);
+  saveTags();
+  closeImageOptionModal();
+  renderImageTable();
+  showToast('新增成功', 'success');
 }
 
 function syncToOpener() {
